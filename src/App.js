@@ -46,13 +46,30 @@ const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [erro, setErro] = useState('');
+  const [mensagem, setMensagem] = useState('');
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setErro('');
+    setMensagem('');
     try {
       await signInWithEmailAndPassword(auth, email, password);
     } catch (error) {
       setErro('E-mail ou senha incorretos. Tente novamente.');
+    }
+  };
+
+  const handleEsqueciSenha = async () => {
+    if (!email) {
+      setErro('Por favor, digite o seu e-mail acima antes de clicar em mudar a senha.');
+      return;
+    }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setMensagem('E-mail enviado! Verifique a sua caixa de entrada para criar a nova senha.');
+      setErro('');
+    } catch (error) {
+      setErro('Erro ao enviar e-mail. Verifique se o e-mail está digitado corretamente.');
     }
   };
 
@@ -61,12 +78,24 @@ const LoginScreen = () => {
       <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', width: '100%', maxWidth: '400px' }}>
         <h2 style={{ textAlign: 'center', color: '#1e3a8a', marginBottom: '20px' }}>Acesso ao Sistema PEI</h2>
         <p style={{ textAlign: 'center', color: '#6b7280', marginBottom: '30px' }}>Redenção da Serra - SP</p>
+        
         {erro && <div style={{ backgroundColor: '#fee2e2', color: '#ef4444', padding: '10px', borderRadius: '4px', marginBottom: '15px', fontSize: '0.9rem', textAlign: 'center' }}>{erro}</div>}
+        {mensagem && <div style={{ backgroundColor: '#d1fae5', color: '#065f46', padding: '10px', borderRadius: '4px', marginBottom: '15px', fontSize: '0.9rem', textAlign: 'center' }}>{mensagem}</div>}
+        
         <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
           <input type="email" placeholder="Seu e-mail" value={email} onChange={(e) => setEmail(e.target.value)} style={s.input} required />
-          <input type="password" placeholder="Sua senha" value={password} onChange={(e) => setPassword(e.target.value)} style={s.input} required />
+          <input type="password" placeholder="Sua senha" value={password} onChange={(e) => setPassword(e.target.value)} style={s.input} />
           <button type="submit" style={s.btnPrimary}>Entrar</button>
         </form>
+        
+        <div style={{ marginTop: '20px', textAlign: 'center' }}>
+          <button 
+            type="button"
+            onClick={handleEsqueciSenha} 
+            style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', fontSize: '0.9rem', textDecoration: 'underline' }}>
+            Esqueci ou quero mudar a minha senha
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -635,4 +664,5 @@ export default function App() {
     return <SistemaPEI alunoData={alunoEditando} onVoltar={() => setTelaAtiva('lista')} onLogout={fazerLogout} usuario={usuario} />;
   }
 }
+
 
