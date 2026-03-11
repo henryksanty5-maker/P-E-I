@@ -190,8 +190,8 @@ const ListaAlunos = ({ onNovo, onEditar, onLogout, usuario }) => {
 
   // 🌟 AQUI FICA A SUA LISTA VIP: Digite os e-mails reais aqui!
   const listaEspecialistas = [
-    'seu_email_aqui@gmail.com', // <--- COLOQUE SEU E-MAIL AQUI
-    'direcao@escola.com'        // Pode colocar o da direção ou apagar essa linha
+    'henryksanty5@gmail.com', // <--- COLOQUE SEU E-MAIL AQUI
+    'escolajac663@gmail.com'        // Pode colocar o da direção ou apagar essa linha
   ];
   
   const isEspecialista = listaEspecialistas.includes(usuario.email);
@@ -495,3 +495,4 @@ export default function App() {
   if (telaAtiva === 'lista') return <ListaAlunos onNovo={irParaNovoFormulario} onEditar={irParaEditarFormulario} onLogout={fazerLogout} usuario={usuario} />;
   return <SistemaPEI alunoData={alunoEditando} onVoltar={() => setTelaAtiva('lista')} onLogout={fazerLogout} usuario={usuario} />;
 }
+
