@@ -188,12 +188,13 @@ const ListaAlunos = ({ onNovo, onEditar, onLogout, usuario }) => {
 
 // 4. Tela do Formulário (Sistema PEI Completo)
 const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
-  const estadoInicial = {
+ const estadoInicial = {
     aluno: '', nascimento: '', anoSerie: '', turma: '', responsaveis: '',
     escola: 'EMEIEF "PROFESSORA EDNA REGINA DE OLIVEIRA E SILVA"',
     diagnostico: '', cid: '', crm: '',
     resultadoAvaliacao: '', rotinaFamiliar: '', fatoresAmbientais: '',
     resumoAluno: '',
+    campoLinguagem: '', campoMatematica: '', // 🌟 ADICIONE ESTA LINHA AQUI
     anexos: {},
     conteudos: {},
     diario: {},
@@ -496,9 +497,23 @@ const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
         </div>
       </div>
 
-      {/* E. ADAPTAÇÕES CURRICULARES */}
+     {/* E. ADAPTAÇÕES CURRICULARES */}
       <div className="card-print" style={s.card}>
-        <div style={s.cardHeader}><span className="badge-print" style={s.badge}>E</span> Adaptações Curriculares por Disciplina</div>
+        <div style={s.cardHeader}><span className="badge-print" style={s.badge}>E</span> Adaptações Curriculares e Campos de Experiência</div>
+        
+        {/* 🌟 NOVOS CAMPOS DE EXPERIÊNCIA AQUI */}
+        <div style={{...s.grid2, marginBottom: '20px'}}>
+          <div style={s.inputGroup}>
+            <label style={s.label}>Campo de Experiência: Linguagem</label>
+            <textarea style={{...s.input, minHeight: '80px'}} name="campoLinguagem" value={formData.campoLinguagem} onChange={handleChange} placeholder="Adaptações e objetivos para a área da linguagem..."></textarea>
+          </div>
+          <div style={s.inputGroup}>
+            <label style={s.label}>Campo de Experiência: Matemática</label>
+            <textarea style={{...s.input, minHeight: '80px'}} name="campoMatematica" value={formData.campoMatematica} onChange={handleChange} placeholder="Adaptações e objetivos para a área da matemática..."></textarea>
+          </div>
+        </div>
+
+        <h4 style={s.sectionTitle}>Adaptações por Disciplina</h4>
         <div style={s.grid3}>
           {disciplinas.map((disc) => (
             <div key={disc} style={{ border: '1px solid #e2e8f0', borderRadius: '6px', padding: '15px', backgroundColor: '#f8fafc' }}>
@@ -572,10 +587,11 @@ const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
         </div>
       </div>
 
-      {/* H. MÉTODOS DE AVALIAÇÃO */}
+      {/*{/* H. MÉTODOS DE AVALIAÇÃO */}
       <div className="card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>H</span> Métodos de Avaliação</div>
         <div style={s.grid3}>
+          <Checkbox label="Sondagem pedagógica" /> {/* 🌟 NOVA OPÇÃO AQUI */}
           <Checkbox label="Múltipla escolha (objetiva)" />
           <Checkbox label="Questões discursivas (claras)" />
           <Checkbox label="Alternativas reduzidas" />
@@ -664,5 +680,6 @@ export default function App() {
     return <SistemaPEI alunoData={alunoEditando} onVoltar={() => setTelaAtiva('lista')} onLogout={fazerLogout} usuario={usuario} />;
   }
 }
+
 
 
