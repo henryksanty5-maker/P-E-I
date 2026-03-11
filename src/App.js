@@ -65,6 +65,7 @@ const GlobalCSS = () => (
                           radial-gradient(at 100% 0%, hsla(0,100%,76%,0.05) 0px, transparent 50%),
                           radial-gradient(at 100% 100%, hsla(158,100%,76%,0.08) 0px, transparent 50%);
         background-attachment: fixed;
+        overflow-x: hidden;
       }
 
       .glass-panel {
@@ -83,14 +84,47 @@ const GlobalCSS = () => (
       label.checkbox-row:hover { background-color: rgba(209, 250, 229, 0.5); }
 
       @media screen { .print-only { display: none !important; } }
+      
+      /* 🌟 CORREÇÃO MÁGICA DA IMPRESSÃO AQUI 🌟 */
       @media print {
-        body { background: white !important; }
+        @page { margin: 12mm; } /* Isso ajuda a esconder a data e o link da Vercel! */
+        
+        body, html { 
+          background: white !important; 
+          overflow: visible !important; /* Destrava as páginas seguintes */
+          height: auto !important; 
+        }
+        
+        .print-page { 
+          overflow: visible !important; 
+          display: block !important; 
+        }
+        
         .no-print { display: none !important; }
         .print-only { display: block !important; }
-        .glass-panel { background: white !important; border: none !important; box-shadow: none !important; padding: 10px 0 !important; margin-bottom: 20px !important; }
-        input, textarea { border: none !important; border-bottom: 1px dashed #999 !important; border-radius: 0 !important; background: transparent !important; padding: 5px 0 !important; color: black !important; }
-        textarea { height: auto !important; min-height: 40px !important; }
-        h1, h3, h4 { color: black !important; }
+        
+        /* Removemos o vidro para o papel entender a quebra de linha */
+        .glass-panel, .card-print { 
+          background: white !important; 
+          border: none !important; 
+          box-shadow: none !important; 
+          padding: 10px 0 !important; 
+          margin-bottom: 25px !important;
+          page-break-inside: avoid; /* Tenta não cortar um bloco no meio da folha */
+          display: block !important;
+        }
+        
+        /* Linhas limpas para as respostas no papel */
+        input, textarea { 
+          border: none !important; 
+          border-bottom: 1px dashed #999 !important; 
+          border-radius: 0 !important; 
+          background: transparent !important; 
+          padding: 5px 0 !important; 
+          color: black !important; 
+        }
+        textarea { height: auto !important; min-height: 30px !important; overflow: hidden !important; }
+        h1, h2, h3, h4 { color: black !important; page-break-after: avoid; }
         .badge-print { background: none !important; color: black !important; border: 1px solid black; padding: 2px 6px; }
       }
     `}
@@ -473,6 +507,7 @@ export default function App() {
   if (telaAtiva === 'lista') return <ListaAlunos onNovo={irParaNovoFormulario} onEditar={irParaEditarFormulario} onLogout={fazerLogout} usuario={usuario} />;
   return <SistemaPEI alunoData={alunoEditando} onVoltar={() => setTelaAtiva('lista')} onLogout={fazerLogout} usuario={usuario} />;
 }
+
 
 
 
