@@ -3,7 +3,7 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from 'firebase/auth';
 import { getDatabase, ref, set, onValue, remove } from 'firebase/database';
 
-// 1. Configuração do Firebase
+// 1. Configuração do Firebase (SEU BANCO DE DADOS ATIVO)
 const firebaseConfig = {
   apiKey: "AIzaSyDrQFf-ABIdhJocaMaBiBM0S7uzr8nfue4",
   authDomain: "pei-escola-redencao.firebaseapp.com",
@@ -17,23 +17,23 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-// --- ESTILOS MODERNOS (UI/UX) ---
+// --- ESTILOS MODERNOS (Paleta: Verde e Vermelho da Cidade) ---
 const s = {
   page: { minHeight: '100vh', padding: '30px 20px', color: '#1e293b' },
   topbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px 25px', marginBottom: '30px', flexWrap: 'wrap', gap: '15px' },
   profile: { display: 'flex', alignItems: 'center', gap: '15px' },
-  avatar: { width: '48px', height: '48px', background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)', color: 'white', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', fontSize: '1.2rem', boxShadow: '0 4px 10px rgba(59, 130, 246, 0.3)' },
+  avatar: { width: '48px', height: '48px', background: 'linear-gradient(135deg, #059669 0%, #ef4444 100%)', color: 'white', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', fontSize: '1.2rem', boxShadow: '0 4px 10px rgba(5, 150, 105, 0.3)' },
   btnGroup: { display: 'flex', gap: '10px', flexWrap: 'wrap' },
   
-  // Botões com Gradientes
-  btnPrimary: { background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', letterSpacing: '0.5px' },
-  btnSuccess: { background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', letterSpacing: '0.5px' },
+  // Botões com Gradientes (Verde e Vermelho)
+  btnPrimary: { background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', letterSpacing: '0.5px' },
+  btnSuccess: { background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', letterSpacing: '0.5px' },
   btnSecondary: { background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)', color: '#334155', border: '1px solid #cbd5e1', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' },
-  btnDanger: { background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' },
+  btnDanger: { background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)', color: '#dc2626', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' },
   
   card: { padding: '28px', marginBottom: '24px' },
-  cardHeader: { color: '#1e3a8a', fontSize: '1.25rem', fontWeight: '700', borderBottom: '2px solid rgba(59, 130, 246, 0.1)', paddingBottom: '12px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px' },
-  badge: { background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)', color: '#1d4ed8', padding: '6px 12px', borderRadius: '6px', fontSize: '0.9rem', fontWeight: 'bold', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' },
+  cardHeader: { color: '#059669', fontSize: '1.25rem', fontWeight: '700', borderBottom: '2px solid rgba(16, 185, 129, 0.1)', paddingBottom: '12px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px' },
+  badge: { background: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)', color: '#065f46', padding: '6px 12px', borderRadius: '6px', fontSize: '0.9rem', fontWeight: 'bold', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' },
   
   grid2: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' },
   grid3: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px' },
@@ -43,11 +43,11 @@ const s = {
   input: { padding: '12px', border: '1px solid rgba(203, 213, 225, 0.6)', borderRadius: '8px', width: '100%', boxSizing: 'border-box', backgroundColor: 'rgba(255, 255, 255, 0.9)', outline: 'none', fontSize: '0.95rem', transition: 'all 0.3s ease' },
   
   checkboxContainer: { display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px', cursor: 'pointer', padding: '6px 8px', borderRadius: '6px' },
-  uploadBox: { border: '2px dashed #93c5fd', borderRadius: '12px', padding: '20px', textAlign: 'center', backgroundColor: 'rgba(239, 246, 255, 0.5)', marginTop: '10px' },
+  uploadBox: { border: '2px dashed #a7f3d0', borderRadius: '12px', padding: '20px', textAlign: 'center', backgroundColor: 'rgba(209, 250, 229, 0.4)', marginTop: '10px' },
   sectionTitle: { color: '#1e293b', marginBottom: '15px', fontSize: '1.05rem', borderBottom: '1px solid rgba(203, 213, 225, 0.5)', paddingBottom: '8px', fontWeight: '600' }
 };
 
-// --- CSS GLOBAL (Animações e Fonte) ---
+// --- CSS GLOBAL (Animações do Quebra-Cabeça e Fonte) ---
 const GlobalCSS = () => (
   <style>
     {`
@@ -57,10 +57,11 @@ const GlobalCSS = () => (
         font-family: 'Poppins', sans-serif !important;
         margin: 0;
         background-color: #f0f4f8;
-        background-image: radial-gradient(at 0% 0%, hsla(217,100%,76%,0.15) 0px, transparent 50%),
-                          radial-gradient(at 100% 0%, hsla(348,100%,76%,0.05) 0px, transparent 50%),
-                          radial-gradient(at 100% 100%, hsla(217,100%,76%,0.15) 0px, transparent 50%);
+        background-image: radial-gradient(at 0% 0%, hsla(158,100%,76%,0.08) 0px, transparent 50%),
+                          radial-gradient(at 100% 0%, hsla(0,100%,76%,0.05) 0px, transparent 50%),
+                          radial-gradient(at 100% 100%, hsla(158,100%,76%,0.08) 0px, transparent 50%);
         background-attachment: fixed;
+        overflow-x: hidden;
       }
 
       .glass-panel {
@@ -72,16 +73,32 @@ const GlobalCSS = () => (
         border-radius: 16px;
       }
 
+      // Animações de Botões e Inputs
       button { transition: all 0.3s ease !important; }
       button:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15); filter: brightness(1.05); }
       button:active { transform: translateY(0); }
+      input:focus, textarea:focus { border-color: #10b981 !important; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2) !important; background-color: #ffffff !important; }
+      label.checkbox-row:hover { background-color: rgba(209, 250, 229, 0.5); }
 
-      input:focus, textarea:focus { border-color: #3b82f6 !important; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important; background-color: #ffffff !important; }
-      label.checkbox-row:hover { background-color: rgba(239, 246, 255, 0.8); }
+      // ANIMAÇÃO DO QUEBRA-CABEÇA (Symbolo do Autismo)
+      @keyframes float-puzzle {
+        0% { transform: translateY(0) rotate(0deg); opacity: 0.6; }
+        50% { transform: translateY(-20px) rotate(10deg); opacity: 0.9; }
+        100% { transform: translateY(0) rotate(0deg); opacity: 0.6; }
+      }
 
+      .puzzle-piece {
+        position: absolute;
+        width: 60px; height: 60px;
+        opacity: 0.6;
+        pointer-events: none;
+        animation: float-puzzle 6s ease-in-out infinite;
+      }
+
+      // Estilos de Impressão (PDF)
       @media screen { .print-only { display: none !important; } }
       @media print {
-        body { background: white !important; }
+        body { background: white !important; font-family: sans-serif !important; }
         .no-print { display: none !important; }
         .print-only { display: block !important; }
         .glass-panel { background: white !important; border: none !important; box-shadow: none !important; padding: 10px 0 !important; margin-bottom: 20px !important; }
@@ -94,7 +111,14 @@ const GlobalCSS = () => (
   </style>
 );
 
-// 2. Tela de Login
+// Ícone SVG da Peça do Quebra-Cabeça (Symbolo do Autismo)
+const PuzzleIcon = ({ style, color }) => (
+  <svg className="puzzle-piece" style={style} viewBox="0 0 512 512" fill={color} xmlns="http://www.w3.org/2000/svg">
+    <path d="M470 178c-52 0-93 42-93 94 0 25 10 47 26 64L256 360V136c25 10 47 26 64 26 52 0 94-42 94-93 0-52-42-93-94-93-52 0-93 41-93 93 0 25 10 47 26 64L102 102V256c25-10 47-26 64-26 52 0 94 42 94 93 0 52-42 94-94 94-52 0-93-42-93-94 0-25 10-47 26-64L0 256c0 102 82 184 184 184 25 0 47-10 64-26L410 410C394 394 384 372 384 346c0-52 41-93 93-93 52 0 93 41 93 93 0 52-41 93-93 93-25 0-47-10-64-26L256 512c102 0 184-82 184-184L470 178z"/>
+  </svg>
+);
+
+// 2. Tela de Login (COM ANIMAÇÃO DO QUEBRA-CABEÇA)
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -126,13 +150,22 @@ const LoginScreen = () => {
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', padding: '20px' }}>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', padding: '20px', position: 'relative' }}>
       <GlobalCSS />
-      <div className="glass-panel" style={{ padding: '50px 40px', width: '100%', maxWidth: '420px' }}>
-        <h2 style={{ textAlign: 'center', color: '#1e3a8a', marginBottom: '10px', fontSize: '1.8rem', fontWeight: '700' }}>Sistema PEI</h2>
+      
+      {/* PEÇAS DO QUEBRA-CABEÇA ANIMADAS NO FUNDO */}
+      <PuzzleIcon color="#10b981" style={{ top: '15%', left: '10%', animationDelay: '0s' }} />
+      <PuzzleIcon color="#ef4444" style={{ top: '25%', right: '15%', animationDelay: '1s' }} />
+      <PuzzleIcon color="#f59e0b" style={{ bottom: '15%', left: '15%', animationDelay: '2s', width: '80px', height: '80px' }} />
+      <PuzzleIcon color="#3b82f6" style={{ bottom: '25%', right: '10%', animationDelay: '3s' }} />
+      <PuzzleIcon color="#8b5cf6" style={{ top: '60%', left: '50%', animationDelay: '4s', width: '50px', height: '50px' }} />
+
+      {/* PAINEL DE LOGIN (Vidro) */}
+      <div className="glass-panel" style={{ padding: '50px 40px', width: '100%', maxWidth: '420px', position: 'relative', zIndex: '1' }}>
+        <h2 style={{ textAlign: 'center', color: '#0f172a', marginBottom: '10px', fontSize: '1.9rem', fontWeight: '800' }}>Sistema PEI</h2>
         <p style={{ textAlign: 'center', color: '#64748b', marginBottom: '35px', fontWeight: '500' }}>Redenção da Serra - SP</p>
         
-        {erro && <div style={{ backgroundColor: '#fee2e2', color: '#ef4444', padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '0.9rem', textAlign: 'center', fontWeight: '500' }}>{erro}</div>}
+        {erro && <div style={{ backgroundColor: '#fee2e2', color: '#dc2626', padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '0.9rem', textAlign: 'center', fontWeight: '500' }}>{erro}</div>}
         {mensagem && <div style={{ backgroundColor: '#d1fae5', color: '#065f46', padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '0.9rem', textAlign: 'center', fontWeight: '500' }}>{mensagem}</div>}
         
         <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -142,7 +175,7 @@ const LoginScreen = () => {
         </form>
         
         <div style={{ marginTop: '25px', textAlign: 'center' }}>
-          <button type="button" onClick={handleEsqueciSenha} style={{ background: 'none', border: 'none', color: '#3b82f6', cursor: 'pointer', fontSize: '0.9rem', fontWeight: '500' }}>
+          <button type="button" onClick={handleEsqueciSenha} style={{ background: 'none', border: 'none', color: '#10b981', cursor: 'pointer', fontSize: '0.9rem', fontWeight: '500' }}>
             Esqueci ou quero mudar a minha senha
           </button>
         </div>
@@ -151,14 +184,14 @@ const LoginScreen = () => {
   );
 };
 
-// 3. Tela de Lista de Alunos
+// 3. Tela de Lista de Alunos (COM NOVAS CORES)
 const ListaAlunos = ({ onNovo, onEditar, onLogout, usuario }) => {
   const [alunos, setAlunos] = useState([]);
 
   // 🌟 AQUI FICA A SUA LISTA VIP: Digite os e-mails reais aqui!
   const listaEspecialistas = [
-    'seu_email_aqui@gmail.com',
-    'direcao@escola.com'
+    'seu_email_aqui@gmail.com', // <--- COLOQUE SEU E-MAIL AQUI
+    'direcao@escola.com'        // Pode colocar o da direção ou apagar essa linha
   ];
   
   const isEspecialista = listaEspecialistas.includes(usuario.email);
@@ -188,11 +221,12 @@ const ListaAlunos = ({ onNovo, onEditar, onLogout, usuario }) => {
   return (
     <div style={s.page}>
       <GlobalCSS />
+      {/* BARRA SUPERIOR DO DASHBOARD */}
       <div className="glass-panel no-print" style={s.topbar}>
         <div style={s.profile}>
           <div style={s.avatar}>{usuario.email.substring(0,2).toUpperCase()}</div>
           <div>
-            <h2 style={{ margin: 0, fontSize: '1.1rem', color: '#0f172a', fontWeight: '600' }}>Painel de Controle</h2>
+            <h2 style={{ margin: 0, fontSize: '1.1rem', color: '#0f172a', fontWeight: '600' }}>Painel do Professor</h2>
             <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', fontWeight: '500' }}>
               {isEspecialista ? 'Especialista / Admin' : 'Professor Regente'} • {usuario.email}
             </p>
@@ -200,35 +234,35 @@ const ListaAlunos = ({ onNovo, onEditar, onLogout, usuario }) => {
         </div>
         <div style={s.btnGroup}>
           <button style={s.btnPrimary} onClick={onNovo}>+ Novo PEI</button>
-          <button style={s.btnSecondary} onClick={onLogout}>Sair</button>
+          <button style={s.btnDanger} onClick={onLogout}>Sair</button>
         </div>
       </div>
 
       <h1 style={{ color: '#0f172a', marginBottom: '25px', fontSize: '1.8rem', fontWeight: '700' }}>
-        {isEspecialista ? 'Visão Global de Alunos' : 'Minha Turma'}
+        {isEspecialista ? 'Visão Global da Escola' : 'Meus Alunos'}
       </h1>
 
       {alunos.length === 0 ? (
         <div className="glass-panel" style={{ textAlign: 'center', padding: '60px 20px', color: '#64748b' }}>
-          <span style={{ fontSize: '3rem', display: 'block', marginBottom: '15px' }}>📂</span>
-          <p style={{ fontSize: '1.1rem', fontWeight: '500' }}>Nenhum aluno encontrado no seu perfil.</p>
-          <p style={{ fontSize: '0.9rem' }}>Clique em "Novo PEI" no topo da tela para começar a cadastrar.</p>
+          <span style={{ fontSize: '3.5rem', display: 'block', marginBottom: '15px' }}>📂</span>
+          <p style={{ fontSize: '1.1rem', fontWeight: '600' }}>Nenhum aluno cadastrado.</p>
+          <p style={{ fontSize: '0.9rem' }}>Clique em "Novo PEI" no topo da tela para começar.</p>
         </div>
       ) : (
         <div style={s.grid3}>
           {alunos.map((aluno) => (
             <div key={aluno.id} className="glass-panel" style={{...s.card, marginBottom: '0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between'}}>
               <div>
-                <h3 style={{ color: '#1e3a8a', margin: '0 0 12px 0', fontSize: '1.3rem', fontWeight: '600' }}>{aluno.aluno}</h3>
-                <div style={{ backgroundColor: 'rgba(239, 246, 255, 0.5)', padding: '12px', borderRadius: '8px', marginBottom: '15px' }}>
-                  <p style={{ margin: '0 0 5px 0', fontSize: '0.9rem', color: '#475569' }}><strong>Ano/Série:</strong> {aluno.anoSerie || '-'} {aluno.turma}</p>
-                  <p style={{ margin: '0 0 0 0', fontSize: '0.9rem', color: '#475569' }}><strong>Diagnóstico:</strong> {aluno.diagnostico || 'Não informado'}</p>
+                <h3 style={{ color: '#059669', margin: '0 0 12px 0', fontSize: '1.3rem', fontWeight: '600' }}>{aluno.aluno}</h3>
+                <div style={{ backgroundColor: 'rgba(209, 250, 229, 0.4)', padding: '12px', borderRadius: '8px', marginBottom: '15px' }}>
+                  <p style={{ margin: '0 0 5px 0', fontSize: '0.9rem', color: '#334155' }}><strong>Ano/Série:</strong> {aluno.anoSerie || '-'} {aluno.turma}</p>
+                  <p style={{ margin: '0', fontSize: '0.9rem', color: '#334155' }}><strong>Diagnóstico:</strong> {aluno.diagnostico || 'Não informado'}</p>
                 </div>
                 <p style={{ margin: '0 0 20px 0', fontSize: '0.75rem', color: '#94a3b8', fontWeight: '500' }}>Criado por: {aluno.criadoPor || 'Legado (Sem dono)'}</p>
               </div>
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button style={{...s.btnSecondary, flex: '1', backgroundColor: 'white'}} onClick={() => onEditar(aluno)}>Abrir / Editar</button>
-                <button style={{...s.btnDanger}} onClick={() => deletarAluno(aluno.id)}>Excluir</button>
+                <button style={{...s.btnSuccess, padding: '10px'}} onClick={() => deletarAluno(aluno.id)}>✓ Fechar</button>
               </div>
             </div>
           ))}
@@ -238,27 +272,18 @@ const ListaAlunos = ({ onNovo, onEditar, onLogout, usuario }) => {
   );
 };
 
-// 4. Tela do Formulário (Sistema PEI Completo)
+// 4. Tela do Formulário (COM NOVAS CORES)
 const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
   const estadoInicial = {
-    aluno: '', nascimento: '', anoSerie: '', turma: '', responsaveis: '',
-    escola: 'EMEIEF "PROFESSORA EDNA REGINA DE OLIVEIRA E SILVA"',
-    diagnostico: '', cid: '', crm: '',
-    resultadoAvaliacao: '', rotinaFamiliar: '', fatoresAmbientais: '',
-    resumoAluno: '',
-    campoLinguagem: '', campoMatematica: '', // Novos campos!
-    anexos: {}, conteudos: {}, diario: {}, opcoes: {} 
+    aluno: '', nascimento: '', anoSerie: '', turma: '', responsaveis: '', esco: 'EMEIEF "PROFESSORA EDNA REGINA DE OLIVEIRA E SILVA"', diagnostico: '', cid: '', crm: '', resultadoAvaliacao: '', rotinaFamiliar: '', fatoresAmbientais: '', resumoAluno: '', campoLinguagem: '', campoMatematica: '', anexos: {}, conteudos: {}, diario: {}, opcoes: {} 
   };
 
   const [formData, setFormData] = useState(() => {
-    if (alunoData) {
-      return { ...estadoInicial, ...alunoData, anexos: alunoData.anexos || {}, conteudos: alunoData.conteudos || {}, diario: alunoData.diario || {}, opcoes: alunoData.opcoes || {} };
-    }
+    if (alunoData) { return { ...estadoInicial, ...alunoData, anexos: alunoData.anexos || {}, conteudos: alunoData.conteudos || {}, diario: alunoData.diario || {}, opcoes: alunoData.opcoes || {} }; }
     return estadoInicial;
   });
 
   const [aEnviar, setAEnviar] = useState(false);
-
   const disciplinas = ['Língua Portuguesa', 'Matemática', 'Ciências', 'História', 'Geografia', 'Artes', 'Educação Física', 'Inglês', 'Informática'];
   const bimestres = ['1º Bimestre', '2º Bimestre', '3º Bimestre', '4º Bimestre'];
 
@@ -286,10 +311,8 @@ const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const scaleSize = 700 / img.width;
-        canvas.width = 700; canvas.height = img.height * scaleSize;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const scaleSize = 700 / img.width; canvas.width = 700; canvas.height = img.height * scaleSize;
+        const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         setFormData(prev => ({ ...prev, anexos: { ...(prev.anexos || {}), [campoID]: canvas.toDataURL('image/jpeg', 0.6) } }));
         setAEnviar(false);
       };
@@ -299,16 +322,12 @@ const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
   };
 
   const removerAnexo = (campoID) => {
-    setFormData(prev => {
-      const novosAnexos = { ...(prev.anexos || {}) };
-      delete novosAnexos[campoID];
-      return { ...prev, anexos: novosAnexos };
-    });
+    setFormData(prev => { const novosAnexos = { ...(prev.anexos || {}) }; delete novosAnexos[campoID]; return { ...prev, anexos: novosAnexos }; });
   };
 
   const Checkbox = ({ label }) => (
     <label className="checkbox-row" style={s.checkboxContainer}>
-      <input type="checkbox" checked={!!(formData.opcoes || {})[label]} onChange={() => handleCheckbox(label)} style={{ width: '18px', height: '18px', accentColor: '#2563eb' }} />
+      <input type="checkbox" checked={!!(formData.opcoes || {})[label]} onChange={() => handleCheckbox(label)} style={{ width: '18px', height: '18px', accentColor: '#10b981' }} />
       <span style={{ fontSize: '0.95rem', color: '#334155', fontWeight: '500' }}>{label}</span>
     </label>
   );
@@ -317,15 +336,15 @@ const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
     <div className="no-print" style={s.uploadBox}>
       {formData.anexos && formData.anexos[campoID] ? (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <img src={formData.anexos[campoID]} alt="Anexo" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '8px', border: '1px solid #cbd5e1', objectFit: 'contain', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }} />
-          <button type="button" onClick={() => removerAnexo(campoID)} style={{ marginTop: '12px', padding: '8px 16px', backgroundColor: '#fee2e2', color: '#ef4444', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '600' }}>Remover Imagem</button>
+          <img src={formData.anexos[campoID]} alt="Anexo" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '8px', border: '1px solid #a7f3d0', objectFit: 'contain', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }} />
+          <button type="button" onClick={() => removerAnexo(campoID)} style={{ marginTop: '12px', padding: '8px 16px', backgroundColor: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '600' }}>Remover Imagem</button>
         </div>
       ) : (
         <>
           <span style={{ fontSize: '2rem' }}>📷</span>
-          <p style={{ margin: '8px 0', fontWeight: '600', color: '#2563eb', fontSize: '0.95rem' }}>{label}</p>
+          <p style={{ margin: '8px 0', fontWeight: '600', color: '#059669', fontSize: '0.95rem' }}>{label}</p>
           <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, campoID)} style={{ fontSize: '0.85rem', marginTop: '8px', maxWidth: '100%', color: '#64748b' }} disabled={aEnviar} />
-          {aEnviar && <span style={{fontSize: '0.85rem', color: '#ef4444', display: 'block', marginTop: '8px', fontWeight: '500'}}>Processando imagem...</span>}
+          {aEnviar && <span style={{fontSize: '0.85rem', color: '#ef4444', display: 'block', marginTop: '8px', fontWeight: '500'}}>Processando...</span>}
         </>
       )}
     </div>
@@ -334,20 +353,19 @@ const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
   return (
     <div className="print-page" style={s.page}>
       <GlobalCSS />
-
-      {/* BARRA SUPERIOR */}
+      {/* BARRA SUPERIOR DO EDITOR */}
       <div className="glass-panel no-print" style={s.topbar}>
         <div style={s.profile}>
           <div style={s.avatar}>{usuario.email.substring(0,2).toUpperCase()}</div>
           <div>
-            <h2 style={{ margin: 0, fontSize: '1.1rem', color: '#0f172a', fontWeight: '600' }}>Editor de PEI</h2>
+            <h2 style={{ margin: 0, fontSize: '1.1rem', color: '#0f172a', fontWeight: '600' }}>Editor do PEI</h2>
             <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', fontWeight: '500' }}>{usuario.email}</p>
           </div>
         </div>
         <div style={s.btnGroup}>
-          <button style={s.btnSecondary} onClick={onVoltar}>← Voltar à Lista</button>
-          <button style={s.btnSuccess} onClick={salvarNoBanco}>✓ Salvar na Nuvem</button>
-          <button style={{...s.btnPrimary, background: 'linear-gradient(135deg, #4f46e5 0%, #3730a3 100%)'}} onClick={gerarPDF}>🖨️ Gerar PDF</button>
+          <button style={s.btnSecondary} onClick={onVoltar}>← Voltar</button>
+          <button style={s.btnPrimary} onClick={salvarNoBanco}>✓ Salvar na Nuvem</button>
+          <button style={{...s.btnSuccess}} onClick={gerarPDF}>🖨️ Gerar PDF</button>
         </div>
       </div>
 
@@ -367,31 +385,13 @@ const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
       <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>A</span> Identificação do Aluno</div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: '30px' }}>
-          <div className="no-print">
-            <div style={s.label}>Foto do Aluno</div>
-            <FileUpload label="Selecionar Foto" campoID="foto_perfil" />
-          </div>
+          <div className="no-print"><FileUpload label="Selecionar Foto" campoID="foto_perfil" /></div>
           <div style={s.grid2}>
-            <div style={s.inputGroup}>
-              <label style={s.label}>Nome do Aluno *</label>
-              <input style={s.input} name="aluno" value={formData.aluno} onChange={handleChange} />
-            </div>
-            <div style={s.inputGroup}>
-              <label style={s.label}>Data de Nascimento</label>
-              <input style={s.input} name="nascimento" value={formData.nascimento} onChange={handleChange} />
-            </div>
-            <div style={s.inputGroup}>
-              <label style={s.label}>Ano/Série</label>
-              <input style={s.input} name="anoSerie" value={formData.anoSerie} onChange={handleChange} />
-            </div>
-            <div style={s.inputGroup}>
-              <label style={s.label}>Turma</label>
-              <input style={s.input} name="turma" value={formData.turma} onChange={handleChange} />
-            </div>
-            <div style={{...s.inputGroup, gridColumn: '1 / -1'}}>
-              <label style={s.label}>Responsáveis</label>
-              <input style={s.input} name="responsaveis" value={formData.responsaveis} onChange={handleChange} />
-            </div>
+            <div style={s.inputGroup}><label style={s.label}>Nome do Aluno *</label><input style={s.input} name="aluno" value={formData.aluno} onChange={handleChange} /></div>
+            <div style={s.inputGroup}><label style={s.label}>Data de Nascimento</label><input style={s.input} name="nascimento" value={formData.nascimento} onChange={handleChange} /></div>
+            <div style={s.inputGroup}><label style={s.label}>Ano/Série</label><input style={s.input} name="anoSerie" value={formData.anoSerie} onChange={handleChange} /></div>
+            <div style={s.inputGroup}><label style={s.label}>Turma</label><input style={s.input} name="turma" value={formData.turma} onChange={handleChange} /></div>
+            <div style={{...s.inputGroup, gridColumn: '1 / -1'}}><label style={s.label}>Responsáveis</label><input style={s.input} name="responsaveis" value={formData.responsaveis} onChange={handleChange} /></div>
           </div>
         </div>
       </div>
@@ -400,178 +400,55 @@ const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
       <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>B</span> Informações Clínicas</div>
         <div style={s.grid3}>
-          <div style={s.inputGroup}>
-            <label style={s.label}>Diagnóstico</label>
-            <input style={s.input} name="diagnostico" value={formData.diagnostico} onChange={handleChange} />
-            <FileUpload label="Anexar Laudo" campoID="laudo_medico" />
-          </div>
-          <div style={s.inputGroup}>
-            <label style={s.label}>Códigos CID</label>
-            <input style={s.input} name="cid" value={formData.cid} onChange={handleChange} />
-          </div>
-          <div style={s.inputGroup}>
-            <label style={s.label}>CRM do Médico</label>
-            <input style={s.input} name="crm" value={formData.crm} onChange={handleChange} />
-          </div>
+          <div style={s.inputGroup}><label style={s.label}>Diagnóstico</label><input style={s.input} name="diagnostico" value={formData.diagnostico} onChange={handleChange} /><FileUpload label="Anexar Laudo" campoID="laudo_medico" /></div>
+          <div style={s.inputGroup}><label style={s.label}>Códigos CID</label><input style={s.input} name="cid" value={formData.cid} onChange={handleChange} /></div>
+          <div style={s.inputGroup}><label style={s.label}>CRM do Médico</label><input style={s.input} name="crm" value={formData.crm} onChange={handleChange} /></div>
         </div>
       </div>
 
-      {/* C. MEDICAÇÃO E TERAPIAS */}
+      {/* C. MEDICAÇÃO, TERAPIAS E ADAPTAÇÕES (NOVOS CAMPOS) */}
       <div className="glass-panel card-print" style={s.card}>
-        <div style={s.cardHeader}><span className="badge-print" style={s.badge}>C</span> Medicação, Terapias e Especialistas</div>
+        <div style={s.cardHeader}><span className="badge-print" style={s.badge}>C</span> Medicação, Terapias e Adaptações Curriculares</div>
         <div style={s.grid2}>
-          <div>
-            <Checkbox label="O aluno utiliza medicação?" />
-            <FileUpload label="Anexar Receita" campoID="receita_medica" />
-          </div>
-          <div>
-            <Checkbox label="O aluno tem acompanhamento terapêutico?" />
-          </div>
+          <div><Checkbox label="O aluno utiliza medicação?" /><FileUpload label="Anexar Receita" campoID="receita_medica" /></div>
+          <div><Checkbox label="O aluno tem acompanhamento terapêutico?" /></div>
         </div>
-        <div style={{ marginTop: '20px' }}>
-          <h4 style={s.sectionTitle}>Especialistas que acompanham o aluno:</h4>
-          <div style={s.grid3}>
-            <Checkbox label="Neurologista" />
-            <Checkbox label="Neuropediatra" />
-            <Checkbox label="Psiquiatra" />
-            <Checkbox label="Psicólogo" />
-            <Checkbox label="Fonoaudiólogo" />
-            <Checkbox label="Psicopedagogo" />
-            <Checkbox label="Terapeuta Ocupacional" />
-            <Checkbox label="Psicomotricidade" />
-            <Checkbox label="ABA / TCC" />
-          </div>
+        <div style={{...s.grid2, marginTop: '20px'}}>
+          <div style={s.inputGroup}><label style={s.label}>Campo de Experiência: Linguagem</label><textarea style={{...s.input, minHeight: '80px'}} name="campoLinguagem" value={formData.campoLinguagem} onChange={handleChange} placeholder="Adaptações e objetivos para a área da linguagem..."></textarea></div>
+          <div style={s.inputGroup}><label style={s.label}>Campo de Experiência: Matemática</label><textarea style={{...s.input, minHeight: '80px'}} name="campoMatematica" value={formData.campoMatematica} onChange={handleChange} placeholder="Adaptações e objetivos para a área da matemática..."></textarea></div>
         </div>
+        <div style={{ marginTop: '20px' }}><h4 style={s.sectionTitle}>Especialistas que acompanham o aluno:</h4><div style={s.grid3}><Checkbox label="Neurologista" /><Checkbox label="Psicólogo" /><Checkbox label="Fonoaudiólogo" /><Checkbox label="Psicopedagogo" /><Checkbox label="Terapeuta Ocupacional" /><Checkbox label="Psicomotricidade" /><Checkbox label="ABA / TCC" /></div></div>
       </div>
 
       {/* D. AVALIAÇÃO DIAGNÓSTICA E CONTEXTUAL */}
       <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>D</span> Avaliação Diagnóstica e Contextual</div>
         <div style={s.grid2}>
-          <div style={s.inputGroup}>
-            <label style={s.label}>Resultado da Avaliação Diagnóstica</label>
-            <textarea style={{...s.input, minHeight: '100px'}} name="resultadoAvaliacao" value={formData.resultadoAvaliacao} onChange={handleChange} placeholder="Estágio atual de aprendizagem..."></textarea>
-          </div>
-          <div style={s.inputGroup}>
-            <label style={s.label}>Evidência / Avaliação</label>
-            <FileUpload label="Anexar Avaliação" campoID="avaliacao_diagnostica" />
-          </div>
+          <div style={s.inputGroup}><label style={s.label}>Resultado da Avaliação Diagnóstica</label><textarea style={{...s.input, minHeight: '100px'}} name="resultadoAvaliacao" value={formData.resultadoAvaliacao} onChange={handleChange} placeholder="Estágio atual de aprendizagem..."></textarea></div>
+          <div style={s.inputGroup}><label style={s.label}>Evidência / Avaliação</label><FileUpload label="Anexar Avaliação" campoID="avaliacao_diagnostica" /></div>
         </div>
-        <div style={{ marginTop: '20px' }}>
-          <Checkbox label="A avaliação é a mesma da turma regular?" />
-          <Checkbox label="O aluno conta com Profissional de Apoio Especializado (PAE)?" />
-        </div>
-        <div style={{...s.grid2, marginTop: '20px'}}>
-          <div style={s.inputGroup}>
-            <label style={s.label}>Aspectos da Rotina Familiar</label>
-            <textarea style={{...s.input, minHeight: '80px'}} name="rotinaFamiliar" value={formData.rotinaFamiliar} onChange={handleChange}></textarea>
-          </div>
-          <div style={s.inputGroup}>
-            <label style={s.label}>Fatores Ambientais (Facilitadores/Barreiras)</label>
-            <textarea style={{...s.input, minHeight: '80px'}} name="fatoresAmbientais" value={formData.fatoresAmbientais} onChange={handleChange}></textarea>
-          </div>
-        </div>
+        <div style={{...s.grid2, marginTop: '20px'}}><div style={s.inputGroup}><label style={s.label}>Aspectos da Rotina Familiar</label><textarea style={{...s.input, minHeight: '80px'}} name="rotinaFamiliar" value={formData.rotinaFamiliar} onChange={handleChange}></textarea></div><div style={s.inputGroup}><label style={s.label}>Fatores Ambientais</label><textarea style={{...s.input, minHeight: '80px'}} name="fatoresAmbientais" value={formData.fatoresAmbientais} onChange={handleChange}></textarea></div></div>
       </div>
 
-      {/* E. ADAPTAÇÕES CURRICULARES */}
+      {/* E. ADAPTAÇÕES POR DISCIPLINA */}
       <div className="glass-panel card-print" style={s.card}>
-        <div style={s.cardHeader}><span className="badge-print" style={s.badge}>E</span> Adaptações Curriculares e Campos de Experiência</div>
-        
-        {/* NOVOS CAMPOS AQUI */}
-        <div style={{...s.grid2, marginBottom: '25px'}}>
-          <div style={s.inputGroup}>
-            <label style={s.label}>Campo de Experiência: Linguagem</label>
-            <textarea style={{...s.input, minHeight: '80px'}} name="campoLinguagem" value={formData.campoLinguagem} onChange={handleChange} placeholder="Adaptações e objetivos para a área da linguagem..."></textarea>
-          </div>
-          <div style={s.inputGroup}>
-            <label style={s.label}>Campo de Experiência: Matemática</label>
-            <textarea style={{...s.input, minHeight: '80px'}} name="campoMatematica" value={formData.campoMatematica} onChange={handleChange} placeholder="Adaptações e objetivos para a área da matemática..."></textarea>
-          </div>
-        </div>
-
-        <h4 style={s.sectionTitle}>Adaptações por Disciplina</h4>
+        <div style={s.cardHeader}><span className="badge-print" style={s.badge}>E</span> Adaptações por Disciplina</div>
         <div style={s.grid3}>
           {disciplinas.map((disc) => (
-            <div key={disc} style={{ border: '1px solid rgba(203, 213, 225, 0.5)', borderRadius: '10px', padding: '18px', backgroundColor: 'rgba(248, 250, 252, 0.6)' }}>
-              <h4 style={{ margin: '0 0 12px 0', borderBottom: '1px solid #e2e8f0', paddingBottom: '8px', color: '#334155' }}>{disc}</h4>
+            <div key={disc} style={{ border: '1px solid rgba(203, 213, 225, 0.5)', borderRadius: '10px', padding: '18px', backgroundColor: 'rgba(209, 250, 229, 0.2)' }}>
+              <h4 style={{ margin: '0 0 12px 0', color: '#065f46', borderBottom: '1px solid #a7f3d0', paddingBottom: '8px' }}>{disc}</h4>
               <Checkbox label={`${disc} - Priorização de conteúdos`} />
               <Checkbox label={`${disc} - Introdução de conteúdos alternativos`} />
-              <Checkbox label={`${disc} - Priorização de objetivos`} />
-              <div style={{...s.inputGroup, marginTop: '12px'}}>
-                <label style={{...s.label, fontSize: '0.85rem'}}>Conteúdo Ministrado:</label>
-                <textarea style={{...s.input, minHeight: '60px', fontSize: '0.9rem'}} value={(formData.conteudos || {})[disc] || ''} onChange={(e) => handleNestedText('conteudos', disc, e.target.value)} />
-              </div>
+              <div style={{...s.inputGroup, marginTop: '12px'}}><label style={{...s.label, fontSize: '0.85rem'}}>Conteúdo:</label><textarea style={{...s.input, minHeight: '60px', fontSize: '0.9rem'}} value={(formData.conteudos || {})[disc] || ''} onChange={(e) => handleNestedText('conteudos', disc, e.target.value)} /></div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* F. PROCEDIMENTOS DIDÁTICOS */}
-      <div className="glass-panel card-print" style={s.card}>
-        <div style={s.cardHeader}><span className="badge-print" style={s.badge}>F</span> Adaptações Organizacionais e Didáticas</div>
-        <div style={s.grid3}>
-          <div>
-            <h4 style={s.sectionTitle}>Procedimentos</h4>
-            <Checkbox label="Organização de materiais" />
-            <Checkbox label="Atividades alternativas" />
-            <Checkbox label="Modificação de complexidade" />
-            <Checkbox label="Agrupamento de alunos" />
-            <Checkbox label="Pistas contextuais" />
-          </div>
-          <div>
-            <h4 style={s.sectionTitle}>Apoio Visual / Estrutural</h4>
-            <Checkbox label="Listas de vocabulário" />
-            <Checkbox label="Recursos visuais/imagens" />
-            <Checkbox label="Resumos e sínteses" />
-            <Checkbox label="Organizadores gráficos" />
-          </div>
-          <div>
-            <h4 style={s.sectionTitle}>Treinamento e Ferramentas</h4>
-            <Checkbox label="Treino: Ditado" />
-            <Checkbox label="Treino: Trabalho reduzido" />
-            <Checkbox label="Treino: Decodificação" />
-            <Checkbox label="Instrumentos facilitadores (calculadora, tablet, etc)" />
-          </div>
-        </div>
-      </div>
-
-      {/* G. ESPAÇO E TECNOLOGIA */}
-      <div className="glass-panel card-print" style={s.card}>
-        <div style={s.cardHeader}><span className="badge-print" style={s.badge}>G</span> Adaptações de Espaço e Tecnologia</div>
-        <div style={s.grid3}>
-          <div>
-            <h4 style={s.sectionTitle}>Espaço Físico</h4>
-            <Checkbox label="Acessibilidade" />
-            <Checkbox label="Disposição de mobiliário" />
-            <Checkbox label="Equipamentos adaptados" />
-          </div>
-          <div>
-            <h4 style={s.sectionTitle}>Tecnologia Assistiva</h4>
-            <Checkbox label="Acesso ao computador" />
-            <Checkbox label="Auxílios visuais/auditivos" />
-            <Checkbox label="CAA - Comunicação Aumentativa" />
-          </div>
-          <div>
-            <h4 style={s.sectionTitle}>Adaptações Temporais</h4>
-            <Checkbox label="Tempo estendido para atividades" />
-            <Checkbox label="Escolarização prolongada" />
-          </div>
-        </div>
-      </div>
-
-      {/* H. MÉTODOS DE AVALIAÇÃO */}
+      {/* H. MÉTODOS DE AVALIAÇÃO (NOVO CAMPO) */}
       <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>H</span> Métodos de Avaliação</div>
-        <div style={s.grid3}>
-          <Checkbox label="Sondagem pedagógica" />
-          <Checkbox label="Múltipla escolha (objetiva)" />
-          <Checkbox label="Questões discursivas (claras)" />
-          <Checkbox label="Alternativas reduzidas" />
-          <Checkbox label="Ilustrações" />
-          <Checkbox label="Resposta oral" />
-          <Checkbox label="Exercícios práticos" />
-          <Checkbox label="Trabalhos escritos/orais" />
-        </div>
+        <div style={s.grid3}><Checkbox label="Sondagem pedagógica" /><Checkbox label="Múltipla escolha (objetiva)" /><Checkbox label="Resposta oral" /><Checkbox label="Exercícios práticos" /><Checkbox label="Trabalhos escritos/orais" /></div>
       </div>
 
       {/* I. DIÁRIO DO ALUNO (COM IMAGENS) */}
@@ -579,10 +456,10 @@ const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>I</span> Diário do Aluno (Acompanhamento Bimestral)</div>
         <div style={s.grid2}>
           {bimestres.map((bim, index) => (
-            <div key={bim} style={{ border: '1px solid rgba(203, 213, 225, 0.5)', borderRadius: '10px', padding: '18px', backgroundColor: 'rgba(248, 250, 252, 0.6)' }}>
-              <h4 style={{ margin: '0 0 12px 0', color: '#334155' }}>{bim}</h4>
+            <div key={bim} style={{ border: '1px solid rgba(203, 213, 225, 0.5)', borderRadius: '10px', padding: '18px', backgroundColor: 'rgba(209, 250, 229, 0.2)' }}>
+              <h4 style={{ margin: '0 0 12px 0', color: '#065f46' }}>{bim}</h4>
               <textarea style={{...s.input, minHeight: '80px'}} placeholder="Evolução, observações e conquistas..." value={(formData.diario || {})[bim] || ''} onChange={(e) => handleNestedText('diario', bim, e.target.value)} />
-              <FileUpload label="Anexar Evidência / Atividade" campoID={`diario_bimestre_${index+1}`} />
+              <FileUpload label="Anexar Evidência" campoID={`diario_bimestre_${index+1}`} />
             </div>
           ))}
         </div>
@@ -591,19 +468,9 @@ const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
       {/* J. REVISÃO FINAL */}
       <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>J</span> Revisão Final e Observações</div>
-        <div style={s.inputGroup}>
-          <label style={s.label}>Resumo do Aluno (Pontos Fortes, Dificuldades e Recomendações)</label>
-          <textarea style={{...s.input, minHeight: '120px'}} name="resumoAluno" value={formData.resumoAluno} onChange={handleChange}></textarea>
-        </div>
-
-        {/* ASSINATURAS */}
+        <div style={s.inputGroup}><label style={s.label}>Resumo do Aluno (Pontos Fortes, Dificuldades e Recomendações)</label><textarea style={{...s.input, minHeight: '120px'}} name="resumoAluno" value={formData.resumoAluno} onChange={handleChange}></textarea></div>
         <div className="print-only" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '60px', flexWrap: 'wrap', gap: '20px' }}>
-          {['Professor(a)', 'Direção / Coordenação', 'Pais/Responsáveis'].map(role => (
-            <div key={role} style={{ flex: '1', minWidth: '150px', textAlign: 'center' }}>
-              <div style={{ borderBottom: '1px solid black', marginBottom: '10px', height: '30px' }}></div>
-              <p style={{ fontWeight: 'bold', margin: 0 }}>{role}</p>
-            </div>
-          ))}
+          {['Professor(a)', 'Direção / Coordenação', 'Pais/Responsáveis'].map(role => (<div key={role} style={{ flex: '1', minWidth: '150px', textAlign: 'center' }}><div style={{ borderBottom: '1px solid black', marginBottom: '10px', height: '30px' }}></div><p style={{ fontWeight: 'bold', margin: 0 }}>{role}</p></div>))}
         </div>
       </div>
 
@@ -618,21 +485,13 @@ export default function App() {
   const [telaAtiva, setTelaAtiva] = useState('lista');
   const [alunoEditando, setAlunoEditando] = useState(null);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUsuario(user); setCarregando(false);
-    });
-    return () => unsubscribe();
-  }, []);
-
+  useEffect(() => { const unsubscribe = onAuthStateChanged(auth, (user) => { setUsuario(user); setCarregando(false); }); return () => unsubscribe(); }, []);
   const fazerLogout = () => signOut(auth);
-
   const irParaNovoFormulario = () => { setAlunoEditando(null); setTelaAtiva('formulario'); };
   const irParaEditarFormulario = (aluno) => { setAlunoEditando(aluno); setTelaAtiva('formulario'); };
 
-  if (carregando) return <div style={{ textAlign: 'center', marginTop: '50px', fontFamily: 'sans-serif' }}>A carregar o ambiente...</div>;
+  if (carregando) return <div style={{ textAlign: 'center', marginTop: '50px', fontFamily: 'sans-serif', color: '#64748b' }}>A carregar o ambiente pedagógico...</div>;
   if (!usuario) return <LoginScreen />;
-
   if (telaAtiva === 'lista') return <ListaAlunos onNovo={irParaNovoFormulario} onEditar={irParaEditarFormulario} onLogout={fazerLogout} usuario={usuario} />;
   return <SistemaPEI alunoData={alunoEditando} onVoltar={() => setTelaAtiva('lista')} onLogout={fazerLogout} usuario={usuario} />;
 }
