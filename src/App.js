@@ -3,6 +3,10 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from 'firebase/auth';
 import { getDatabase, ref, set, onValue, remove } from 'firebase/database';
 
+// IMPORTAÇÃO DA IMAGEM: Esta linha é essencial!
+// Certifique-se de que o arquivo "logo_pei.png" está na mesma pasta que este App.js
+import logoPei from './logo_pei.png'; 
+
 // 1. Configuração do Firebase (SEU BANCO DE DADOS ATIVO)
 const firebaseConfig = {
   apiKey: "AIzaSyDrQFf-ABIdhJocaMaBiBM0S7uzr8nfue4",
@@ -47,7 +51,7 @@ const s = {
   sectionTitle: { color: '#1e293b', marginBottom: '15px', fontSize: '1.05rem', borderBottom: '1px solid rgba(203, 213, 225, 0.5)', paddingBottom: '8px', fontWeight: '600' }
 };
 
-// --- CSS GLOBAL (Animações do Quebra-Cabeça e Fonte) ---
+// --- CSS GLOBAL (Animações e Fonte Poppins) ---
 const GlobalCSS = () => (
   <style>
     {`
@@ -61,7 +65,6 @@ const GlobalCSS = () => (
                           radial-gradient(at 100% 0%, hsla(0,100%,76%,0.05) 0px, transparent 50%),
                           radial-gradient(at 100% 100%, hsla(158,100%,76%,0.08) 0px, transparent 50%);
         background-attachment: fixed;
-        overflow-x: hidden;
       }
 
       .glass-panel {
@@ -73,32 +76,15 @@ const GlobalCSS = () => (
         border-radius: 16px;
       }
 
-      // Animações de Botões e Inputs
       button { transition: all 0.3s ease !important; }
       button:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15); filter: brightness(1.05); }
       button:active { transform: translateY(0); }
       input:focus, textarea:focus { border-color: #10b981 !important; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2) !important; background-color: #ffffff !important; }
       label.checkbox-row:hover { background-color: rgba(209, 250, 229, 0.5); }
 
-      // ANIMAÇÃO DO QUEBRA-CABEÇA (Symbolo do Autismo)
-      @keyframes float-puzzle {
-        0% { transform: translateY(0) rotate(0deg); opacity: 0.6; }
-        50% { transform: translateY(-20px) rotate(10deg); opacity: 0.9; }
-        100% { transform: translateY(0) rotate(0deg); opacity: 0.6; }
-      }
-
-      .puzzle-piece {
-        position: absolute;
-        width: 60px; height: 60px;
-        opacity: 0.6;
-        pointer-events: none;
-        animation: float-puzzle 6s ease-in-out infinite;
-      }
-
-      // Estilos de Impressão (PDF)
       @media screen { .print-only { display: none !important; } }
       @media print {
-        body { background: white !important; font-family: sans-serif !important; }
+        body { background: white !important; }
         .no-print { display: none !important; }
         .print-only { display: block !important; }
         .glass-panel { background: white !important; border: none !important; box-shadow: none !important; padding: 10px 0 !important; margin-bottom: 20px !important; }
@@ -111,14 +97,7 @@ const GlobalCSS = () => (
   </style>
 );
 
-// Ícone SVG da Peça do Quebra-Cabeça (Symbolo do Autismo)
-const PuzzleIcon = ({ style, color }) => (
-  <svg className="puzzle-piece" style={style} viewBox="0 0 512 512" fill={color} xmlns="http://www.w3.org/2000/svg">
-    <path d="M470 178c-52 0-93 42-93 94 0 25 10 47 26 64L256 360V136c25 10 47 26 64 26 52 0 94-42 94-93 0-52-42-93-94-93-52 0-93 41-93 93 0 25 10 47 26 64L102 102V256c25-10 47-26 64-26 52 0 94 42 94 93 0 52-42 94-94 94-52 0-93-42-93-94 0-25 10-47 26-64L0 256c0 102 82 184 184 184 25 0 47-10 64-26L410 410C394 394 384 372 384 346c0-52 41-93 93-93 52 0 93 41 93 93 0 52-41 93-93 93-25 0-47-10-64-26L256 512c102 0 184-82 184-184L470 178z"/>
-  </svg>
-);
-
-// 2. Tela de Login (COM ANIMAÇÃO DO QUEBRA-CABEÇA)
+// 2. Tela de Login (COM A NOVA IMAGEM E CORES DA CIDADE)
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -150,20 +129,16 @@ const LoginScreen = () => {
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', padding: '20px', position: 'relative' }}>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', padding: '20px' }}>
       <GlobalCSS />
-      
-      {/* PEÇAS DO QUEBRA-CABEÇA ANIMADAS NO FUNDO */}
-      <PuzzleIcon color="#10b981" style={{ top: '15%', left: '10%', animationDelay: '0s' }} />
-      <PuzzleIcon color="#ef4444" style={{ top: '25%', right: '15%', animationDelay: '1s' }} />
-      <PuzzleIcon color="#f59e0b" style={{ bottom: '15%', left: '15%', animationDelay: '2s', width: '80px', height: '80px' }} />
-      <PuzzleIcon color="#3b82f6" style={{ bottom: '25%', right: '10%', animationDelay: '3s' }} />
-      <PuzzleIcon color="#8b5cf6" style={{ top: '60%', left: '50%', animationDelay: '4s', width: '50px', height: '50px' }} />
-
-      {/* PAINEL DE LOGIN (Vidro) */}
-      <div className="glass-panel" style={{ padding: '50px 40px', width: '100%', maxWidth: '420px', position: 'relative', zIndex: '1' }}>
-        <h2 style={{ textAlign: 'center', color: '#0f172a', marginBottom: '10px', fontSize: '1.9rem', fontWeight: '800' }}>Sistema PEI</h2>
-        <p style={{ textAlign: 'center', color: '#64748b', marginBottom: '35px', fontWeight: '500' }}>Redenção da Serra - SP</p>
+      <div className="glass-panel" style={{ padding: '40px', width: '100%', maxWidth: '420px', textAlign: 'center' }}>
+        
+        {/* EXIBIÇÃO DA NOVA IMAGEM PEDAGÓGICA */}
+        <img 
+          src={logoPei} 
+          alt="Sistema PEI - Construindo caminhos individualizados para cada aluno" 
+          style={{ maxWidth: '100%', height: 'auto', marginBottom: '30px', borderRadius: '12px' }} 
+        />
         
         {erro && <div style={{ backgroundColor: '#fee2e2', color: '#dc2626', padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '0.9rem', textAlign: 'center', fontWeight: '500' }}>{erro}</div>}
         {mensagem && <div style={{ backgroundColor: '#d1fae5', color: '#065f46', padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '0.9rem', textAlign: 'center', fontWeight: '500' }}>{mensagem}</div>}
@@ -184,14 +159,14 @@ const LoginScreen = () => {
   );
 };
 
-// 3. Tela de Lista de Alunos (COM NOVAS CORES)
+// 3. Tela de Lista de Alunos (COM NOVAS CORES VERDE E VERMELHO)
 const ListaAlunos = ({ onNovo, onEditar, onLogout, usuario }) => {
   const [alunos, setAlunos] = useState([]);
 
   // 🌟 AQUI FICA A SUA LISTA VIP: Digite os e-mails reais aqui!
   const listaEspecialistas = [
-    'henryksanty5@gmail.com', // <--- COLOQUE SEU E-MAIL AQUI
-    'escolajac663@gmail.com'        // Pode colocar o da direção ou apagar essa linha
+    'seu_email_aqui@gmail.com', // <--- COLOQUE SEU E-MAIL AQUI
+    'direcao@escola.com'        // Pode colocar o da direção ou apagar essa linha
   ];
   
   const isEspecialista = listaEspecialistas.includes(usuario.email);
@@ -221,7 +196,7 @@ const ListaAlunos = ({ onNovo, onEditar, onLogout, usuario }) => {
   return (
     <div style={s.page}>
       <GlobalCSS />
-      {/* BARRA SUPERIOR DO DASHBOARD */}
+      {/* BARRA SUPERIOR DO DASHBOARD COM CORES DA CIDADE */}
       <div className="glass-panel no-print" style={s.topbar}>
         <div style={s.profile}>
           <div style={s.avatar}>{usuario.email.substring(0,2).toUpperCase()}</div>
@@ -245,7 +220,7 @@ const ListaAlunos = ({ onNovo, onEditar, onLogout, usuario }) => {
       {alunos.length === 0 ? (
         <div className="glass-panel" style={{ textAlign: 'center', padding: '60px 20px', color: '#64748b' }}>
           <span style={{ fontSize: '3.5rem', display: 'block', marginBottom: '15px' }}>📂</span>
-          <p style={{ fontSize: '1.1rem', fontWeight: '600' }}>Nenhum aluno cadastrado.</p>
+          <p style={{ fontSize: '1.1rem', fontWeight: '600' }}>Nenhum aluno cadastrado no seu perfil.</p>
           <p style={{ fontSize: '0.9rem' }}>Clique em "Novo PEI" no topo da tela para começar.</p>
         </div>
       ) : (
@@ -262,7 +237,7 @@ const ListaAlunos = ({ onNovo, onEditar, onLogout, usuario }) => {
               </div>
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button style={{...s.btnSecondary, flex: '1', backgroundColor: 'white'}} onClick={() => onEditar(aluno)}>Abrir / Editar</button>
-                <button style={{...s.btnSuccess, padding: '10px'}} onClick={() => deletarAluno(aluno.id)}>✓ Fechar</button>
+                <button style={{...s.btnSuccess, padding: '10px'}} onClick={() => deletarAluno(aluno.id)}>✓ Fechar PEI</button>
               </div>
             </div>
           ))}
@@ -272,7 +247,7 @@ const ListaAlunos = ({ onNovo, onEditar, onLogout, usuario }) => {
   );
 };
 
-// 4. Tela do Formulário (COM NOVAS CORES)
+// 4. Tela do Formulário (COM NOVAS CORES VERDE E VERMELHO)
 const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
   const estadoInicial = {
     aluno: '', nascimento: '', anoSerie: '', turma: '', responsaveis: '', esco: 'EMEIEF "PROFESSORA EDNA REGINA DE OLIVEIRA E SILVA"', diagnostico: '', cid: '', crm: '', resultadoAvaliacao: '', rotinaFamiliar: '', fatoresAmbientais: '', resumoAluno: '', campoLinguagem: '', campoMatematica: '', anexos: {}, conteudos: {}, diario: {}, opcoes: {} 
@@ -363,7 +338,7 @@ const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
           </div>
         </div>
         <div style={s.btnGroup}>
-          <button style={s.btnSecondary} onClick={onVoltar}>← Voltar</button>
+          <button style={s.btnSecondary} onClick={onVoltar}>← Voltar à Lista</button>
           <button style={s.btnPrimary} onClick={salvarNoBanco}>✓ Salvar na Nuvem</button>
           <button style={{...s.btnSuccess}} onClick={gerarPDF}>🖨️ Gerar PDF</button>
         </div>
@@ -427,19 +402,19 @@ const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
           <div style={s.inputGroup}><label style={s.label}>Resultado da Avaliação Diagnóstica</label><textarea style={{...s.input, minHeight: '100px'}} name="resultadoAvaliacao" value={formData.resultadoAvaliacao} onChange={handleChange} placeholder="Estágio atual de aprendizagem..."></textarea></div>
           <div style={s.inputGroup}><label style={s.label}>Evidência / Avaliação</label><FileUpload label="Anexar Avaliação" campoID="avaliacao_diagnostica" /></div>
         </div>
-        <div style={{...s.grid2, marginTop: '20px'}}><div style={s.inputGroup}><label style={s.label}>Aspectos da Rotina Familiar</label><textarea style={{...s.input, minHeight: '80px'}} name="rotinaFamiliar" value={formData.rotinaFamiliar} onChange={handleChange}></textarea></div><div style={s.inputGroup}><label style={s.label}>Fatores Ambientais</label><textarea style={{...s.input, minHeight: '80px'}} name="fatoresAmbientais" value={formData.fatoresAmbientais} onChange={handleChange}></textarea></div></div>
+        <div style={{...s.grid2, marginTop: '20px'}}><div style={s.inputGroup}><label style={s.label}>Aspectos da Rotina Familiar</label><textarea style={{...s.input, minHeight: '80px'}} name="rotinaFamiliar" value={formData.rotinaFamiliar} onChange={handleChange}></textarea></div><div style={s.inputGroup}><label style={s.label}>Fatores Ambientais Facilitadores/Barreiras</label><textarea style={{...s.input, minHeight: '80px'}} name="fatoresAmbientais" value={formData.fatoresAmbientais} onChange={handleChange}></textarea></div></div>
       </div>
 
-      {/* E. ADAPTAÇÕES POR DISCIPLINA */}
+      {/* E. ADAPTAÇÕES CURRICULARES */}
       <div className="glass-panel card-print" style={s.card}>
-        <div style={s.cardHeader}><span className="badge-print" style={s.badge}>E</span> Adaptações por Disciplina</div>
+        <div style={s.cardHeader}><span className="badge-print" style={s.badge}>E</span> Adaptações Curriculares</div>
         <div style={s.grid3}>
           {disciplinas.map((disc) => (
             <div key={disc} style={{ border: '1px solid rgba(203, 213, 225, 0.5)', borderRadius: '10px', padding: '18px', backgroundColor: 'rgba(209, 250, 229, 0.2)' }}>
               <h4 style={{ margin: '0 0 12px 0', color: '#065f46', borderBottom: '1px solid #a7f3d0', paddingBottom: '8px' }}>{disc}</h4>
               <Checkbox label={`${disc} - Priorização de conteúdos`} />
               <Checkbox label={`${disc} - Introdução de conteúdos alternativos`} />
-              <div style={{...s.inputGroup, marginTop: '12px'}}><label style={{...s.label, fontSize: '0.85rem'}}>Conteúdo:</label><textarea style={{...s.input, minHeight: '60px', fontSize: '0.9rem'}} value={(formData.conteudos || {})[disc] || ''} onChange={(e) => handleNestedText('conteudos', disc, e.target.value)} /></div>
+              <div style={{...s.inputGroup, marginTop: '12px'}}><label style={{...s.label, fontSize: '0.85rem'}}>Conteúdo Ministrado:</label><textarea style={{...s.input, minHeight: '60px', fontSize: '0.9rem'}} value={(formData.conteudos || {})[disc] || ''} onChange={(e) => handleNestedText('conteudos', disc, e.target.value)} /></div>
             </div>
           ))}
         </div>
@@ -459,7 +434,7 @@ const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
             <div key={bim} style={{ border: '1px solid rgba(203, 213, 225, 0.5)', borderRadius: '10px', padding: '18px', backgroundColor: 'rgba(209, 250, 229, 0.2)' }}>
               <h4 style={{ margin: '0 0 12px 0', color: '#065f46' }}>{bim}</h4>
               <textarea style={{...s.input, minHeight: '80px'}} placeholder="Evolução, observações e conquistas..." value={(formData.diario || {})[bim] || ''} onChange={(e) => handleNestedText('diario', bim, e.target.value)} />
-              <FileUpload label="Anexar Evidência" campoID={`diario_bimestre_${index+1}`} />
+              <FileUpload label="Anexar Evidência / Atividade" campoID={`diario_bimestre_${index+1}`} />
             </div>
           ))}
         </div>
@@ -495,5 +470,3 @@ export default function App() {
   if (telaAtiva === 'lista') return <ListaAlunos onNovo={irParaNovoFormulario} onEditar={irParaEditarFormulario} onLogout={fazerLogout} usuario={usuario} />;
   return <SistemaPEI alunoData={alunoEditando} onVoltar={() => setTelaAtiva('lista')} onLogout={fazerLogout} usuario={usuario} />;
 }
-
-
