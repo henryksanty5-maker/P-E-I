@@ -17,29 +17,82 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-// --- ESTILOS GERAIS ---
+// --- ESTILOS MODERNOS (UI/UX) ---
 const s = {
-  page: { backgroundColor: '#f3f4f6', minHeight: '100vh', padding: '20px', fontFamily: '"Inter", system-ui, sans-serif', color: '#1f2937' },
-  topbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#ffffff', padding: '15px 25px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', marginBottom: '20px', flexWrap: 'wrap', gap: '15px' },
+  page: { minHeight: '100vh', padding: '30px 20px', color: '#1e293b' },
+  topbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px 25px', marginBottom: '30px', flexWrap: 'wrap', gap: '15px' },
   profile: { display: 'flex', alignItems: 'center', gap: '15px' },
-  avatar: { width: '40px', height: '40px', backgroundColor: '#3b82f6', color: 'white', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold' },
+  avatar: { width: '48px', height: '48px', background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)', color: 'white', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', fontSize: '1.2rem', boxShadow: '0 4px 10px rgba(59, 130, 246, 0.3)' },
   btnGroup: { display: 'flex', gap: '10px', flexWrap: 'wrap' },
-  btnPrimary: { backgroundColor: '#2563eb', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontWeight: '500' },
-  btnSuccess: { backgroundColor: '#10b981', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' },
-  btnSecondary: { backgroundColor: '#e5e7eb', color: '#374151', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontWeight: '500' },
-  btnDanger: { backgroundColor: '#fee2e2', color: '#ef4444', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontWeight: '500' },
-  card: { backgroundColor: '#ffffff', borderRadius: '8px', padding: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', marginBottom: '24px' },
-  cardHeader: { color: '#1e3a8a', fontSize: '1.2rem', fontWeight: 'bold', borderBottom: '2px solid #eff6ff', paddingBottom: '12px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' },
-  badge: { backgroundColor: '#dbeafe', color: '#1d4ed8', padding: '4px 10px', borderRadius: '4px', fontSize: '0.9rem' },
-  grid2: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' },
-  grid3: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' },
-  inputGroup: { display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '15px' },
-  label: { fontWeight: '600', color: '#4b5563', fontSize: '0.9rem' },
-  input: { padding: '10px', border: '1px solid #d1d5db', borderRadius: '6px', width: '100%', boxSizing: 'border-box', backgroundColor: '#f9fafb' },
-  checkboxContainer: { display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '8px', cursor: 'pointer' },
-  uploadBox: { border: '2px dashed #93c5fd', borderRadius: '6px', padding: '15px', textAlign: 'center', backgroundColor: '#eff6ff', marginTop: '10px' },
-  sectionTitle: { color: '#374151', marginBottom: '10px', fontSize: '1rem', borderBottom: '1px solid #e5e7eb', paddingBottom: '5px' }
+  
+  // Botões com Gradientes
+  btnPrimary: { background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', letterSpacing: '0.5px' },
+  btnSuccess: { background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', letterSpacing: '0.5px' },
+  btnSecondary: { background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)', color: '#334155', border: '1px solid #cbd5e1', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' },
+  btnDanger: { background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' },
+  
+  card: { padding: '28px', marginBottom: '24px' },
+  cardHeader: { color: '#1e3a8a', fontSize: '1.25rem', fontWeight: '700', borderBottom: '2px solid rgba(59, 130, 246, 0.1)', paddingBottom: '12px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px' },
+  badge: { background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)', color: '#1d4ed8', padding: '6px 12px', borderRadius: '6px', fontSize: '0.9rem', fontWeight: 'bold', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' },
+  
+  grid2: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' },
+  grid3: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px' },
+  
+  inputGroup: { display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' },
+  label: { fontWeight: '600', color: '#334155', fontSize: '0.95rem' },
+  input: { padding: '12px', border: '1px solid rgba(203, 213, 225, 0.6)', borderRadius: '8px', width: '100%', boxSizing: 'border-box', backgroundColor: 'rgba(255, 255, 255, 0.9)', outline: 'none', fontSize: '0.95rem', transition: 'all 0.3s ease' },
+  
+  checkboxContainer: { display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px', cursor: 'pointer', padding: '6px 8px', borderRadius: '6px' },
+  uploadBox: { border: '2px dashed #93c5fd', borderRadius: '12px', padding: '20px', textAlign: 'center', backgroundColor: 'rgba(239, 246, 255, 0.5)', marginTop: '10px' },
+  sectionTitle: { color: '#1e293b', marginBottom: '15px', fontSize: '1.05rem', borderBottom: '1px solid rgba(203, 213, 225, 0.5)', paddingBottom: '8px', fontWeight: '600' }
 };
+
+// --- CSS GLOBAL (Animações e Fonte) ---
+const GlobalCSS = () => (
+  <style>
+    {`
+      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+      
+      body {
+        font-family: 'Poppins', sans-serif !important;
+        margin: 0;
+        background-color: #f0f4f8;
+        background-image: radial-gradient(at 0% 0%, hsla(217,100%,76%,0.15) 0px, transparent 50%),
+                          radial-gradient(at 100% 0%, hsla(348,100%,76%,0.05) 0px, transparent 50%),
+                          radial-gradient(at 100% 100%, hsla(217,100%,76%,0.15) 0px, transparent 50%);
+        background-attachment: fixed;
+      }
+
+      .glass-panel {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+        border-radius: 16px;
+      }
+
+      button { transition: all 0.3s ease !important; }
+      button:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15); filter: brightness(1.05); }
+      button:active { transform: translateY(0); }
+
+      input:focus, textarea:focus { border-color: #3b82f6 !important; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important; background-color: #ffffff !important; }
+      label.checkbox-row:hover { background-color: rgba(239, 246, 255, 0.8); }
+
+      @media screen { .print-only { display: none !important; } }
+      @media print {
+        body { background: white !important; }
+        .no-print { display: none !important; }
+        .print-only { display: block !important; }
+        .glass-panel { background: white !important; border: none !important; box-shadow: none !important; padding: 10px 0 !important; margin-bottom: 20px !important; }
+        input, textarea { border: none !important; border-bottom: 1px dashed #999 !important; border-radius: 0 !important; background: transparent !important; padding: 5px 0 !important; color: black !important; }
+        textarea { height: auto !important; min-height: 40px !important; }
+        h1, h3, h4 { color: black !important; }
+        .badge-print { background: none !important; color: black !important; border: 1px solid black; padding: 2px 6px; }
+      }
+    `}
+  </style>
+);
 
 // 2. Tela de Login
 const LoginScreen = () => {
@@ -50,8 +103,7 @@ const LoginScreen = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setErro('');
-    setMensagem('');
+    setErro(''); setMensagem('');
     try {
       await signInWithEmailAndPassword(auth, email, password);
     } catch (error) {
@@ -74,25 +126,23 @@ const LoginScreen = () => {
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#f3f4f6', fontFamily: 'system-ui' }}>
-      <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', width: '100%', maxWidth: '400px' }}>
-        <h2 style={{ textAlign: 'center', color: '#1e3a8a', marginBottom: '20px' }}>Acesso ao Sistema PEI</h2>
-        <p style={{ textAlign: 'center', color: '#6b7280', marginBottom: '30px' }}>Redenção da Serra - SP</p>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', padding: '20px' }}>
+      <GlobalCSS />
+      <div className="glass-panel" style={{ padding: '50px 40px', width: '100%', maxWidth: '420px' }}>
+        <h2 style={{ textAlign: 'center', color: '#1e3a8a', marginBottom: '10px', fontSize: '1.8rem', fontWeight: '700' }}>Sistema PEI</h2>
+        <p style={{ textAlign: 'center', color: '#64748b', marginBottom: '35px', fontWeight: '500' }}>Redenção da Serra - SP</p>
         
-        {erro && <div style={{ backgroundColor: '#fee2e2', color: '#ef4444', padding: '10px', borderRadius: '4px', marginBottom: '15px', fontSize: '0.9rem', textAlign: 'center' }}>{erro}</div>}
-        {mensagem && <div style={{ backgroundColor: '#d1fae5', color: '#065f46', padding: '10px', borderRadius: '4px', marginBottom: '15px', fontSize: '0.9rem', textAlign: 'center' }}>{mensagem}</div>}
+        {erro && <div style={{ backgroundColor: '#fee2e2', color: '#ef4444', padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '0.9rem', textAlign: 'center', fontWeight: '500' }}>{erro}</div>}
+        {mensagem && <div style={{ backgroundColor: '#d1fae5', color: '#065f46', padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '0.9rem', textAlign: 'center', fontWeight: '500' }}>{mensagem}</div>}
         
-        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          <input type="email" placeholder="Seu e-mail" value={email} onChange={(e) => setEmail(e.target.value)} style={s.input} required />
-          <input type="password" placeholder="Sua senha" value={password} onChange={(e) => setPassword(e.target.value)} style={s.input} />
-          <button type="submit" style={s.btnPrimary}>Entrar</button>
+        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <input type="email" placeholder="E-mail institucional" value={email} onChange={(e) => setEmail(e.target.value)} style={s.input} required />
+          <input type="password" placeholder="Senha de acesso" value={password} onChange={(e) => setPassword(e.target.value)} style={s.input} required />
+          <button type="submit" style={{...s.btnPrimary, padding: '14px', fontSize: '1.05rem', marginTop: '10px'}}>Acessar Plataforma</button>
         </form>
         
-        <div style={{ marginTop: '20px', textAlign: 'center' }}>
-          <button 
-            type="button"
-            onClick={handleEsqueciSenha} 
-            style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', fontSize: '0.9rem', textDecoration: 'underline' }}>
+        <div style={{ marginTop: '25px', textAlign: 'center' }}>
+          <button type="button" onClick={handleEsqueciSenha} style={{ background: 'none', border: 'none', color: '#3b82f6', cursor: 'pointer', fontSize: '0.9rem', fontWeight: '500' }}>
             Esqueci ou quero mudar a minha senha
           </button>
         </div>
@@ -101,14 +151,14 @@ const LoginScreen = () => {
   );
 };
 
-// 3. Tela de Lista de Alunos (COM FILTRO VIP)
+// 3. Tela de Lista de Alunos
 const ListaAlunos = ({ onNovo, onEditar, onLogout, usuario }) => {
   const [alunos, setAlunos] = useState([]);
 
   // 🌟 AQUI FICA A SUA LISTA VIP: Digite os e-mails reais aqui!
   const listaEspecialistas = [
-    'henryksanty5@gmail.com', // <--- COLOQUE SEU E-MAIL AQUI
-    'escolajac663@gmail.com'        // Pode colocar o da direção ou apagar essa linha
+    'seu_email_aqui@gmail.com',
+    'direcao@escola.com'
   ];
   
   const isEspecialista = listaEspecialistas.includes(usuario.email);
@@ -119,12 +169,9 @@ const ListaAlunos = ({ onNovo, onEditar, onLogout, usuario }) => {
       const data = snapshot.val();
       if (data) {
         let lista = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-        
-        // Se NÃO for especialista, mostra só os alunos que ele mesmo criou
         if (!isEspecialista) {
           lista = lista.filter(aluno => aluno.criadoPor === usuario.email);
         }
-        
         setAlunos(lista);
       } else {
         setAlunos([]);
@@ -133,49 +180,54 @@ const ListaAlunos = ({ onNovo, onEditar, onLogout, usuario }) => {
   }, [usuario.email, isEspecialista]);
 
   const deletarAluno = async (id) => {
-    if(window.confirm(`Tem certeza que deseja excluir o PEI do(a) ${id}?`)) {
+    if(window.confirm(`Tem certeza que deseja excluir o PEI do(a) ${id}? Esta ação não pode ser desfeita.`)) {
       await remove(ref(db, `alunos/${id}`));
     }
   };
 
   return (
     <div style={s.page}>
-      <div style={s.topbar}>
+      <GlobalCSS />
+      <div className="glass-panel no-print" style={s.topbar}>
         <div style={s.profile}>
           <div style={s.avatar}>{usuario.email.substring(0,2).toUpperCase()}</div>
           <div>
-            <h2 style={{ margin: 0, fontSize: '1.1rem', color: '#111827' }}>Logado como:</h2>
-            <p style={{ margin: 0, fontSize: '0.85rem', color: '#6b7280' }}>
+            <h2 style={{ margin: 0, fontSize: '1.1rem', color: '#0f172a', fontWeight: '600' }}>Painel de Controle</h2>
+            <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', fontWeight: '500' }}>
               {isEspecialista ? 'Especialista / Admin' : 'Professor Regente'} • {usuario.email}
             </p>
           </div>
         </div>
         <div style={s.btnGroup}>
           <button style={s.btnPrimary} onClick={onNovo}>+ Novo PEI</button>
-          <button style={s.btnDanger} onClick={onLogout}>Sair</button>
+          <button style={s.btnSecondary} onClick={onLogout}>Sair</button>
         </div>
       </div>
 
-      <h1 style={{ color: '#1f2937', marginBottom: '20px', fontSize: '1.5rem' }}>
-        {isEspecialista ? 'Todos os Alunos da Escola' : 'Meus Alunos'}
+      <h1 style={{ color: '#0f172a', marginBottom: '25px', fontSize: '1.8rem', fontWeight: '700' }}>
+        {isEspecialista ? 'Visão Global de Alunos' : 'Minha Turma'}
       </h1>
 
       {alunos.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '50px', color: '#6b7280', backgroundColor: 'white', borderRadius: '8px' }}>
-          Nenhum aluno encontrado para o seu perfil. Clique em "Novo PEI" para começar.
+        <div className="glass-panel" style={{ textAlign: 'center', padding: '60px 20px', color: '#64748b' }}>
+          <span style={{ fontSize: '3rem', display: 'block', marginBottom: '15px' }}>📂</span>
+          <p style={{ fontSize: '1.1rem', fontWeight: '500' }}>Nenhum aluno encontrado no seu perfil.</p>
+          <p style={{ fontSize: '0.9rem' }}>Clique em "Novo PEI" no topo da tela para começar a cadastrar.</p>
         </div>
       ) : (
         <div style={s.grid3}>
           {alunos.map((aluno) => (
-            <div key={aluno.id} style={{...s.card, marginBottom: '0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between'}}>
+            <div key={aluno.id} className="glass-panel" style={{...s.card, marginBottom: '0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between'}}>
               <div>
-                <h3 style={{ color: '#1e3a8a', margin: '0 0 10px 0' }}>{aluno.aluno}</h3>
-                <p style={{ margin: '0 0 5px 0', fontSize: '0.9rem', color: '#4b5563' }}><strong>Ano/Série:</strong> {aluno.anoSerie || '-'} {aluno.turma}</p>
-                <p style={{ margin: '0 0 15px 0', fontSize: '0.9rem', color: '#4b5563' }}><strong>Diagnóstico:</strong> {aluno.diagnostico || 'Não informado'}</p>
-                <p style={{ margin: '0 0 15px 0', fontSize: '0.75rem', color: '#9ca3af' }}>Criado por: {aluno.criadoPor || 'Legado (Sem dono)'}</p>
+                <h3 style={{ color: '#1e3a8a', margin: '0 0 12px 0', fontSize: '1.3rem', fontWeight: '600' }}>{aluno.aluno}</h3>
+                <div style={{ backgroundColor: 'rgba(239, 246, 255, 0.5)', padding: '12px', borderRadius: '8px', marginBottom: '15px' }}>
+                  <p style={{ margin: '0 0 5px 0', fontSize: '0.9rem', color: '#475569' }}><strong>Ano/Série:</strong> {aluno.anoSerie || '-'} {aluno.turma}</p>
+                  <p style={{ margin: '0 0 0 0', fontSize: '0.9rem', color: '#475569' }}><strong>Diagnóstico:</strong> {aluno.diagnostico || 'Não informado'}</p>
+                </div>
+                <p style={{ margin: '0 0 20px 0', fontSize: '0.75rem', color: '#94a3b8', fontWeight: '500' }}>Criado por: {aluno.criadoPor || 'Legado (Sem dono)'}</p>
               </div>
               <div style={{ display: 'flex', gap: '10px' }}>
-                <button style={{...s.btnSecondary, flex: '1'}} onClick={() => onEditar(aluno)}>Abrir / Editar</button>
+                <button style={{...s.btnSecondary, flex: '1', backgroundColor: 'white'}} onClick={() => onEditar(aluno)}>Abrir / Editar</button>
                 <button style={{...s.btnDanger}} onClick={() => deletarAluno(aluno.id)}>Excluir</button>
               </div>
             </div>
@@ -188,29 +240,19 @@ const ListaAlunos = ({ onNovo, onEditar, onLogout, usuario }) => {
 
 // 4. Tela do Formulário (Sistema PEI Completo)
 const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
- const estadoInicial = {
+  const estadoInicial = {
     aluno: '', nascimento: '', anoSerie: '', turma: '', responsaveis: '',
     escola: 'EMEIEF "PROFESSORA EDNA REGINA DE OLIVEIRA E SILVA"',
     diagnostico: '', cid: '', crm: '',
     resultadoAvaliacao: '', rotinaFamiliar: '', fatoresAmbientais: '',
     resumoAluno: '',
-    campoLinguagem: '', campoMatematica: '', // 🌟 ADICIONE ESTA LINHA AQUI
-    anexos: {},
-    conteudos: {},
-    diario: {},
-    opcoes: {} 
+    campoLinguagem: '', campoMatematica: '', // Novos campos!
+    anexos: {}, conteudos: {}, diario: {}, opcoes: {} 
   };
 
   const [formData, setFormData] = useState(() => {
     if (alunoData) {
-      return {
-        ...estadoInicial,
-        ...alunoData,
-        anexos: alunoData.anexos || {},
-        conteudos: alunoData.conteudos || {},
-        diario: alunoData.diario || {},
-        opcoes: alunoData.opcoes || {}
-      };
+      return { ...estadoInicial, ...alunoData, anexos: alunoData.anexos || {}, conteudos: alunoData.conteudos || {}, diario: alunoData.diario || {}, opcoes: alunoData.opcoes || {} };
     }
     return estadoInicial;
   });
@@ -220,49 +262,17 @@ const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
   const disciplinas = ['Língua Portuguesa', 'Matemática', 'Ciências', 'História', 'Geografia', 'Artes', 'Educação Física', 'Inglês', 'Informática'];
   const bimestres = ['1º Bimestre', '2º Bimestre', '3º Bimestre', '4º Bimestre'];
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleCheckbox = (opcao) => {
-    setFormData(prev => ({
-      ...prev,
-      opcoes: {
-        ...(prev.opcoes || {}),
-        [opcao]: !(prev.opcoes || {})[opcao]
-      }
-    }));
-  };
-
-  const handleNestedText = (categoria, chave, valor) => {
-    setFormData(prev => ({
-      ...prev,
-      [categoria]: {
-        ...(prev[categoria] || {}),
-        [chave]: valor
-      }
-    }));
-  };
+  const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleCheckbox = (opcao) => setFormData(prev => ({ ...prev, opcoes: { ...(prev.opcoes || {}), [opcao]: !(prev.opcoes || {})[opcao] } }));
+  const handleNestedText = (categoria, chave, valor) => setFormData(prev => ({ ...prev, [categoria]: { ...(prev[categoria] || {}), [chave]: valor } }));
 
   const salvarNoBanco = async () => {
-    if (!formData.aluno) {
-      alert("Por favor, preencha o nome do aluno antes de salvar.");
-      return;
-    }
-    
-    // CARIMBO: Registra quem criou o formulário para o filtro funcionar
-    const dadosParaSalvar = {
-      ...formData,
-      criadoPor: formData.criadoPor || usuario.email
-    };
-
+    if (!formData.aluno) { alert("Por favor, preencha o nome do aluno antes de salvar."); return; }
+    const dadosParaSalvar = { ...formData, criadoPor: formData.criadoPor || usuario.email };
     try {
       await set(ref(db, 'alunos/' + formData.aluno), dadosParaSalvar);
       alert(`✅ Dados salvos com sucesso na nuvem!`);
-    } catch (error) {
-      alert("Erro ao salvar os dados. Verifique a sua conexão.");
-    }
+    } catch (error) { alert("Erro ao salvar os dados. Verifique a sua conexão."); }
   };
 
   const gerarPDF = () => window.print();
@@ -270,29 +280,17 @@ const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
   const handleFileUpload = (e, campoID) => {
     const file = e.target.files[0];
     if (!file) return;
-
     setAEnviar(true);
     const reader = new FileReader();
-
     reader.onload = (event) => {
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 700; 
-        const scaleSize = MAX_WIDTH / img.width;
-        canvas.width = MAX_WIDTH;
-        canvas.height = img.height * scaleSize;
-
+        const scaleSize = 700 / img.width;
+        canvas.width = 700; canvas.height = img.height * scaleSize;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-        const base64String = canvas.toDataURL('image/jpeg', 0.6);
-
-        setFormData(prev => ({
-          ...prev,
-          anexos: { ...(prev.anexos || {}), [campoID]: base64String }
-        }));
-        
+        setFormData(prev => ({ ...prev, anexos: { ...(prev.anexos || {}), [campoID]: canvas.toDataURL('image/jpeg', 0.6) } }));
         setAEnviar(false);
       };
       img.src = event.target.result;
@@ -309,14 +307,9 @@ const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
   };
 
   const Checkbox = ({ label }) => (
-    <label style={s.checkboxContainer}>
-      <input 
-        type="checkbox" 
-        checked={!!(formData.opcoes || {})[label]} 
-        onChange={() => handleCheckbox(label)}
-        style={{ width: '16px', height: '16px', accentColor: '#2563eb', marginTop: '3px' }} 
-      />
-      <span style={{ fontSize: '0.9rem', color: '#4b5563' }}>{label}</span>
+    <label className="checkbox-row" style={s.checkboxContainer}>
+      <input type="checkbox" checked={!!(formData.opcoes || {})[label]} onChange={() => handleCheckbox(label)} style={{ width: '18px', height: '18px', accentColor: '#2563eb' }} />
+      <span style={{ fontSize: '0.95rem', color: '#334155', fontWeight: '500' }}>{label}</span>
     </label>
   );
 
@@ -324,15 +317,15 @@ const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
     <div className="no-print" style={s.uploadBox}>
       {formData.anexos && formData.anexos[campoID] ? (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <img src={formData.anexos[campoID]} alt="Anexo" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '6px', border: '1px solid #d1d5db', objectFit: 'contain' }} />
-          <button type="button" onClick={() => removerAnexo(campoID)} style={{ marginTop: '10px', padding: '6px 12px', backgroundColor: '#fee2e2', color: '#ef4444', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold' }}>Remover Imagem</button>
+          <img src={formData.anexos[campoID]} alt="Anexo" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '8px', border: '1px solid #cbd5e1', objectFit: 'contain', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }} />
+          <button type="button" onClick={() => removerAnexo(campoID)} style={{ marginTop: '12px', padding: '8px 16px', backgroundColor: '#fee2e2', color: '#ef4444', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '600' }}>Remover Imagem</button>
         </div>
       ) : (
         <>
-          <span style={{ fontSize: '1.5rem' }}>📷</span>
-          <p style={{ margin: '5px 0', fontWeight: 'bold', color: '#2563eb', fontSize: '0.9rem' }}>{label}</p>
-          <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, campoID)} style={{ fontSize: '0.8rem', marginTop: '8px', maxWidth: '100%' }} disabled={aEnviar} />
-          {aEnviar && <span style={{fontSize: '0.8rem', color: '#ef4444', display: 'block', marginTop: '5px'}}>Processando imagem...</span>}
+          <span style={{ fontSize: '2rem' }}>📷</span>
+          <p style={{ margin: '8px 0', fontWeight: '600', color: '#2563eb', fontSize: '0.95rem' }}>{label}</p>
+          <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, campoID)} style={{ fontSize: '0.85rem', marginTop: '8px', maxWidth: '100%', color: '#64748b' }} disabled={aEnviar} />
+          {aEnviar && <span style={{fontSize: '0.85rem', color: '#ef4444', display: 'block', marginTop: '8px', fontWeight: '500'}}>Processando imagem...</span>}
         </>
       )}
     </div>
@@ -340,35 +333,21 @@ const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
 
   return (
     <div className="print-page" style={s.page}>
-      <style>
-        {`
-          @media screen { .print-only { display: none !important; } }
-          @media print {
-            body, .print-page { background-color: white !important; margin: 0 !important; padding: 0 !important; color: black !important; }
-            .no-print { display: none !important; }
-            .print-only { display: block !important; }
-            .card-print { box-shadow: none !important; border: none !important; padding: 10px 0 !important; margin-bottom: 20px !important; page-break-inside: avoid; }
-            input, textarea { border: none !important; border-bottom: 1px dashed #999 !important; border-radius: 0 !important; background: transparent !important; padding: 5px 0 !important; color: black !important; }
-            textarea { height: auto !important; min-height: 40px !important; }
-            h1, h3, h4 { color: black !important; }
-            .badge-print { background: none !important; color: black !important; border: 1px solid black; padding: 2px 6px; }
-          }
-        `}
-      </style>
+      <GlobalCSS />
 
       {/* BARRA SUPERIOR */}
-      <div className="no-print" style={s.topbar}>
+      <div className="glass-panel no-print" style={s.topbar}>
         <div style={s.profile}>
           <div style={s.avatar}>{usuario.email.substring(0,2).toUpperCase()}</div>
           <div>
-            <h2 style={{ margin: 0, fontSize: '1.1rem', color: '#111827' }}>Logado como:</h2>
-            <p style={{ margin: 0, fontSize: '0.85rem', color: '#6b7280' }}>{usuario.email}</p>
+            <h2 style={{ margin: 0, fontSize: '1.1rem', color: '#0f172a', fontWeight: '600' }}>Editor de PEI</h2>
+            <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', fontWeight: '500' }}>{usuario.email}</p>
           </div>
         </div>
         <div style={s.btnGroup}>
-          <button style={s.btnSecondary} onClick={onVoltar}>← Lista</button>
-          <button style={s.btnSuccess} onClick={salvarNoBanco}>Salvar na Nuvem</button>
-          <button style={{...s.btnPrimary, backgroundColor: '#4f46e5'}} onClick={gerarPDF}>🖨️ Imprimir PEI</button>
+          <button style={s.btnSecondary} onClick={onVoltar}>← Voltar à Lista</button>
+          <button style={s.btnSuccess} onClick={salvarNoBanco}>✓ Salvar na Nuvem</button>
+          <button style={{...s.btnPrimary, background: 'linear-gradient(135deg, #4f46e5 0%, #3730a3 100%)'}} onClick={gerarPDF}>🖨️ Gerar PDF</button>
         </div>
       </div>
 
@@ -380,12 +359,12 @@ const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
         <h1 style={{ marginTop: '20px', fontSize: '1.4rem', textTransform: 'uppercase' }}>Plano Educacional Individualizado – PEI</h1>
       </div>
 
-      <h1 className="no-print" style={{ color: '#1f2937', marginBottom: '20px', fontSize: '1.5rem' }}>
-        {alunoData ? 'Editando PEI' : 'Novo PEI'}
+      <h1 className="no-print" style={{ color: '#0f172a', marginBottom: '25px', fontSize: '1.8rem', fontWeight: '700' }}>
+        {alunoData ? 'Editando Documento' : 'Novo Documento'}
       </h1>
 
       {/* A. IDENTIFICAÇÃO */}
-      <div className="card-print" style={s.card}>
+      <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>A</span> Identificação do Aluno</div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: '30px' }}>
           <div className="no-print">
@@ -418,7 +397,7 @@ const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
       </div>
 
       {/* B. CLÍNICAS */}
-      <div className="card-print" style={s.card}>
+      <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>B</span> Informações Clínicas</div>
         <div style={s.grid3}>
           <div style={s.inputGroup}>
@@ -438,7 +417,7 @@ const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
       </div>
 
       {/* C. MEDICAÇÃO E TERAPIAS */}
-      <div className="card-print" style={s.card}>
+      <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>C</span> Medicação, Terapias e Especialistas</div>
         <div style={s.grid2}>
           <div>
@@ -466,9 +445,8 @@ const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
       </div>
 
       {/* D. AVALIAÇÃO DIAGNÓSTICA E CONTEXTUAL */}
-      <div className="card-print" style={s.card}>
+      <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>D</span> Avaliação Diagnóstica e Contextual</div>
-        
         <div style={s.grid2}>
           <div style={s.inputGroup}>
             <label style={s.label}>Resultado da Avaliação Diagnóstica</label>
@@ -479,12 +457,10 @@ const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
             <FileUpload label="Anexar Avaliação" campoID="avaliacao_diagnostica" />
           </div>
         </div>
-
         <div style={{ marginTop: '20px' }}>
           <Checkbox label="A avaliação é a mesma da turma regular?" />
           <Checkbox label="O aluno conta com Profissional de Apoio Especializado (PAE)?" />
         </div>
-
         <div style={{...s.grid2, marginTop: '20px'}}>
           <div style={s.inputGroup}>
             <label style={s.label}>Aspectos da Rotina Familiar</label>
@@ -497,12 +473,12 @@ const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
         </div>
       </div>
 
-     {/* E. ADAPTAÇÕES CURRICULARES */}
-      <div className="card-print" style={s.card}>
+      {/* E. ADAPTAÇÕES CURRICULARES */}
+      <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>E</span> Adaptações Curriculares e Campos de Experiência</div>
         
-        {/* 🌟 NOVOS CAMPOS DE EXPERIÊNCIA AQUI */}
-        <div style={{...s.grid2, marginBottom: '20px'}}>
+        {/* NOVOS CAMPOS AQUI */}
+        <div style={{...s.grid2, marginBottom: '25px'}}>
           <div style={s.inputGroup}>
             <label style={s.label}>Campo de Experiência: Linguagem</label>
             <textarea style={{...s.input, minHeight: '80px'}} name="campoLinguagem" value={formData.campoLinguagem} onChange={handleChange} placeholder="Adaptações e objetivos para a área da linguagem..."></textarea>
@@ -516,18 +492,14 @@ const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
         <h4 style={s.sectionTitle}>Adaptações por Disciplina</h4>
         <div style={s.grid3}>
           {disciplinas.map((disc) => (
-            <div key={disc} style={{ border: '1px solid #e2e8f0', borderRadius: '6px', padding: '15px', backgroundColor: '#f8fafc' }}>
-              <h4 style={{ margin: '0 0 10px 0', borderBottom: '1px solid #e5e7eb', paddingBottom: '8px' }}>{disc}</h4>
+            <div key={disc} style={{ border: '1px solid rgba(203, 213, 225, 0.5)', borderRadius: '10px', padding: '18px', backgroundColor: 'rgba(248, 250, 252, 0.6)' }}>
+              <h4 style={{ margin: '0 0 12px 0', borderBottom: '1px solid #e2e8f0', paddingBottom: '8px', color: '#334155' }}>{disc}</h4>
               <Checkbox label={`${disc} - Priorização de conteúdos`} />
               <Checkbox label={`${disc} - Introdução de conteúdos alternativos`} />
               <Checkbox label={`${disc} - Priorização de objetivos`} />
-              <div style={{...s.inputGroup, marginTop: '10px'}}>
-                <label style={{...s.label, fontSize: '0.8rem'}}>Conteúdo Ministrado:</label>
-                <textarea 
-                  style={{...s.input, minHeight: '60px', fontSize: '0.85rem'}} 
-                  value={(formData.conteudos || {})[disc] || ''} 
-                  onChange={(e) => handleNestedText('conteudos', disc, e.target.value)} 
-                />
+              <div style={{...s.inputGroup, marginTop: '12px'}}>
+                <label style={{...s.label, fontSize: '0.85rem'}}>Conteúdo Ministrado:</label>
+                <textarea style={{...s.input, minHeight: '60px', fontSize: '0.9rem'}} value={(formData.conteudos || {})[disc] || ''} onChange={(e) => handleNestedText('conteudos', disc, e.target.value)} />
               </div>
             </div>
           ))}
@@ -535,7 +507,7 @@ const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
       </div>
 
       {/* F. PROCEDIMENTOS DIDÁTICOS */}
-      <div className="card-print" style={s.card}>
+      <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>F</span> Adaptações Organizacionais e Didáticas</div>
         <div style={s.grid3}>
           <div>
@@ -564,7 +536,7 @@ const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
       </div>
 
       {/* G. ESPAÇO E TECNOLOGIA */}
-      <div className="card-print" style={s.card}>
+      <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>G</span> Adaptações de Espaço e Tecnologia</div>
         <div style={s.grid3}>
           <div>
@@ -587,11 +559,11 @@ const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
         </div>
       </div>
 
-      {/*{/* H. MÉTODOS DE AVALIAÇÃO */}
-      <div className="card-print" style={s.card}>
+      {/* H. MÉTODOS DE AVALIAÇÃO */}
+      <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>H</span> Métodos de Avaliação</div>
         <div style={s.grid3}>
-          <Checkbox label="Sondagem pedagógica" /> {/* 🌟 NOVA OPÇÃO AQUI */}
+          <Checkbox label="Sondagem pedagógica" />
           <Checkbox label="Múltipla escolha (objetiva)" />
           <Checkbox label="Questões discursivas (claras)" />
           <Checkbox label="Alternativas reduzidas" />
@@ -603,18 +575,13 @@ const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
       </div>
 
       {/* I. DIÁRIO DO ALUNO (COM IMAGENS) */}
-      <div className="card-print" style={s.card}>
+      <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>I</span> Diário do Aluno (Acompanhamento Bimestral)</div>
         <div style={s.grid2}>
           {bimestres.map((bim, index) => (
-            <div key={bim} style={{ border: '1px solid #e2e8f0', borderRadius: '6px', padding: '15px' }}>
-              <h4 style={{ margin: '0 0 10px 0' }}>{bim}</h4>
-              <textarea 
-                style={{...s.input, minHeight: '80px'}} 
-                placeholder="Evolução, observações e conquistas..."
-                value={(formData.diario || {})[bim] || ''} 
-                onChange={(e) => handleNestedText('diario', bim, e.target.value)}
-              />
+            <div key={bim} style={{ border: '1px solid rgba(203, 213, 225, 0.5)', borderRadius: '10px', padding: '18px', backgroundColor: 'rgba(248, 250, 252, 0.6)' }}>
+              <h4 style={{ margin: '0 0 12px 0', color: '#334155' }}>{bim}</h4>
+              <textarea style={{...s.input, minHeight: '80px'}} placeholder="Evolução, observações e conquistas..." value={(formData.diario || {})[bim] || ''} onChange={(e) => handleNestedText('diario', bim, e.target.value)} />
               <FileUpload label="Anexar Evidência / Atividade" campoID={`diario_bimestre_${index+1}`} />
             </div>
           ))}
@@ -622,7 +589,7 @@ const SistemaPEI = ({ alunoData, onVoltar, onLogout, usuario }) => {
       </div>
 
       {/* J. REVISÃO FINAL */}
-      <div className="card-print" style={s.card}>
+      <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>J</span> Revisão Final e Observações</div>
         <div style={s.inputGroup}>
           <label style={s.label}>Resumo do Aluno (Pontos Fortes, Dificuldades e Recomendações)</label>
@@ -653,33 +620,19 @@ export default function App() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUsuario(user);
-      setCarregando(false);
+      setUsuario(user); setCarregando(false);
     });
     return () => unsubscribe();
   }, []);
 
   const fazerLogout = () => signOut(auth);
 
-  const irParaNovoFormulario = () => {
-    setAlunoEditando(null);
-    setTelaAtiva('formulario');
-  };
+  const irParaNovoFormulario = () => { setAlunoEditando(null); setTelaAtiva('formulario'); };
+  const irParaEditarFormulario = (aluno) => { setAlunoEditando(aluno); setTelaAtiva('formulario'); };
 
-  const irParaEditarFormulario = (aluno) => {
-    setAlunoEditando(aluno);
-    setTelaAtiva('formulario');
-  };
-
-  if (carregando) return <div style={{ textAlign: 'center', marginTop: '50px' }}>A carregar...</div>;
+  if (carregando) return <div style={{ textAlign: 'center', marginTop: '50px', fontFamily: 'sans-serif' }}>A carregar o ambiente...</div>;
   if (!usuario) return <LoginScreen />;
 
-  if (telaAtiva === 'lista') {
-    return <ListaAlunos onNovo={irParaNovoFormulario} onEditar={irParaEditarFormulario} onLogout={fazerLogout} usuario={usuario} />;
-  } else {
-    return <SistemaPEI alunoData={alunoEditando} onVoltar={() => setTelaAtiva('lista')} onLogout={fazerLogout} usuario={usuario} />;
-  }
+  if (telaAtiva === 'lista') return <ListaAlunos onNovo={irParaNovoFormulario} onEditar={irParaEditarFormulario} onLogout={fazerLogout} usuario={usuario} />;
+  return <SistemaPEI alunoData={alunoEditando} onVoltar={() => setTelaAtiva('lista')} onLogout={fazerLogout} usuario={usuario} />;
 }
-
-
-
