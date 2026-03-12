@@ -52,6 +52,7 @@ const s = {
 };
 
 // --- CSS GLOBAL (Animações e Fonte Poppins) ---
+// --- CSS GLOBAL (Animações e Fonte Poppins) ---
 const GlobalCSS = () => (
   <style>
     {`
@@ -65,7 +66,6 @@ const GlobalCSS = () => (
                           radial-gradient(at 100% 0%, hsla(0,100%,76%,0.05) 0px, transparent 50%),
                           radial-gradient(at 100% 100%, hsla(158,100%,76%,0.08) 0px, transparent 50%);
         background-attachment: fixed;
-        overflow-x: hidden;
       }
 
       .glass-panel {
@@ -85,47 +85,61 @@ const GlobalCSS = () => (
 
       @media screen { .print-only { display: none !important; } }
       
-      /* 🌟 CORREÇÃO MÁGICA DA IMPRESSÃO AQUI 🌟 */
+      /* 🌟 CORREÇÃO DEFINITIVA DA IMPRESSÃO (SEM CORTES) 🌟 */
       @media print {
-        @page { margin: 12mm; } /* Isso ajuda a esconder a data e o link da Vercel! */
+        @page { margin: 15mm; }
         
         body, html { 
           background: white !important; 
-          overflow: visible !important; /* Destrava as páginas seguintes */
           height: auto !important; 
+          overflow: visible !important; 
         }
         
-        .print-page { 
-          overflow: visible !important; 
+        /* Removemos efeitos visuais que confundem a impressora */
+        .glass-panel { 
+          background: transparent !important; 
+          backdrop-filter: none !important; 
+          -webkit-backdrop-filter: none !important; 
+          border: none !important; 
+          box-shadow: none !important; 
+        }
+        
+        /* Permitir que o formulário flua e quebre naturalmente nas folhas */
+        .card-print { 
+          display: block !important; 
+          page-break-inside: auto !important; /* ISSO IMPEDE AS FOLHAS EM BRANCO */
+          margin-bottom: 25px !important; 
+          padding: 0 !important; 
+        }
+        
+        /* Transforma as colunas laterais em blocos empilhados */
+        .card-print > div {
           display: block !important; 
         }
         
-        .no-print { display: none !important; }
-        .print-only { display: block !important; }
-        
-        /* Removemos o vidro para o papel entender a quebra de linha */
-        .glass-panel, .card-print { 
-          background: white !important; 
-          border: none !important; 
-          box-shadow: none !important; 
-          padding: 10px 0 !important; 
-          margin-bottom: 25px !important;
-          page-break-inside: avoid; /* Tenta não cortar um bloco no meio da folha */
-          display: block !important;
-        }
-        
-        /* Linhas limpas para as respostas no papel */
+        /* Linhas limpas para escrever no papel */
         input, textarea { 
           border: none !important; 
-          border-bottom: 1px dashed #999 !important; 
+          border-bottom: 1px dashed #666 !important; 
           border-radius: 0 !important; 
           background: transparent !important; 
-          padding: 5px 0 !important; 
           color: black !important; 
+          width: 100% !important; 
+          padding: 5px 0 !important; 
+          box-sizing: border-box !important;
         }
-        textarea { height: auto !important; min-height: 30px !important; overflow: hidden !important; }
-        h1, h2, h3, h4 { color: black !important; page-break-after: avoid; }
-        .badge-print { background: none !important; color: black !important; border: 1px solid black; padding: 2px 6px; }
+        
+        textarea { 
+          height: auto !important; 
+          min-height: 40px !important; 
+          white-space: pre-wrap !important;
+        }
+
+        h4 { margin-top: 15px !important; }
+        
+        /* Regra de Ouro: Esconder a barra de ferramentas (Agora sim no final do arquivo) */
+        .no-print { display: none !important; }
+        .print-only { display: block !important; }
       }
     `}
   </style>
@@ -507,6 +521,7 @@ export default function App() {
   if (telaAtiva === 'lista') return <ListaAlunos onNovo={irParaNovoFormulario} onEditar={irParaEditarFormulario} onLogout={fazerLogout} usuario={usuario} />;
   return <SistemaPEI alunoData={alunoEditando} onVoltar={() => setTelaAtiva('lista')} onLogout={fazerLogout} usuario={usuario} />;
 }
+
 
 
 
