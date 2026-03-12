@@ -52,7 +52,6 @@ const s = {
 };
 
 // --- CSS GLOBAL (Animações e Fonte Poppins) ---
-// --- CSS GLOBAL (Animações e Fonte Poppins) ---
 const GlobalCSS = () => (
   <style>
     {`
@@ -85,59 +84,94 @@ const GlobalCSS = () => (
 
       @media screen { .print-only { display: none !important; } }
       
-      /* 🌟 CORREÇÃO DEFINITIVA DA IMPRESSÃO (SEM CORTES) 🌟 */
+      /* 🌟 IMPRESSÃO OFICIAL: ESTILO DOCUMENTO ALINHADO 🌟 */
       @media print {
         @page { margin: 15mm; }
         
         body, html { 
           background: white !important; 
-          height: auto !important; 
-          overflow: visible !important; 
+          color: black !important; 
+          font-size: 11pt !important; 
+          height: auto !important;
         }
         
-        /* Removemos efeitos visuais que confundem a impressora */
-        .glass-panel { 
+        /* Limpa o fundo para o papel */
+        .glass-panel, .card-print { 
           background: transparent !important; 
-          backdrop-filter: none !important; 
-          -webkit-backdrop-filter: none !important; 
           border: none !important; 
           box-shadow: none !important; 
-        }
-        
-        /* Permitir que o formulário flua e quebre naturalmente nas folhas */
-        .card-print { 
-          display: block !important; 
-          page-break-inside: auto !important; /* ISSO IMPEDE AS FOLHAS EM BRANCO */
           margin-bottom: 25px !important; 
           padding: 0 !important; 
         }
         
-        /* Transforma as colunas laterais em blocos empilhados */
-        .card-print > div {
-          display: block !important; 
-        }
-        
-        /* Linhas limpas para escrever no papel */
-        input, textarea { 
-          border: none !important; 
-          border-bottom: 1px dashed #666 !important; 
-          border-radius: 0 !important; 
-          background: transparent !important; 
-          color: black !important; 
-          width: 100% !important; 
-          padding: 5px 0 !important; 
-          box-sizing: border-box !important;
-        }
-        
-        textarea { 
-          height: auto !important; 
-          min-height: 40px !important; 
-          white-space: pre-wrap !important;
+        /* MATA O GRID E AS COLUNAS: Força tudo a ficar alinhado à esquerda, um embaixo do outro */
+        div[style*="display: grid"],
+        div[style*="grid-template-columns"] {
+          display: block !important;
         }
 
-        h4 { margin-top: 15px !important; }
-        
-        /* Regra de Ouro: Esconder a barra de ferramentas (Agora sim no final do arquivo) */
+        /* Desliga o layout flexível (que espremia as informações) */
+        div[style*="display: flex"] {
+          display: block !important; 
+        }
+
+        /* Mantém APENAS o título das seções na mesma linha (Ex: "A - Identificação") */
+        .card-print > div:first-child {
+           border-bottom: 2px solid black !important;
+           padding-bottom: 5px !important;
+           margin-bottom: 15px !important;
+           display: flex !important; 
+           align-items: center !important;
+           page-break-after: avoid !important;
+        }
+
+        /* ALINHAMENTO DE TEXTO: Fica com cara de formulário preenchido à mão */
+        label {
+          display: block !important;
+          font-weight: bold !important;
+          margin-bottom: 2px !important;
+          margin-top: 12px !important;
+          color: black !important;
+        }
+
+        input:not([type="checkbox"]), textarea {
+          border: none !important;
+          border-bottom: 1px solid black !important; /* Linha contínua e forte */
+          border-radius: 0 !important;
+          background: transparent !important;
+          color: black !important;
+          width: 100% !important;
+          padding: 2px 0 5px 0 !important;
+          font-size: 11pt !important;
+        }
+
+        /* CAIXAS DE SELEÇÃO (CHECKBOX) PERFEITAMENTE ALINHADAS */
+        label.checkbox-row {
+          display: flex !important;
+          align-items: center !important;
+          margin-top: 6px !important;
+          margin-bottom: 6px !important;
+          font-weight: normal !important; /* O texto ao lado do quadradinho não precisa de negrito */
+        }
+
+        label.checkbox-row input[type="checkbox"] {
+          width: auto !important;
+          margin-right: 10px !important; /* Espaço correto entre o quadrado e o texto */
+        }
+
+        h4 {
+          font-size: 12pt !important;
+          margin-top: 20px !important;
+          margin-bottom: 5px !important;
+          page-break-after: avoid !important;
+        }
+
+        .badge-print {
+          background: none !important;
+          color: black !important;
+          border: 1px solid black !important;
+        }
+
         .no-print { display: none !important; }
         .print-only { display: block !important; }
       }
@@ -524,6 +558,7 @@ export default function App() {
   if (telaAtiva === 'lista') return <ListaAlunos onNovo={irParaNovoFormulario} onEditar={irParaEditarFormulario} onLogout={fazerLogout} usuario={usuario} />;
   return <SistemaPEI alunoData={alunoEditando} onVoltar={() => setTelaAtiva('lista')} onLogout={fazerLogout} usuario={usuario} />;
 }
+
 
 
 
