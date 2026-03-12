@@ -217,7 +217,10 @@ const ListaAlunos = ({ onNovo, onEditar, onLogout, usuario }) => {
    'educacaoredencao@gmail.com', 
    'escolajac663@gmail.com',
    'iquinhoslp@yahoo.com.br',
-   'mariaroselidossantosrosa@gmail.com'
+   'mariaroselidossantosrosa@gmail.com',
+   'belavista112@gmail.com',
+   'rackellbonete@gmail.com',
+   'adriananeri@prof.educacao.sp.gov.br'
   ];
   
   const isEspecialista = listaEspecialistas.includes(usuario.email);
@@ -521,6 +524,7 @@ export default function App() {
   if (telaAtiva === 'lista') return <ListaAlunos onNovo={irParaNovoFormulario} onEditar={irParaEditarFormulario} onLogout={fazerLogout} usuario={usuario} />;
   return <SistemaPEI alunoData={alunoEditando} onVoltar={() => setTelaAtiva('lista')} onLogout={fazerLogout} usuario={usuario} />;
 }
+
 
 
 
