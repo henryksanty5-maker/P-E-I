@@ -17,7 +17,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-// --- ESTILOS MODERNOS (Paleta: Verde e Vermelho da Cidade) ---
+// --- ESTILOS MODERNOS ---
 const s = {
   page: { minHeight: '100vh', padding: '30px 20px', color: '#1e293b' },
   topbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px 25px', marginBottom: '30px', flexWrap: 'wrap', gap: '15px' },
@@ -25,27 +25,27 @@ const s = {
   avatar: { width: '48px', height: '48px', background: 'linear-gradient(135deg, #059669 0%, #ef4444 100%)', color: 'white', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 'bold', fontSize: '1.2rem', boxShadow: '0 4px 10px rgba(5, 150, 105, 0.3)' },
   btnGroup: { display: 'flex', gap: '10px', flexWrap: 'wrap' },
   
-  btnPrimary: { background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', letterSpacing: '0.5px' },
-  btnSuccess: { background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', letterSpacing: '0.5px' },
+  btnPrimary: { background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' },
+  btnSuccess: { background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' },
   btnSecondary: { background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)', color: '#334155', border: '1px solid #cbd5e1', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' },
   btnDanger: { background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)', color: '#dc2626', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' },
   btnEspecial: { background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' },
   
   card: { padding: '28px', marginBottom: '24px' },
   cardHeader: { color: '#059669', fontSize: '1.25rem', fontWeight: '700', borderBottom: '2px solid rgba(16, 185, 129, 0.1)', paddingBottom: '12px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px' },
-  badge: { background: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)', color: '#065f46', padding: '6px 12px', borderRadius: '6px', fontSize: '0.9rem', fontWeight: 'bold', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' },
+  badge: { background: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)', color: '#065f46', padding: '6px 12px', borderRadius: '6px', fontSize: '0.9rem', fontWeight: 'bold' },
   
   grid2: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' },
   grid3: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px' },
   
   inputGroup: { display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' },
   label: { fontWeight: '600', color: '#334155', fontSize: '0.95rem' },
-  input: { padding: '12px', border: '1px solid rgba(203, 213, 225, 0.6)', borderRadius: '8px', width: '100%', boxSizing: 'border-box', backgroundColor: 'rgba(255, 255, 255, 0.9)', outline: 'none', fontSize: '0.95rem', transition: 'all 0.3s ease' },
+  input: { padding: '12px', border: '1px solid rgba(203, 213, 225, 0.6)', borderRadius: '8px', width: '100%', boxSizing: 'border-box', backgroundColor: 'rgba(255, 255, 255, 0.9)', outline: 'none', fontSize: '0.95rem' },
   checkboxContainer: { display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px', cursor: 'pointer', padding: '6px 8px', borderRadius: '6px' },
+  uploadBox: { border: '2px dashed #a7f3d0', borderRadius: '12px', padding: '20px', textAlign: 'center', backgroundColor: 'rgba(209, 250, 229, 0.4)', marginTop: '10px' },
   sectionTitle: { color: '#1e293b', marginBottom: '15px', fontSize: '1.05rem', borderBottom: '1px solid rgba(203, 213, 225, 0.5)', paddingBottom: '8px', fontWeight: '600' }
 };
 
-// --- CSS GLOBAL DE IMPRESSÃO PERFEITA ---
 const GlobalCSS = () => (
   <style>
     {`
@@ -54,12 +54,9 @@ const GlobalCSS = () => (
       .glass-panel { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04); border-radius: 16px; }
       button { transition: all 0.3s ease !important; }
       button:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); filter: brightness(1.05); }
-      button:active { transform: translateY(0); }
-      input:focus, textarea:focus { border-color: #10b981 !important; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2) !important; background-color: #ffffff !important; }
-
       @media screen { .print-only { display: none !important; } }
       
-      /* REGRAS DE IMPRESSÃO (ESTILO DOCUMENTO OFICIAL ALINHADO) */
+      /* IMPRESSÃO PERFEITA */
       @media print {
         @page { margin: 15mm; }
         body, html { background: white !important; color: black !important; font-size: 11pt !important; height: auto !important; }
@@ -67,9 +64,9 @@ const GlobalCSS = () => (
         div[style*="display: grid"], div[style*="grid-template-columns"], div[style*="display: flex"] { display: block !important; }
         .card-print > div:first-child { border-bottom: 2px solid black !important; padding-bottom: 5px !important; margin-bottom: 15px !important; display: flex !important; align-items: center !important; page-break-after: avoid !important; }
         label { display: block !important; font-weight: bold !important; margin-bottom: 2px !important; margin-top: 12px !important; color: black !important; }
-        input:not([type="checkbox"]), input:not([type="radio"]), textarea { border: none !important; border-bottom: 1px solid black !important; border-radius: 0 !important; background: transparent !important; color: black !important; width: 100% !important; padding: 2px 0 5px 0 !important; font-size: 11pt !important; box-sizing: border-box !important; }
+        input:not([type="checkbox"]), textarea { border: none !important; border-bottom: 1px solid black !important; border-radius: 0 !important; background: transparent !important; color: black !important; width: 100% !important; padding: 2px 0 5px 0 !important; font-size: 11pt !important; box-sizing: border-box !important; }
         label.checkbox-row { display: flex !important; align-items: center !important; margin-top: 6px !important; margin-bottom: 6px !important; font-weight: normal !important; }
-        label.checkbox-row input[type="checkbox"], label.checkbox-row input[type="radio"] { width: auto !important; margin-right: 10px !important; }
+        label.checkbox-row input[type="checkbox"] { width: auto !important; margin-right: 10px !important; }
         h4 { font-size: 12pt !important; margin-top: 20px !important; margin-bottom: 5px !important; page-break-after: avoid !important; }
         .badge-print { background: none !important; color: black !important; border: 1px solid black !important; }
         .no-print { display: none !important; }
@@ -79,7 +76,6 @@ const GlobalCSS = () => (
   </style>
 );
 
-// --- COMPONENTES AUXILIARES ---
 const Checkbox = ({ label, formData, handleCheckbox }) => (
   <label className="checkbox-row" style={s.checkboxContainer}>
     <input type="checkbox" checked={!!(formData.opcoes || {})[label]} onChange={() => handleCheckbox(label)} style={{ width: '18px', height: '18px', accentColor: '#10b981' }} />
@@ -124,14 +120,14 @@ const LoginScreen = () => {
   );
 };
 
-// 3. Tela de Lista de Alunos (DASHBOARD MULTI-DOCUMENTO)
+// 3. Tela de Lista de Alunos (DASHBOARD)
 const ListaAlunos = ({ onNovoPEI, onNovoPAEE, onEditar, onLogout, usuario }) => {
   const [alunos, setAlunos] = useState([]);
 
   // 🌟 AQUI FICA A SUA LISTA VIP:
   const listaEspecialistas = [
     'henryksanty5@gmail.com',
-    'jaqueline@escola.com', // Adicione o email da Jaqueline aqui!
+    'jaqueline@escola.com',
     'direcao@escola.com'
   ];
   
@@ -165,9 +161,8 @@ const ListaAlunos = ({ onNovoPEI, onNovoPAEE, onEditar, onLogout, usuario }) => 
           </div>
         </div>
         <div style={s.btnGroup}>
-          <button style={s.btnPrimary} onClick={onNovoPEI}>+ Novo PEI (Regente)</button>
-          {/* Botão PAEE exclusivo para VIPs ou liberado para todos, mantemos visível para as chefias */}
-          {isEspecialista && <button style={s.btnEspecial} onClick={onNovoPAEE}>+ Novo PAEE (AEE)</button>}
+          <button style={s.btnPrimary} onClick={onNovoPEI}>+ Novo PEI</button>
+          {isEspecialista && <button style={s.btnEspecial} onClick={onNovoPAEE}>+ Novo PAEE</button>}
           <button style={s.btnDanger} onClick={onLogout}>Sair</button>
         </div>
       </div>
@@ -207,10 +202,11 @@ const ListaAlunos = ({ onNovoPEI, onNovoPAEE, onEditar, onLogout, usuario }) => 
   );
 };
 
-// 4A. FORMULÁRIO PEI (Original do Professor Regente)
+// 4A. FORMULÁRIO PEI (RESTAURADO COM FOTOS E DIÁRIO COMPLETO)
 const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
   const estadoInicial = { tipoDocumento: 'PEI', aluno: '', nascimento: '', anoSerie: '', turma: '', responsaveis: '', diagnostico: '', cid: '', crm: '', resultadoAvaliacao: '', rotinaFamiliar: '', fatoresAmbientais: '', resumoAluno: '', campoLinguagem: '', campoMatematica: '', anexos: {}, conteudos: {}, diario: {}, opcoes: {} };
-  const [formData, setFormData] = useState(() => { return alunoData ? { ...estadoInicial, ...alunoData } : estadoInicial; });
+  const [formData, setFormData] = useState(() => { return alunoData ? { ...estadoInicial, ...alunoData, anexos: alunoData.anexos || {} } : estadoInicial; });
+  const [aEnviar, setAEnviar] = useState(false);
   const disciplinas = ['Língua Portuguesa', 'Matemática', 'Ciências', 'História', 'Geografia', 'Artes', 'Educação Física', 'Inglês', 'Informática'];
   const bimestres = ['1º Bimestre', '2º Bimestre', '3º Bimestre', '4º Bimestre'];
 
@@ -221,16 +217,51 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
   const salvarNoBanco = async () => {
     if (!formData.aluno) { alert("Preencha o nome do aluno."); return; }
     const dadosParaSalvar = { ...formData, criadoPor: formData.criadoPor || usuario.email };
-    const dbKey = alunoData?.dbKey || `${formData.aluno} (PEI)`; // Garante que o PEI e PAEE não se sobrescrevam
+    const dbKey = alunoData?.dbKey || `${formData.aluno} (PEI)`; 
     try { await set(ref(db, `alunos/${dbKey}`), dadosParaSalvar); alert(`✅ PEI salvo na nuvem!`); } 
     catch (error) { alert("Erro ao salvar."); }
   };
+
+  const handleFileUpload = (e, campoID) => {
+    const file = e.target.files[0]; if (!file) return;
+    setAEnviar(true); const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas'); const scaleSize = 700 / img.width; canvas.width = 700; canvas.height = img.height * scaleSize;
+        const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        setFormData(prev => ({ ...prev, anexos: { ...(prev.anexos || {}), [campoID]: canvas.toDataURL('image/jpeg', 0.6) } }));
+        setAEnviar(false);
+      }; img.src = event.target.result;
+    }; reader.readAsDataURL(file);
+  };
+
+  const removerAnexo = (campoID) => {
+    setFormData(prev => { const novosAnexos = { ...(prev.anexos || {}) }; delete novosAnexos[campoID]; return { ...prev, anexos: novosAnexos }; });
+  };
+
+  const FileUpload = ({ label, campoID }) => (
+    <div className="no-print" style={s.uploadBox}>
+      {formData.anexos && formData.anexos[campoID] ? (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <img src={formData.anexos[campoID]} alt="Anexo" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '8px', border: '1px solid #a7f3d0' }} />
+          <button type="button" onClick={() => removerAnexo(campoID)} style={{ marginTop: '12px', padding: '8px 16px', backgroundColor: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}>Remover Imagem</button>
+        </div>
+      ) : (
+        <>
+          <span style={{ fontSize: '2rem' }}>📷</span><p style={{ margin: '8px 0', fontWeight: '600', color: '#059669' }}>{label}</p>
+          <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, campoID)} disabled={aEnviar} />
+          {aEnviar && <span style={{color: '#ef4444', display: 'block', marginTop: '8px'}}>Processando...</span>}
+        </>
+      )}
+    </div>
+  );
 
   return (
     <div className="print-page" style={s.page}>
       <GlobalCSS />
       <div className="glass-panel no-print" style={s.topbar}>
-        <div><h2 style={{margin: 0, color: '#0f172a'}}>Editor de PEI (Sala Regular)</h2><p style={{margin:0, fontSize:'0.85rem', color:'#64748b'}}>Alinhado para Impressão</p></div>
+        <div><h2 style={{margin: 0, color: '#0f172a'}}>Editor de PEI</h2></div>
         <div style={s.btnGroup}><button style={s.btnSecondary} onClick={onVoltar}>← Voltar</button><button style={s.btnPrimary} onClick={salvarNoBanco}>✓ Salvar Nuvem</button><button style={s.btnSuccess} onClick={()=>window.print()}>🖨️ Imprimir PDF</button></div>
       </div>
 
@@ -240,46 +271,85 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
         <h1 style={{ marginTop: '20px', fontSize: '1.4rem' }}>PLANO EDUCACIONAL INDIVIDUALIZADO – PEI</h1>
       </div>
 
-      {/* A. IDENTIFICAÇÃO (PEI) */}
       <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>A</span> Identificação do Aluno</div>
-        <div style={s.grid2}>
-          <div style={s.inputGroup}><label style={s.label}>Nome do Aluno *</label><input style={s.input} name="aluno" value={formData.aluno} onChange={handleChange} /></div>
-          <div style={s.inputGroup}><label style={s.label}>Nascimento</label><input style={s.input} name="nascimento" value={formData.nascimento} onChange={handleChange} /></div>
-          <div style={s.inputGroup}><label style={s.label}>Ano/Série</label><input style={s.input} name="anoSerie" value={formData.anoSerie} onChange={handleChange} /></div>
-          <div style={s.inputGroup}><label style={s.label}>Turma</label><input style={s.input} name="turma" value={formData.turma} onChange={handleChange} /></div>
-          <div style={{...s.inputGroup, gridColumn: '1 / -1'}}><label style={s.label}>Responsáveis</label><input style={s.input} name="responsaveis" value={formData.responsaveis} onChange={handleChange} /></div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: '30px' }}>
+          <div className="no-print"><FileUpload label="Selecionar Foto" campoID="foto_perfil" /></div>
+          <div style={s.grid2}>
+            <div style={s.inputGroup}><label style={s.label}>Nome do Aluno *</label><input style={s.input} name="aluno" value={formData.aluno} onChange={handleChange} /></div>
+            <div style={s.inputGroup}><label style={s.label}>Data de Nascimento</label><input style={s.input} name="nascimento" value={formData.nascimento} onChange={handleChange} /></div>
+            <div style={s.inputGroup}><label style={s.label}>Ano/Série</label><input style={s.input} name="anoSerie" value={formData.anoSerie} onChange={handleChange} /></div>
+            <div style={s.inputGroup}><label style={s.label}>Turma</label><input style={s.input} name="turma" value={formData.turma} onChange={handleChange} /></div>
+            <div style={{...s.inputGroup, gridColumn: '1 / -1'}}><label style={s.label}>Responsáveis</label><input style={s.input} name="responsaveis" value={formData.responsaveis} onChange={handleChange} /></div>
+          </div>
         </div>
       </div>
 
-      {/* B. CLÍNICAS */}
       <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>B</span> Informações Clínicas</div>
         <div style={s.grid3}>
-          <div style={s.inputGroup}><label style={s.label}>Diagnóstico</label><input style={s.input} name="diagnostico" value={formData.diagnostico} onChange={handleChange} /></div>
-          <div style={s.inputGroup}><label style={s.label}>CID</label><input style={s.input} name="cid" value={formData.cid} onChange={handleChange} /></div>
+          <div style={s.inputGroup}><label style={s.label}>Diagnóstico</label><input style={s.input} name="diagnostico" value={formData.diagnostico} onChange={handleChange} /><FileUpload label="Anexar Laudo" campoID="laudo_medico" /></div>
+          <div style={s.inputGroup}><label style={s.label}>Códigos CID</label><input style={s.input} name="cid" value={formData.cid} onChange={handleChange} /></div>
+          <div style={s.inputGroup}><label style={s.label}>CRM do Médico</label><input style={s.input} name="crm" value={formData.crm} onChange={handleChange} /></div>
         </div>
       </div>
 
-      {/* E. ADAPTAÇÕES POR DISCIPLINA */}
       <div className="glass-panel card-print" style={s.card}>
-        <div style={s.cardHeader}><span className="badge-print" style={s.badge}>C</span> Adaptações Curriculares (PEI)</div>
+        <div style={s.cardHeader}><span className="badge-print" style={s.badge}>C</span> Medicação e Terapias</div>
+        <div style={s.grid2}>
+          <div><Checkbox label="O aluno utiliza medicação?" formData={formData} handleCheckbox={handleCheckbox} /><FileUpload label="Anexar Receita" campoID="receita_medica" /></div>
+          <div><Checkbox label="Acompanhamento terapêutico?" formData={formData} handleCheckbox={handleCheckbox} /></div>
+        </div>
+        <div style={{...s.grid2, marginTop: '20px'}}>
+          <div style={s.inputGroup}><label style={s.label}>Campo de Experiência: Linguagem</label><textarea style={{...s.input, minHeight: '80px'}} name="campoLinguagem" value={formData.campoLinguagem} onChange={handleChange}></textarea></div>
+          <div style={s.inputGroup}><label style={s.label}>Campo de Experiência: Matemática</label><textarea style={{...s.input, minHeight: '80px'}} name="campoMatematica" value={formData.campoMatematica} onChange={handleChange}></textarea></div>
+        </div>
+        <div style={{ marginTop: '20px' }}><h4 style={s.sectionTitle}>Especialistas que acompanham o aluno:</h4><div style={s.grid3}><Checkbox label="Neurologista" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Psicólogo" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Fonoaudiólogo" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Psicopedagogo" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Terapeuta Ocupacional" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="ABA / TCC" formData={formData} handleCheckbox={handleCheckbox} /></div></div>
+      </div>
+
+      <div className="glass-panel card-print" style={s.card}>
+        <div style={s.cardHeader}><span className="badge-print" style={s.badge}>D</span> Avaliação Diagnóstica</div>
+        <div style={s.grid2}>
+          <div style={s.inputGroup}><label style={s.label}>Resultado da Avaliação</label><textarea style={{...s.input, minHeight: '100px'}} name="resultadoAvaliacao" value={formData.resultadoAvaliacao} onChange={handleChange}></textarea></div>
+          <div style={s.inputGroup}><label style={s.label}>Evidência / Avaliação</label><FileUpload label="Anexar Avaliação" campoID="avaliacao_diagnostica" /></div>
+        </div>
+      </div>
+
+      <div className="glass-panel card-print" style={s.card}>
+        <div style={s.cardHeader}><span className="badge-print" style={s.badge}>E</span> Adaptações por Disciplina</div>
         <div style={s.grid3}>
           {disciplinas.map((disc) => (
             <div key={disc} style={{ border: '1px solid rgba(203, 213, 225, 0.5)', padding: '18px', backgroundColor: 'rgba(209, 250, 229, 0.2)' }}>
               <h4 style={{ margin: '0 0 12px 0', color: '#065f46' }}>{disc}</h4>
               <Checkbox label={`${disc} - Priorização de conteúdos`} formData={formData} handleCheckbox={handleCheckbox} />
-              <Checkbox label={`${disc} - Conteúdos alternativos`} formData={formData} handleCheckbox={handleCheckbox} />
-              <div style={{...s.inputGroup, marginTop: '12px'}}><label style={s.label}>Conteúdo:</label><textarea style={{...s.input, minHeight: '60px'}} value={(formData.conteudos || {})[disc] || ''} onChange={(e) => handleNestedText('conteudos', disc, e.target.value)} /></div>
+              <Checkbox label={`${disc} - Introdução de conteúdos alternativos`} formData={formData} handleCheckbox={handleCheckbox} />
+              <div style={{...s.inputGroup, marginTop: '12px'}}><label style={s.label}>Conteúdo Ministrado:</label><textarea style={{...s.input, minHeight: '60px'}} value={(formData.conteudos || {})[disc] || ''} onChange={(e) => handleNestedText('conteudos', disc, e.target.value)} /></div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="glass-panel card-print" style={s.card}>
+        <div style={s.cardHeader}><span className="badge-print" style={s.badge}>H</span> Métodos de Avaliação</div>
+        <div style={s.grid3}><Checkbox label="Sondagem pedagógica" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Múltipla escolha (objetiva)" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Resposta oral" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Exercícios práticos" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Trabalhos escritos/orais" formData={formData} handleCheckbox={handleCheckbox} /></div>
+      </div>
+
+      <div className="glass-panel card-print" style={s.card}>
+        <div style={s.cardHeader}><span className="badge-print" style={s.badge}>I</span> Diário do Aluno (Acompanhamento)</div>
+        <div style={s.grid2}>
+          {bimestres.map((bim, index) => (
+            <div key={bim} style={{ border: '1px solid rgba(203, 213, 225, 0.5)', padding: '18px', backgroundColor: 'rgba(209, 250, 229, 0.2)' }}>
+              <h4 style={{ margin: '0 0 12px 0', color: '#065f46' }}>{bim}</h4>
+              <textarea style={{...s.input, minHeight: '80px'}} placeholder="Evolução, observações e conquistas..." value={(formData.diario || {})[bim] || ''} onChange={(e) => handleNestedText('diario', bim, e.target.value)} />
+              <FileUpload label="Anexar Evidência / Atividade" campoID={`diario_bimestre_${index+1}`} />
             </div>
           ))}
         </div>
       </div>
       
-      {/* J. REVISÃO FINAL */}
       <div className="glass-panel card-print" style={s.card}>
-        <div style={s.cardHeader}><span className="badge-print" style={s.badge}>D</span> Revisão Final</div>
-        <div style={s.inputGroup}><label style={s.label}>Resumo do Aluno</label><textarea style={{...s.input, minHeight: '80px'}} name="resumoAluno" value={formData.resumoAluno} onChange={handleChange}></textarea></div>
+        <div style={s.cardHeader}><span className="badge-print" style={s.badge}>J</span> Revisão Final</div>
+        <div style={s.inputGroup}><label style={s.label}>Resumo do Aluno</label><textarea style={{...s.input, minHeight: '120px'}} name="resumoAluno" value={formData.resumoAluno} onChange={handleChange}></textarea></div>
         <div className="print-only" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '60px' }}>
           {['Professor(a)', 'Coordenação', 'Responsáveis'].map(r => (<div key={r} style={{ flex: 1, textAlign: 'center', margin: '0 10px' }}><div style={{ borderBottom: '1px solid black', height: '30px' }}></div><p>{r}</p></div>))}
         </div>
@@ -288,19 +358,13 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
   );
 };
 
-// 4B. NOVO FORMULÁRIO: PAEE (Especialista AEE - Professora Jaqueline)
+// 4B. NOVO FORMULÁRIO: PAEE
 const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
-  const estadoInicial = { 
-    tipoDocumento: 'PAEE', aluno: '', nascimento: '', sexo: '', escola: 'EMEIEF "PROFESSORA EDNA REGINA DE OLIVEIRA E SILVA"', 
-    turno: '', turma: '', anoSerie: '', nivelApoio: '', observacoesApoio: '', medidasEscola: '',
-    organizacaoTipo: '', organizacaoAtendimentos: '', organizacaoTempo: '', organizacaoDias: '', medicamentos: '', monitorApoio: '',
-    opcoes: {}, textos: {} 
-  };
+  const estadoInicial = { tipoDocumento: 'PAEE', aluno: '', nascimento: '', sexo: '', escola: 'EMEIEF "PROFESSORA EDNA REGINA DE OLIVEIRA E SILVA"', turno: '', turma: '', anoSerie: '', nivelApoio: '', observacoesApoio: '', medidasEscola: '', organizacaoTipo: '', organizacaoAtendimentos: '', organizacaoTempo: '', organizacaoDias: '', medicamentos: '', monitorApoio: '', opcoes: {}, textos: {} };
   const [formData, setFormData] = useState(() => { return alunoData ? { ...estadoInicial, ...alunoData } : estadoInicial; });
 
   const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   const handleCheckbox = (opcao) => setFormData(prev => ({ ...prev, opcoes: { ...(prev.opcoes || {}), [opcao]: !(prev.opcoes || {})[opcao] } }));
-  const handleTexto = (chave, valor) => setFormData(prev => ({ ...prev, textos: { ...(prev.textos || {}), [chave]: valor } }));
 
   const salvarNoBanco = async () => {
     if (!formData.aluno) { alert("Preencha o nome do aluno."); return; }
@@ -324,7 +388,6 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
         <h1 style={{ marginTop: '20px', fontSize: '1.4rem' }}>PLANO DE ATENDIMENTO EDUCACIONAL ESPECIALIZADO - PAEE</h1>
       </div>
 
-      {/* I - INFORMAÇÕES DO ESTUDANTE */}
       <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>I</span> Informações do Estudante</div>
         <div style={s.grid2}>
@@ -335,7 +398,6 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
           <div style={s.inputGroup}><label style={s.label}>Ano de Escolaridade</label><input style={s.input} name="anoSerie" value={formData.anoSerie} onChange={handleChange} /></div>
           <div style={s.inputGroup}><label style={s.label}>Turma</label><input style={s.input} name="turma" value={formData.turma} onChange={handleChange} /></div>
         </div>
-
         <h4 style={s.sectionTitle}>Estudante elegível aos serviços da Educação Especial</h4>
         <div style={s.grid3}>
           <Checkbox label="Deficiência Intelectual" formData={formData} handleCheckbox={handleCheckbox} />
@@ -346,11 +408,9 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
           <Checkbox label="Altas habilidades/superdotação" formData={formData} handleCheckbox={handleCheckbox} />
           <Checkbox label="Deficiência Múltipla" formData={formData} handleCheckbox={handleCheckbox} />
         </div>
-
-        <div style={{...s.inputGroup, marginTop: '20px'}}><label style={s.label}>Nível de Apoio e Observações</label><textarea style={{...s.input, minHeight: '60px'}} name="observacoesApoio" placeholder="Ex: Nível 1, 2 ou 3. Observações adicionais..." value={formData.observacoesApoio} onChange={handleChange}></textarea></div>
+        <div style={{...s.inputGroup, marginTop: '20px'}}><label style={s.label}>Nível de Apoio e Observações</label><textarea style={{...s.input, minHeight: '60px'}} name="observacoesApoio" value={formData.observacoesApoio} onChange={handleChange}></textarea></div>
       </div>
 
-      {/* III - APOIOS E RECURSOS */}
       <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>III</span> Apoios, Recursos e Serviços</div>
         <div style={s.grid2}>
@@ -369,7 +429,6 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
         <div style={{...s.inputGroup, marginTop: '20px'}}><label style={s.label}>Medidas para superar barreiras no Estudo de Caso:</label><textarea style={{...s.input, minHeight: '80px'}} name="medidasEscola" value={formData.medidasEscola} onChange={handleChange}></textarea></div>
       </div>
 
-      {/* IV - PERFIL SENSORIAL E SOCIAL */}
       <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>IV</span> Perfil do Aluno</div>
         <div style={s.grid3}>
@@ -397,36 +456,21 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
         </div>
       </div>
 
-      {/* V - ORGANIZAÇÃO DO AEE */}
       <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>V</span> Organização e Trabalho do AEE</div>
         <div style={s.grid3}>
           <div style={s.inputGroup}><label style={s.label}>Organização do Atendimento</label><input style={s.input} placeholder="Ex: Individual / Coletivo" name="organizacaoTipo" value={formData.organizacaoTipo} onChange={handleChange} /></div>
-          <div style={s.inputGroup}><label style={s.label}>Dias e Frequência</label><input style={s.input} placeholder="Ex: 2x na semana (Seg e Qua)" name="organizacaoDias" value={formData.organizacaoDias} onChange={handleChange} /></div>
+          <div style={s.inputGroup}><label style={s.label}>Dias e Frequência</label><input style={s.input} placeholder="Ex: 2x na semana" name="organizacaoDias" value={formData.organizacaoDias} onChange={handleChange} /></div>
           <div style={s.inputGroup}><label style={s.label}>Medicações / Monitor de Apoio?</label><input style={s.input} name="medicamentos" value={formData.medicamentos} onChange={handleChange} /></div>
         </div>
-        
         <h4 style={s.sectionTitle}>Áreas de Trabalho do AEE (Foco)</h4>
         <div style={s.grid3}>
-          <div>
-            <Checkbox label="Atenção e Concentração" formData={formData} handleCheckbox={handleCheckbox} />
-            <Checkbox label="Raciocínio Lógico" formData={formData} handleCheckbox={handleCheckbox} />
-            <Checkbox label="Funções Executivas" formData={formData} handleCheckbox={handleCheckbox} />
-          </div>
-          <div>
-            <Checkbox label="Coordenação Motora Fina/Grossa" formData={formData} handleCheckbox={handleCheckbox} />
-            <Checkbox label="Compreensão e Fluência Verbal" formData={formData} handleCheckbox={handleCheckbox} />
-            <Checkbox label="Alfabeto e Produção Textual" formData={formData} handleCheckbox={handleCheckbox} />
-          </div>
-          <div>
-            <Checkbox label="Operações Matemáticas" formData={formData} handleCheckbox={handleCheckbox} />
-            <Checkbox label="Noções Espaciais/Lateralidade" formData={formData} handleCheckbox={handleCheckbox} />
-            <Checkbox label="Memória e Percepção (Visual/Auditiva)" formData={formData} handleCheckbox={handleCheckbox} />
-          </div>
+          <div><Checkbox label="Atenção e Concentração" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Raciocínio Lógico" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Funções Executivas" formData={formData} handleCheckbox={handleCheckbox} /></div>
+          <div><Checkbox label="Coordenação Motora Fina/Grossa" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Compreensão e Fluência Verbal" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Alfabeto e Produção Textual" formData={formData} handleCheckbox={handleCheckbox} /></div>
+          <div><Checkbox label="Operações Matemáticas" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Noções Espaciais/Lateralidade" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Memória (Visual/Auditiva)" formData={formData} handleCheckbox={handleCheckbox} /></div>
         </div>
       </div>
 
-      {/* ASSINATURAS */}
       <div className="glass-panel card-print" style={s.card}>
         <div className="print-only" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '60px', flexWrap: 'wrap', gap: '20px' }}>
           {['Diretor(a)', 'Coordenador(a)', 'Prof. AEE', 'Prof. Regente', 'Responsável'].map(role => (<div key={role} style={{ flex: '1', minWidth: '130px', textAlign: 'center' }}><div style={{ borderBottom: '1px solid black', marginBottom: '10px', height: '30px' }}></div><p style={{ fontWeight: 'bold', margin: 0, fontSize: '9pt' }}>{role}</p></div>))}
@@ -436,7 +480,7 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
   );
 };
 
-// 5. COMPONENTE PRINCIPAL (O GESTOR DE TELAS)
+// 5. COMPONENTE PRINCIPAL
 export default function App() {
   const [usuario, setUsuario] = useState(null);
   const [carregando, setCarregando] = useState(true);
@@ -448,16 +492,12 @@ export default function App() {
   const fazerLogout = () => signOut(auth);
   const irParaNovoPEI = () => { setAlunoEditando(null); setTelaAtiva('formularioPEI'); };
   const irParaNovoPAEE = () => { setAlunoEditando(null); setTelaAtiva('formularioPAEE'); };
-  
-  const irParaEditar = (aluno) => { 
-    setAlunoEditando(aluno); 
-    setTelaAtiva(aluno.tipoDocumento === 'PAEE' ? 'formularioPAEE' : 'formularioPEI'); 
-  };
+  const irParaEditar = (aluno) => { setAlunoEditando(aluno); setTelaAtiva(aluno.tipoDocumento === 'PAEE' ? 'formularioPAEE' : 'formularioPEI'); };
 
   if (carregando) return <div style={{ textAlign: 'center', marginTop: '50px' }}>A carregar o ambiente pedagógico...</div>;
   if (!usuario) return <LoginScreen />;
   
   if (telaAtiva === 'lista') return <ListaAlunos onNovoPEI={irParaNovoPEI} onNovoPAEE={irParaNovoPAEE} onEditar={irParaEditar} onLogout={fazerLogout} usuario={usuario} />;
   if (telaAtiva === 'formularioPAEE') return <SistemaPAEE alunoData={alunoEditando} onVoltar={() => setTelaAtiva('lista')} usuario={usuario} />;
-  return <SistemaPEI alunoData={alunoEditando} onVoltar={() => setTelaAtiva('lista')} usuario={usuario} />; // Default para PEI
+  return <SistemaPEI alunoData={alunoEditando} onVoltar={() => setTelaAtiva('lista')} usuario={usuario} />;
 }
