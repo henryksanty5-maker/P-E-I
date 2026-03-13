@@ -46,7 +46,7 @@ const s = {
   sectionTitle: { color: '#1e293b', marginBottom: '15px', fontSize: '1.05rem', borderBottom: '1px solid rgba(203, 213, 225, 0.5)', paddingBottom: '8px', fontWeight: '600' }
 };
 
-// --- CSS GLOBAL DE IMPRESSÃO PERFEITA ---
+// --- CSS GLOBAL: A SOLUÇÃO BRUTA PARA IMPRESSÃO ---
 const GlobalCSS = () => (
   <style>
     {`
@@ -58,57 +58,58 @@ const GlobalCSS = () => (
 
       @media screen { .print-only { display: none !important; } }
 
-      /* 🌟 IMPRESSÃO OFICIAL: ESTILO DOCUMENTO ALINHADO E SEM CORTES 🌟 */
+      /* IMPRESSÃO FORÇADA (ANTI-BUG DO CHROME) */
       @media print {
         @page { margin: 15mm; }
 
-        /* Destrava o corte de páginas do Chrome */
         body, html, .print-page {
           background: white !important;
           color: black !important;
-          font-size: 11pt !important;
           height: auto !important;
           overflow: visible !important;
           display: block !important;
         }
 
-        /* Limpa o fundo para o papel e permite quebra de página natural */
+        .no-print { display: none !important; }
+        .print-only { display: block !important; }
+
+        /* Removemos o vidro e convertemos em papel simples */
         .glass-panel, .card-print {
           background: transparent !important;
           border: none !important;
           box-shadow: none !important;
           margin-bottom: 25px !important;
           padding: 0 !important;
+          display: block !important;
           page-break-inside: auto !important;
-          display: block !important;
         }
 
-        /* MATA O GRID E AS COLUNAS: Força tudo a ficar alinhado à esquerda */
-        div[style*="display: grid"],
-        div[style*="grid-template-columns"],
-        div[style*="display: flex"] {
+        /* A ORDEM MILITAR: Tudo o que tem a classe 'print-block' é forçado a empilhar */
+        .print-block, .print-input-group {
           display: block !important;
+          width: 100% !important;
+          page-break-inside: avoid !important;
+          margin-bottom: 15px !important;
         }
 
-        /* Mantém APENAS o título das seções na mesma linha */
+        /* O cabeçalho da secção */
         .card-print > div:first-child {
            border-bottom: 2px solid black !important;
            padding-bottom: 5px !important;
            margin-bottom: 15px !important;
-           display: flex !important;
-           align-items: center !important;
+           display: block !important;
            page-break-after: avoid !important;
         }
 
-        /* ALINHAMENTO DE TEXTO: Fica com cara de formulário preenchido à mão */
         label {
           display: block !important;
           font-weight: bold !important;
-          margin-bottom: 2px !important;
-          margin-top: 12px !important;
+          margin-bottom: 5px !important;
+          margin-top: 10px !important;
           color: black !important;
         }
 
+        /* Linhas do formulário */
         input:not([type="checkbox"]), textarea {
           border: none !important;
           border-bottom: 1px solid black !important;
@@ -116,24 +117,26 @@ const GlobalCSS = () => (
           background: transparent !important;
           color: black !important;
           width: 100% !important;
-          padding: 2px 0 5px 0 !important;
+          padding: 2px 0 !important;
           font-size: 11pt !important;
           box-sizing: border-box !important;
         }
+        
         textarea { height: auto !important; min-height: 40px !important; white-space: pre-wrap !important; }
 
-        /* CAIXAS DE SELEÇÃO (CHECKBOX) PERFEITAMENTE ALINHADAS */
+        /* Checkboxes corrigidas */
         label.checkbox-row {
           display: flex !important;
           align-items: center !important;
-          margin-top: 6px !important;
-          margin-bottom: 6px !important;
+          margin: 8px 0 !important;
           font-weight: normal !important;
+          page-break-inside: avoid !important;
         }
 
         label.checkbox-row input[type="checkbox"] {
           width: auto !important;
           margin-right: 10px !important;
+          display: inline-block !important;
         }
 
         h4 {
@@ -144,14 +147,11 @@ const GlobalCSS = () => (
         }
 
         .badge-print { background: none !important; color: black !important; border: 1px solid black !important; }
-        .no-print { display: none !important; }
-        .print-only { display: block !important; }
       }
     `}
   </style>
 );
 
-// --- COMPONENTE AUXILIAR (Que provavelmente sumiu na cópia anterior) ---
 const Checkbox = ({ label, formData, handleCheckbox }) => (
   <label className="checkbox-row" style={s.checkboxContainer}>
     <input type="checkbox" checked={!!(formData.opcoes || {})[label]} onChange={() => handleCheckbox(label)} style={{ width: '18px', height: '18px', accentColor: '#10b981' }} />
@@ -201,12 +201,12 @@ const ListaAlunos = ({ onNovoPEI, onNovoPAEE, onEditar, onLogout, usuario }) => 
   const [alunos, setAlunos] = useState([]);
 
   // 🌟 AQUI FICA A SUA LISTA VIP:
-  const listaEspecialistas = [
+  const listaEspecialistas = [  
 'henryksanty5@gmail.com',
 'escolajac663@gmail.com',
 'mariaroselidossantosrosa@gmail.com',
 'iquinhoslp@yahoo.com.br',
-'belavista112@gmail.com'
+'belavista112@gmail.com',
 'adriananeri@prof.educacao.sp.gov.br',
 'rackellbonete@gmail.com',
 'educacaoredencao@gmail.com'
@@ -255,7 +255,7 @@ const ListaAlunos = ({ onNovoPEI, onNovoPAEE, onEditar, onLogout, usuario }) => 
           <p style={{ fontSize: '1.1rem', fontWeight: '600' }}>Nenhum documento cadastrado.</p>
         </div>
       ) : (
-        <div style={s.grid3}>
+        <div className="print-block" style={s.grid3}>
           {alunos.map((aluno) => (
             <div key={aluno.dbKey} className="glass-panel" style={{...s.card, marginBottom: '0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between'}}>
               <div>
@@ -283,7 +283,7 @@ const ListaAlunos = ({ onNovoPEI, onNovoPAEE, onEditar, onLogout, usuario }) => 
   );
 };
 
-// 4A. FORMULÁRIO PEI (RESTAURADO COM FOTOS E DIÁRIO COMPLETO)
+// 4A. FORMULÁRIO PEI (BLINDADO)
 const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
   const estadoInicial = { tipoDocumento: 'PEI', aluno: '', nascimento: '', anoSerie: '', turma: '', responsaveis: '', diagnostico: '', cid: '', crm: '', resultadoAvaliacao: '', rotinaFamiliar: '', fatoresAmbientais: '', resumoAluno: '', campoLinguagem: '', campoMatematica: '', anexos: {}, conteudos: {}, diario: {}, opcoes: {} };
   const [formData, setFormData] = useState(() => { return alunoData ? { ...estadoInicial, ...alunoData, anexos: alunoData.anexos || {} } : estadoInicial; });
@@ -354,57 +354,57 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
 
       <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>A</span> Identificação do Aluno</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: '30px' }}>
+        <div className="print-block" style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: '30px' }}>
           <div className="no-print"><FileUpload label="Selecionar Foto" campoID="foto_perfil" /></div>
-          <div style={s.grid2}>
-            <div style={s.inputGroup}><label style={s.label}>Nome do Aluno *</label><input style={s.input} name="aluno" value={formData.aluno} onChange={handleChange} /></div>
-            <div style={s.inputGroup}><label style={s.label}>Data de Nascimento</label><input style={s.input} name="nascimento" value={formData.nascimento} onChange={handleChange} /></div>
-            <div style={s.inputGroup}><label style={s.label}>Ano/Série</label><input style={s.input} name="anoSerie" value={formData.anoSerie} onChange={handleChange} /></div>
-            <div style={s.inputGroup}><label style={s.label}>Turma</label><input style={s.input} name="turma" value={formData.turma} onChange={handleChange} /></div>
-            <div style={{...s.inputGroup, gridColumn: '1 / -1'}}><label style={s.label}>Responsáveis</label><input style={s.input} name="responsaveis" value={formData.responsaveis} onChange={handleChange} /></div>
+          <div className="print-block" style={s.grid2}>
+            <div className="print-input-group" style={s.inputGroup}><label style={s.label}>Nome do Aluno *</label><input style={s.input} name="aluno" value={formData.aluno} onChange={handleChange} /></div>
+            <div className="print-input-group" style={s.inputGroup}><label style={s.label}>Data de Nascimento</label><input style={s.input} name="nascimento" value={formData.nascimento} onChange={handleChange} /></div>
+            <div className="print-input-group" style={s.inputGroup}><label style={s.label}>Ano/Série</label><input style={s.input} name="anoSerie" value={formData.anoSerie} onChange={handleChange} /></div>
+            <div className="print-input-group" style={s.inputGroup}><label style={s.label}>Turma</label><input style={s.input} name="turma" value={formData.turma} onChange={handleChange} /></div>
+            <div className="print-input-group" style={{...s.inputGroup, gridColumn: '1 / -1'}}><label style={s.label}>Responsáveis</label><input style={s.input} name="responsaveis" value={formData.responsaveis} onChange={handleChange} /></div>
           </div>
         </div>
       </div>
 
       <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>B</span> Informações Clínicas</div>
-        <div style={s.grid3}>
-          <div style={s.inputGroup}><label style={s.label}>Diagnóstico</label><input style={s.input} name="diagnostico" value={formData.diagnostico} onChange={handleChange} /><FileUpload label="Anexar Laudo" campoID="laudo_medico" /></div>
-          <div style={s.inputGroup}><label style={s.label}>Códigos CID</label><input style={s.input} name="cid" value={formData.cid} onChange={handleChange} /></div>
-          <div style={s.inputGroup}><label style={s.label}>CRM do Médico</label><input style={s.input} name="crm" value={formData.crm} onChange={handleChange} /></div>
+        <div className="print-block" style={s.grid3}>
+          <div className="print-input-group" style={s.inputGroup}><label style={s.label}>Diagnóstico</label><input style={s.input} name="diagnostico" value={formData.diagnostico} onChange={handleChange} /><FileUpload label="Anexar Laudo" campoID="laudo_medico" /></div>
+          <div className="print-input-group" style={s.inputGroup}><label style={s.label}>Códigos CID</label><input style={s.input} name="cid" value={formData.cid} onChange={handleChange} /></div>
+          <div className="print-input-group" style={s.inputGroup}><label style={s.label}>CRM do Médico</label><input style={s.input} name="crm" value={formData.crm} onChange={handleChange} /></div>
         </div>
       </div>
 
       <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>C</span> Medicação e Terapias</div>
-        <div style={s.grid2}>
-          <div><Checkbox label="O aluno utiliza medicação?" formData={formData} handleCheckbox={handleCheckbox} /><FileUpload label="Anexar Receita" campoID="receita_medica" /></div>
-          <div><Checkbox label="Acompanhamento terapêutico?" formData={formData} handleCheckbox={handleCheckbox} /></div>
+        <div className="print-block" style={s.grid2}>
+          <div className="print-input-group"><Checkbox label="O aluno utiliza medicação?" formData={formData} handleCheckbox={handleCheckbox} /><FileUpload label="Anexar Receita" campoID="receita_medica" /></div>
+          <div className="print-input-group"><Checkbox label="Acompanhamento terapêutico?" formData={formData} handleCheckbox={handleCheckbox} /></div>
         </div>
-        <div style={{...s.grid2, marginTop: '20px'}}>
-          <div style={s.inputGroup}><label style={s.label}>Campo de Experiência: Linguagem</label><textarea style={{...s.input, minHeight: '80px'}} name="campoLinguagem" value={formData.campoLinguagem} onChange={handleChange}></textarea></div>
-          <div style={s.inputGroup}><label style={s.label}>Campo de Experiência: Matemática</label><textarea style={{...s.input, minHeight: '80px'}} name="campoMatematica" value={formData.campoMatematica} onChange={handleChange}></textarea></div>
+        <div className="print-block" style={{...s.grid2, marginTop: '20px'}}>
+          <div className="print-input-group" style={s.inputGroup}><label style={s.label}>Campo de Experiência: Linguagem</label><textarea style={{...s.input, minHeight: '80px'}} name="campoLinguagem" value={formData.campoLinguagem} onChange={handleChange}></textarea></div>
+          <div className="print-input-group" style={s.inputGroup}><label style={s.label}>Campo de Experiência: Matemática</label><textarea style={{...s.input, minHeight: '80px'}} name="campoMatematica" value={formData.campoMatematica} onChange={handleChange}></textarea></div>
         </div>
-        <div style={{ marginTop: '20px' }}><h4 style={s.sectionTitle}>Especialistas que acompanham o aluno:</h4><div style={s.grid3}><Checkbox label="Neurologista" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Psicólogo" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Fonoaudiólogo" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Psicopedagogo" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Terapeuta Ocupacional" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="ABA / TCC" formData={formData} handleCheckbox={handleCheckbox} /></div></div>
+        <div style={{ marginTop: '20px' }}><h4 style={s.sectionTitle}>Especialistas que acompanham o aluno:</h4><div className="print-block" style={s.grid3}><Checkbox label="Neurologista" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Psicólogo" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Fonoaudiólogo" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Psicopedagogo" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Terapeuta Ocupacional" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="ABA / TCC" formData={formData} handleCheckbox={handleCheckbox} /></div></div>
       </div>
 
       <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>D</span> Avaliação Diagnóstica</div>
-        <div style={s.grid2}>
-          <div style={s.inputGroup}><label style={s.label}>Resultado da Avaliação</label><textarea style={{...s.input, minHeight: '100px'}} name="resultadoAvaliacao" value={formData.resultadoAvaliacao} onChange={handleChange}></textarea></div>
-          <div style={s.inputGroup}><label style={s.label}>Evidência / Avaliação</label><FileUpload label="Anexar Avaliação" campoID="avaliacao_diagnostica" /></div>
+        <div className="print-block" style={s.grid2}>
+          <div className="print-input-group" style={s.inputGroup}><label style={s.label}>Resultado da Avaliação</label><textarea style={{...s.input, minHeight: '100px'}} name="resultadoAvaliacao" value={formData.resultadoAvaliacao} onChange={handleChange}></textarea></div>
+          <div className="print-input-group" style={s.inputGroup}><label style={s.label}>Evidência / Avaliação</label><FileUpload label="Anexar Avaliação" campoID="avaliacao_diagnostica" /></div>
         </div>
       </div>
 
       <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>E</span> Adaptações por Disciplina</div>
-        <div style={s.grid3}>
+        <div className="print-block" style={s.grid3}>
           {disciplinas.map((disc) => (
-            <div key={disc} style={{ border: '1px solid rgba(203, 213, 225, 0.5)', padding: '18px', backgroundColor: 'rgba(209, 250, 229, 0.2)' }}>
+            <div key={disc} className="print-block" style={{ border: '1px solid rgba(203, 213, 225, 0.5)', padding: '18px', backgroundColor: 'rgba(209, 250, 229, 0.2)' }}>
               <h4 style={{ margin: '0 0 12px 0', color: '#065f46' }}>{disc}</h4>
               <Checkbox label={`${disc} - Priorização de conteúdos`} formData={formData} handleCheckbox={handleCheckbox} />
               <Checkbox label={`${disc} - Introdução de conteúdos alternativos`} formData={formData} handleCheckbox={handleCheckbox} />
-              <div style={{...s.inputGroup, marginTop: '12px'}}><label style={s.label}>Conteúdo Ministrado:</label><textarea style={{...s.input, minHeight: '60px'}} value={(formData.conteudos || {})[disc] || ''} onChange={(e) => handleNestedText('conteudos', disc, e.target.value)} /></div>
+              <div className="print-input-group" style={{...s.inputGroup, marginTop: '12px'}}><label style={s.label}>Conteúdo Ministrado:</label><textarea style={{...s.input, minHeight: '60px'}} value={(formData.conteudos || {})[disc] || ''} onChange={(e) => handleNestedText('conteudos', disc, e.target.value)} /></div>
             </div>
           ))}
         </div>
@@ -412,14 +412,14 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
 
       <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>H</span> Métodos de Avaliação</div>
-        <div style={s.grid3}><Checkbox label="Sondagem pedagógica" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Múltipla escolha (objetiva)" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Resposta oral" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Exercícios práticos" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Trabalhos escritos/orais" formData={formData} handleCheckbox={handleCheckbox} /></div>
+        <div className="print-block" style={s.grid3}><Checkbox label="Sondagem pedagógica" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Múltipla escolha (objetiva)" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Resposta oral" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Exercícios práticos" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Trabalhos escritos/orais" formData={formData} handleCheckbox={handleCheckbox} /></div>
       </div>
 
       <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>I</span> Diário do Aluno (Acompanhamento)</div>
-        <div style={s.grid2}>
+        <div className="print-block" style={s.grid2}>
           {bimestres.map((bim, index) => (
-            <div key={bim} style={{ border: '1px solid rgba(203, 213, 225, 0.5)', padding: '18px', backgroundColor: 'rgba(209, 250, 229, 0.2)' }}>
+            <div key={bim} className="print-block" style={{ border: '1px solid rgba(203, 213, 225, 0.5)', padding: '18px', backgroundColor: 'rgba(209, 250, 229, 0.2)' }}>
               <h4 style={{ margin: '0 0 12px 0', color: '#065f46' }}>{bim}</h4>
               <textarea style={{...s.input, minHeight: '80px'}} placeholder="Evolução, observações e conquistas..." value={(formData.diario || {})[bim] || ''} onChange={(e) => handleNestedText('diario', bim, e.target.value)} />
               <FileUpload label="Anexar Evidência / Atividade" campoID={`diario_bimestre_${index+1}`} />
@@ -430,7 +430,7 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
       
       <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>J</span> Revisão Final</div>
-        <div style={s.inputGroup}><label style={s.label}>Resumo do Aluno</label><textarea style={{...s.input, minHeight: '120px'}} name="resumoAluno" value={formData.resumoAluno} onChange={handleChange}></textarea></div>
+        <div className="print-input-group" style={s.inputGroup}><label style={s.label}>Resumo do Aluno</label><textarea style={{...s.input, minHeight: '120px'}} name="resumoAluno" value={formData.resumoAluno} onChange={handleChange}></textarea></div>
         <div className="print-only" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '60px' }}>
           {['Professor(a)', 'Coordenação', 'Responsáveis'].map(r => (<div key={r} style={{ flex: 1, textAlign: 'center', margin: '0 10px' }}><div style={{ borderBottom: '1px solid black', height: '30px' }}></div><p>{r}</p></div>))}
         </div>
@@ -439,7 +439,7 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
   );
 };
 
-// 4B. NOVO FORMULÁRIO: PAEE
+// 4B. NOVO FORMULÁRIO: PAEE (BLINDADO)
 const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
   const estadoInicial = { tipoDocumento: 'PAEE', aluno: '', nascimento: '', sexo: '', escola: 'EMEIEF "PROFESSORA EDNA REGINA DE OLIVEIRA E SILVA"', turno: '', turma: '', anoSerie: '', nivelApoio: '', observacoesApoio: '', medidasEscola: '', organizacaoTipo: '', organizacaoAtendimentos: '', organizacaoTempo: '', organizacaoDias: '', medicamentos: '', monitorApoio: '', opcoes: {}, textos: {} };
   const [formData, setFormData] = useState(() => { return alunoData ? { ...estadoInicial, ...alunoData } : estadoInicial; });
@@ -471,16 +471,16 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
 
       <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>I</span> Informações do Estudante</div>
-        <div style={s.grid2}>
-          <div style={s.inputGroup}><label style={s.label}>Nome Completo *</label><input style={s.input} name="aluno" value={formData.aluno} onChange={handleChange} /></div>
-          <div style={s.inputGroup}><label style={s.label}>Data de Nascimento</label><input style={s.input} name="nascimento" value={formData.nascimento} onChange={handleChange} /></div>
-          <div style={s.inputGroup}><label style={s.label}>Sexo</label><input style={s.input} placeholder="Feminino ou Masculino" name="sexo" value={formData.sexo} onChange={handleChange} /></div>
-          <div style={s.inputGroup}><label style={s.label}>Turno</label><input style={s.input} name="turno" value={formData.turno} onChange={handleChange} /></div>
-          <div style={s.inputGroup}><label style={s.label}>Ano de Escolaridade</label><input style={s.input} name="anoSerie" value={formData.anoSerie} onChange={handleChange} /></div>
-          <div style={s.inputGroup}><label style={s.label}>Turma</label><input style={s.input} name="turma" value={formData.turma} onChange={handleChange} /></div>
+        <div className="print-block" style={s.grid2}>
+          <div className="print-input-group" style={s.inputGroup}><label style={s.label}>Nome Completo *</label><input style={s.input} name="aluno" value={formData.aluno} onChange={handleChange} /></div>
+          <div className="print-input-group" style={s.inputGroup}><label style={s.label}>Data de Nascimento</label><input style={s.input} name="nascimento" value={formData.nascimento} onChange={handleChange} /></div>
+          <div className="print-input-group" style={s.inputGroup}><label style={s.label}>Sexo</label><input style={s.input} placeholder="Feminino ou Masculino" name="sexo" value={formData.sexo} onChange={handleChange} /></div>
+          <div className="print-input-group" style={s.inputGroup}><label style={s.label}>Turno</label><input style={s.input} name="turno" value={formData.turno} onChange={handleChange} /></div>
+          <div className="print-input-group" style={s.inputGroup}><label style={s.label}>Ano de Escolaridade</label><input style={s.input} name="anoSerie" value={formData.anoSerie} onChange={handleChange} /></div>
+          <div className="print-input-group" style={s.inputGroup}><label style={s.label}>Turma</label><input style={s.input} name="turma" value={formData.turma} onChange={handleChange} /></div>
         </div>
         <h4 style={s.sectionTitle}>Estudante elegível aos serviços da Educação Especial</h4>
-        <div style={s.grid3}>
+        <div className="print-block" style={s.grid3}>
           <Checkbox label="Deficiência Intelectual" formData={formData} handleCheckbox={handleCheckbox} />
           <Checkbox label="Deficiência Visual" formData={formData} handleCheckbox={handleCheckbox} />
           <Checkbox label="Deficiência Física" formData={formData} handleCheckbox={handleCheckbox} />
@@ -489,45 +489,45 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
           <Checkbox label="Altas habilidades/superdotação" formData={formData} handleCheckbox={handleCheckbox} />
           <Checkbox label="Deficiência Múltipla" formData={formData} handleCheckbox={handleCheckbox} />
         </div>
-        <div style={{...s.inputGroup, marginTop: '20px'}}><label style={s.label}>Nível de Apoio e Observações</label><textarea style={{...s.input, minHeight: '60px'}} name="observacoesApoio" value={formData.observacoesApoio} onChange={handleChange}></textarea></div>
+        <div className="print-input-group" style={{...s.inputGroup, marginTop: '20px'}}><label style={s.label}>Nível de Apoio e Observações</label><textarea style={{...s.input, minHeight: '60px'}} name="observacoesApoio" value={formData.observacoesApoio} onChange={handleChange}></textarea></div>
       </div>
 
       <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>III</span> Apoios, Recursos e Serviços</div>
-        <div style={s.grid2}>
-          <div>
+        <div className="print-block" style={s.grid2}>
+          <div className="print-input-group">
             <Checkbox label="Recursos Pedagógicos e de T.A." formData={formData} handleCheckbox={handleCheckbox} />
             <Checkbox label="Prof. de Libras ou Interlocutor" formData={formData} handleCheckbox={handleCheckbox} />
             <Checkbox label="Prof. Instrutor-mediador" formData={formData} handleCheckbox={handleCheckbox} />
           </div>
-          <div>
+          <div className="print-input-group">
             <p style={{margin: '0 0 10px 0', fontWeight: 'bold'}}>Apoio Escolar para:</p>
             <Checkbox label="Alimentação / Higiene" formData={formData} handleCheckbox={handleCheckbox} />
             <Checkbox label="Locomoção" formData={formData} handleCheckbox={handleCheckbox} />
             <Checkbox label="Comunicação e Interação Social" formData={formData} handleCheckbox={handleCheckbox} />
           </div>
         </div>
-        <div style={{...s.inputGroup, marginTop: '20px'}}><label style={s.label}>Medidas para superar barreiras no Estudo de Caso:</label><textarea style={{...s.input, minHeight: '80px'}} name="medidasEscola" value={formData.medidasEscola} onChange={handleChange}></textarea></div>
+        <div className="print-input-group" style={{...s.inputGroup, marginTop: '20px'}}><label style={s.label}>Medidas para superar barreiras no Estudo de Caso:</label><textarea style={{...s.input, minHeight: '80px'}} name="medidasEscola" value={formData.medidasEscola} onChange={handleChange}></textarea></div>
       </div>
 
       <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>IV</span> Perfil do Aluno</div>
-        <div style={s.grid3}>
-          <div>
+        <div className="print-block" style={s.grid3}>
+          <div className="print-input-group">
             <h4 style={s.sectionTitle}>Linguagem e Comunicação</h4>
             <Checkbox label="Apresenta fala/comunicação verbal" formData={formData} handleCheckbox={handleCheckbox} />
             <Checkbox label="Apresenta ecolalias" formData={formData} handleCheckbox={handleCheckbox} />
             <Checkbox label="Aponta ou usa gestos" formData={formData} handleCheckbox={handleCheckbox} />
             <Checkbox label="Faz uso de CAA (Comunicação Alt.)" formData={formData} handleCheckbox={handleCheckbox} />
           </div>
-          <div>
+          <div className="print-input-group">
             <h4 style={s.sectionTitle}>Perfil Sensorial/Comportamental</h4>
             <Checkbox label="Sensibilidade luz/tátil/auditiva" formData={formData} handleCheckbox={handleCheckbox} />
             <Checkbox label="Alimentação seletiva" formData={formData} handleCheckbox={handleCheckbox} />
             <Checkbox label="Não faz contato visual" formData={formData} handleCheckbox={handleCheckbox} />
             <Checkbox label="Estereotipias constantes" formData={formData} handleCheckbox={handleCheckbox} />
           </div>
-          <div>
+          <div className="print-input-group">
             <h4 style={s.sectionTitle}>Habilidades Sociais e AVD</h4>
             <Checkbox label="Brinca / Imita colegas" formData={formData} handleCheckbox={handleCheckbox} />
             <Checkbox label="Resiste a interação / Isola-se" formData={formData} handleCheckbox={handleCheckbox} />
@@ -539,16 +539,16 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
 
       <div className="glass-panel card-print" style={s.card}>
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>V</span> Organização e Trabalho do AEE</div>
-        <div style={s.grid3}>
-          <div style={s.inputGroup}><label style={s.label}>Organização do Atendimento</label><input style={s.input} placeholder="Ex: Individual / Coletivo" name="organizacaoTipo" value={formData.organizacaoTipo} onChange={handleChange} /></div>
-          <div style={s.inputGroup}><label style={s.label}>Dias e Frequência</label><input style={s.input} placeholder="Ex: 2x na semana" name="organizacaoDias" value={formData.organizacaoDias} onChange={handleChange} /></div>
-          <div style={s.inputGroup}><label style={s.label}>Medicações / Monitor de Apoio?</label><input style={s.input} name="medicamentos" value={formData.medicamentos} onChange={handleChange} /></div>
+        <div className="print-block" style={s.grid3}>
+          <div className="print-input-group" style={s.inputGroup}><label style={s.label}>Organização do Atendimento</label><input style={s.input} placeholder="Ex: Individual / Coletivo" name="organizacaoTipo" value={formData.organizacaoTipo} onChange={handleChange} /></div>
+          <div className="print-input-group" style={s.inputGroup}><label style={s.label}>Dias e Frequência</label><input style={s.input} placeholder="Ex: 2x na semana" name="organizacaoDias" value={formData.organizacaoDias} onChange={handleChange} /></div>
+          <div className="print-input-group" style={s.inputGroup}><label style={s.label}>Medicações / Monitor de Apoio?</label><input style={s.input} name="medicamentos" value={formData.medicamentos} onChange={handleChange} /></div>
         </div>
         <h4 style={s.sectionTitle}>Áreas de Trabalho do AEE (Foco)</h4>
-        <div style={s.grid3}>
-          <div><Checkbox label="Atenção e Concentração" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Raciocínio Lógico" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Funções Executivas" formData={formData} handleCheckbox={handleCheckbox} /></div>
-          <div><Checkbox label="Coordenação Motora Fina/Grossa" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Compreensão e Fluência Verbal" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Alfabeto e Produção Textual" formData={formData} handleCheckbox={handleCheckbox} /></div>
-          <div><Checkbox label="Operações Matemáticas" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Noções Espaciais/Lateralidade" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Memória (Visual/Auditiva)" formData={formData} handleCheckbox={handleCheckbox} /></div>
+        <div className="print-block" style={s.grid3}>
+          <div className="print-input-group"><Checkbox label="Atenção e Concentração" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Raciocínio Lógico" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Funções Executivas" formData={formData} handleCheckbox={handleCheckbox} /></div>
+          <div className="print-input-group"><Checkbox label="Coordenação Motora Fina/Grossa" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Compreensão e Fluência Verbal" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Alfabeto e Produção Textual" formData={formData} handleCheckbox={handleCheckbox} /></div>
+          <div className="print-input-group"><Checkbox label="Operações Matemáticas" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Noções Espaciais/Lateralidade" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Memória (Visual/Auditiva)" formData={formData} handleCheckbox={handleCheckbox} /></div>
         </div>
       </div>
 
