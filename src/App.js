@@ -45,6 +45,7 @@ const s = {
   uploadBox: { border: '2px dashed #a7f3d0', borderRadius: '12px', padding: '20px', textAlign: 'center', backgroundColor: 'rgba(209, 250, 229, 0.4)', marginTop: '10px' },
   sectionTitle: { color: '#1e293b', marginBottom: '15px', fontSize: '1.05rem', borderBottom: '1px solid rgba(203, 213, 225, 0.5)', paddingBottom: '8px', fontWeight: '600' }
 };
+
 // --- CSS GLOBAL DE IMPRESSÃO PERFEITA ---
 const GlobalCSS = () => (
   <style>
@@ -150,6 +151,14 @@ const GlobalCSS = () => (
   </style>
 );
 
+// --- COMPONENTE AUXILIAR (Que provavelmente sumiu na cópia anterior) ---
+const Checkbox = ({ label, formData, handleCheckbox }) => (
+  <label className="checkbox-row" style={s.checkboxContainer}>
+    <input type="checkbox" checked={!!(formData.opcoes || {})[label]} onChange={() => handleCheckbox(label)} style={{ width: '18px', height: '18px', accentColor: '#10b981' }} />
+    <span style={{ fontSize: '0.95rem', color: '#334155', fontWeight: '500' }}>{label}</span>
+  </label>
+);
+
 // 2. Tela de Login
 const LoginScreen = () => {
   const [email, setEmail] = useState(''); const [password, setPassword] = useState('');
@@ -193,9 +202,14 @@ const ListaAlunos = ({ onNovoPEI, onNovoPAEE, onEditar, onLogout, usuario }) => 
 
   // 🌟 AQUI FICA A SUA LISTA VIP:
   const listaEspecialistas = [
-    'henryksanty5@gmail.com',
-    'escolajac663@gmail.com',
-    'educacaoredencao@gmail.com'
+'henryksanty5@gmail.com',
+'escolajac663@gmail.com',
+'mariaroselidossantosrosa@gmail.com',
+'iquinhoslp@yahoo.com.br',
+'belavista112@gmail.com'
+'adriananeri@prof.educacao.sp.gov.br',
+'rackellbonete@gmail.com',
+'educacaoredencao@gmail.com'
   ];
   
   const isEspecialista = listaEspecialistas.includes(usuario.email);
@@ -568,4 +582,3 @@ export default function App() {
   if (telaAtiva === 'formularioPAEE') return <SistemaPAEE alunoData={alunoEditando} onVoltar={() => setTelaAtiva('lista')} usuario={usuario} />;
   return <SistemaPEI alunoData={alunoEditando} onVoltar={() => setTelaAtiva('lista')} usuario={usuario} />;
 }
-
