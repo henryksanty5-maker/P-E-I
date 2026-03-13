@@ -127,8 +127,8 @@ const ListaAlunos = ({ onNovoPEI, onNovoPAEE, onEditar, onLogout, usuario }) => 
   // 🌟 AQUI FICA A SUA LISTA VIP:
   const listaEspecialistas = [
     'henryksanty5@gmail.com',
-    'jaqueline@escola.com',
-    'direcao@escola.com'
+    'escolajac663@gmail.com',
+    'educacaoredencao@gmail.com'
   ];
   
   const isEspecialista = listaEspecialistas.includes(usuario.email);
@@ -501,3 +501,4 @@ export default function App() {
   if (telaAtiva === 'formularioPAEE') return <SistemaPAEE alunoData={alunoEditando} onVoltar={() => setTelaAtiva('lista')} usuario={usuario} />;
   return <SistemaPEI alunoData={alunoEditando} onVoltar={() => setTelaAtiva('lista')} usuario={usuario} />;
 }
+
