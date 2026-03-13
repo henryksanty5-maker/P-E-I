@@ -45,7 +45,7 @@ const s = {
   uploadBox: { border: '2px dashed #a7f3d0', borderRadius: '12px', padding: '20px', textAlign: 'center', backgroundColor: 'rgba(209, 250, 229, 0.4)', marginTop: '10px' },
   sectionTitle: { color: '#1e293b', marginBottom: '15px', fontSize: '1.05rem', borderBottom: '1px solid rgba(203, 213, 225, 0.5)', paddingBottom: '8px', fontWeight: '600' }
 };
-
+// --- CSS GLOBAL DE IMPRESSÃO PERFEITA ---
 const GlobalCSS = () => (
   <style>
     {`
@@ -54,33 +54,100 @@ const GlobalCSS = () => (
       .glass-panel { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04); border-radius: 16px; }
       button { transition: all 0.3s ease !important; }
       button:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); filter: brightness(1.05); }
+
       @media screen { .print-only { display: none !important; } }
-      
-      /* IMPRESSÃO PERFEITA */
+
+      /* 🌟 IMPRESSÃO OFICIAL: ESTILO DOCUMENTO ALINHADO E SEM CORTES 🌟 */
       @media print {
         @page { margin: 15mm; }
-        body, html { background: white !important; color: black !important; font-size: 11pt !important; height: auto !important; }
-        .glass-panel, .card-print { background: transparent !important; border: none !important; box-shadow: none !important; margin-bottom: 25px !important; padding: 0 !important; }
-        div[style*="display: grid"], div[style*="grid-template-columns"], div[style*="display: flex"] { display: block !important; }
-        .card-print > div:first-child { border-bottom: 2px solid black !important; padding-bottom: 5px !important; margin-bottom: 15px !important; display: flex !important; align-items: center !important; page-break-after: avoid !important; }
-        label { display: block !important; font-weight: bold !important; margin-bottom: 2px !important; margin-top: 12px !important; color: black !important; }
-        input:not([type="checkbox"]), textarea { border: none !important; border-bottom: 1px solid black !important; border-radius: 0 !important; background: transparent !important; color: black !important; width: 100% !important; padding: 2px 0 5px 0 !important; font-size: 11pt !important; box-sizing: border-box !important; }
-        label.checkbox-row { display: flex !important; align-items: center !important; margin-top: 6px !important; margin-bottom: 6px !important; font-weight: normal !important; }
-        label.checkbox-row input[type="checkbox"] { width: auto !important; margin-right: 10px !important; }
-        h4 { font-size: 12pt !important; margin-top: 20px !important; margin-bottom: 5px !important; page-break-after: avoid !important; }
+
+        /* Destrava o corte de páginas do Chrome */
+        body, html, .print-page {
+          background: white !important;
+          color: black !important;
+          font-size: 11pt !important;
+          height: auto !important;
+          overflow: visible !important;
+          display: block !important;
+        }
+
+        /* Limpa o fundo para o papel e permite quebra de página natural */
+        .glass-panel, .card-print {
+          background: transparent !important;
+          border: none !important;
+          box-shadow: none !important;
+          margin-bottom: 25px !important;
+          padding: 0 !important;
+          page-break-inside: auto !important;
+          display: block !important;
+        }
+
+        /* MATA O GRID E AS COLUNAS: Força tudo a ficar alinhado à esquerda */
+        div[style*="display: grid"],
+        div[style*="grid-template-columns"],
+        div[style*="display: flex"] {
+          display: block !important;
+        }
+
+        /* Mantém APENAS o título das seções na mesma linha */
+        .card-print > div:first-child {
+           border-bottom: 2px solid black !important;
+           padding-bottom: 5px !important;
+           margin-bottom: 15px !important;
+           display: flex !important;
+           align-items: center !important;
+           page-break-after: avoid !important;
+        }
+
+        /* ALINHAMENTO DE TEXTO: Fica com cara de formulário preenchido à mão */
+        label {
+          display: block !important;
+          font-weight: bold !important;
+          margin-bottom: 2px !important;
+          margin-top: 12px !important;
+          color: black !important;
+        }
+
+        input:not([type="checkbox"]), textarea {
+          border: none !important;
+          border-bottom: 1px solid black !important;
+          border-radius: 0 !important;
+          background: transparent !important;
+          color: black !important;
+          width: 100% !important;
+          padding: 2px 0 5px 0 !important;
+          font-size: 11pt !important;
+          box-sizing: border-box !important;
+        }
+        textarea { height: auto !important; min-height: 40px !important; white-space: pre-wrap !important; }
+
+        /* CAIXAS DE SELEÇÃO (CHECKBOX) PERFEITAMENTE ALINHADAS */
+        label.checkbox-row {
+          display: flex !important;
+          align-items: center !important;
+          margin-top: 6px !important;
+          margin-bottom: 6px !important;
+          font-weight: normal !important;
+        }
+
+        label.checkbox-row input[type="checkbox"] {
+          width: auto !important;
+          margin-right: 10px !important;
+        }
+
+        h4 {
+          font-size: 12pt !important;
+          margin-top: 20px !important;
+          margin-bottom: 5px !important;
+          page-break-after: avoid !important;
+        }
+
         .badge-print { background: none !important; color: black !important; border: 1px solid black !important; }
         .no-print { display: none !important; }
         .print-only { display: block !important; }
       }
     `}
   </style>
-);
-
-const Checkbox = ({ label, formData, handleCheckbox }) => (
-  <label className="checkbox-row" style={s.checkboxContainer}>
-    <input type="checkbox" checked={!!(formData.opcoes || {})[label]} onChange={() => handleCheckbox(label)} style={{ width: '18px', height: '18px', accentColor: '#10b981' }} />
-    <span style={{ fontSize: '0.95rem', color: '#334155', fontWeight: '500' }}>{label}</span>
-  </label>
 );
 
 // 2. Tela de Login
