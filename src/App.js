@@ -194,7 +194,7 @@ const ListaAlunos = ({ onNovoPEI, onNovoPAEE, onEditar, onLogout, usuario }) => 
   // 🌟 AQUI FICA A SUA LISTA VIP:
   const listaEspecialistas = [
     'henryksanty5@gmail.com',
-    'jaqueline@escola.com',
+    'escolajac663@gmail.com',
     'direcao@escola.com'
   ];
   
