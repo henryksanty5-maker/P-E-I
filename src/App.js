@@ -211,7 +211,7 @@ const ListaAlunos = ({ onNovoPEI, onNovoPAEE, onEditar, onLogout, usuario }) => 
 'escolajac663@gmail.com',
 'mariaroselidossantosrosa@gmail.com',
 'iquinhoslp@yahoo.com.br',
-'belavista112@gmail.com'
+'belavista112@gmail.com',
 'adriananeri@prof.educacao.sp.gov.br',
 'rackellbonete@gmail.com',
 'educacaoredencao@gmail.com'
