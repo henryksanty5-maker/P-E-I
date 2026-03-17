@@ -439,9 +439,9 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
   );
 };
 
-// 4B. NOVO FORMULÁRIO: PAEE 
+// 4B. NOVO FORMULÁRIO: PAEE (AGORA 100% COMPLETO)
 const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
-  const estadoInicial = { tipoDocumento: 'PAEE', aluno: '', nascimento: '', sexo: '', escola: 'EMEIEF "PROFESSORA EDNA REGINA DE OLIVEIRA E SILVA"', turno: '', turma: '', anoSerie: '', nivelApoio: '', observacoesApoio: '', medidasEscola: '', organizacaoTipo: '', organizacaoAtendimentos: '', organizacaoTempo: '', organizacaoDias: '', medicamentos: '', monitorApoio: '', opcoes: {}, textos: {} };
+  const estadoInicial = { tipoDocumento: 'PAEE', aluno: '', nascimento: '', sexo: '', escola: 'EMEIEF "PROFESSORA EDNA REGINA DE OLIVEIRA E SILVA"', turno: '', turma: '', anoSerie: '', nivelApoio: '', observacoesApoio: '', medidasEscola: '', organizacaoTipo: '', organizacaoAtendimentos: '', organizacaoTempo: '', organizacaoDias: '', medicamentos: '', monitorApoio: '', outrosAEE: '', objetivosAEE: '', opcoes: {}, textos: {} };
   const [formData, setFormData] = useState(() => { return alunoData ? { ...estadoInicial, ...alunoData } : estadoInicial; });
 
   const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -544,11 +544,70 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
           <div className="print-input-group"><label style={s.label}>Dias e Frequência</label><input style={s.input} placeholder="Ex: 2x na semana" name="organizacaoDias" value={formData.organizacaoDias} onChange={handleChange} /></div>
           <div className="print-input-group"><label style={s.label}>Medicações / Monitor de Apoio?</label><input style={s.input} name="medicamentos" value={formData.medicamentos} onChange={handleChange} /></div>
         </div>
-        <h4>Áreas de Trabalho do AEE (Foco)</h4>
-        <div className="print-block print-input-group" style={s.grid3}>
-          <div><Checkbox label="Atenção e Concentração" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Raciocínio Lógico" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Funções Executivas" formData={formData} handleCheckbox={handleCheckbox} /></div>
-          <div><Checkbox label="Coordenação Motora Fina/Grossa" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Compreensão e Fluência Verbal" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Alfabeto e Produção Textual" formData={formData} handleCheckbox={handleCheckbox} /></div>
-          <div><Checkbox label="Operações Matemáticas" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Noções Espaciais/Lateralidade" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Memória (Visual/Auditiva)" formData={formData} handleCheckbox={handleCheckbox} /></div>
+      </div>
+
+      <div className="glass-panel card-print">
+        <div style={s.cardHeader}><span className="badge-print" style={s.badge}>VI</span> Áreas de Desenvolvimento (Foco do AEE)</div>
+        
+        <div className="print-block" style={s.grid3}>
+          <div className="print-input-group">
+            <h4>Coordenação Motora</h4>
+            <Checkbox label="Coordenação motora grossa" formData={formData} handleCheckbox={handleCheckbox} />
+            <Checkbox label="Coordenação motora fina" formData={formData} handleCheckbox={handleCheckbox} />
+            <Checkbox label="Coordenação grafomotora" formData={formData} handleCheckbox={handleCheckbox} />
+            <Checkbox label="Esquema corporal" formData={formData} handleCheckbox={handleCheckbox} />
+          </div>
+          <div className="print-input-group">
+            <h4>Comunicação e Linguagem</h4>
+            <Checkbox label="Compreensão verbal" formData={formData} handleCheckbox={handleCheckbox} />
+            <Checkbox label="Raciocínio Verbal" formData={formData} handleCheckbox={handleCheckbox} />
+            <Checkbox label="Fluência Verbal" formData={formData} handleCheckbox={handleCheckbox} />
+          </div>
+          <div className="print-input-group">
+            <h4>Memória</h4>
+            <Checkbox label="Memória visual" formData={formData} handleCheckbox={handleCheckbox} />
+            <Checkbox label="Memória auditiva" formData={formData} handleCheckbox={handleCheckbox} />
+            <Checkbox label="Memória verbal e numérica" formData={formData} handleCheckbox={handleCheckbox} />
+          </div>
+        </div>
+
+        <div className="print-block" style={{...s.grid2, marginTop: '15px'}}>
+          <div className="print-input-group">
+            <h4>Aprendizagem</h4>
+            <Checkbox label="Compreensão do Alfabeto" formData={formData} handleCheckbox={handleCheckbox} />
+            <Checkbox label="Compreensão dos Números" formData={formData} handleCheckbox={handleCheckbox} />
+            <Checkbox label="Compreensão da Leitura" formData={formData} handleCheckbox={handleCheckbox} />
+            <Checkbox label="Compreensão da produção textual" formData={formData} handleCheckbox={handleCheckbox} />
+            <Checkbox label="Compreensão das operações matemáticas" formData={formData} handleCheckbox={handleCheckbox} />
+            <Checkbox label="Desenvolvimento das fases da escrita" formData={formData} handleCheckbox={handleCheckbox} />
+          </div>
+          <div className="print-input-group">
+            <h4>Lateralidade e Noções Espaciais</h4>
+            <Checkbox label="Direita e esquerda" formData={formData} handleCheckbox={handleCheckbox} />
+            <Checkbox label="Pequeno e grande / Perto e Longe" formData={formData} handleCheckbox={handleCheckbox} />
+            <Checkbox label="Em cima e embaixo / Fora e dentro" formData={formData} handleCheckbox={handleCheckbox} />
+            <Checkbox label="Cheio e vazio / Fechado e aberto" formData={formData} handleCheckbox={handleCheckbox} />
+          </div>
+        </div>
+
+        <div className="print-block" style={{...s.grid2, marginTop: '15px'}}>
+          <div className="print-input-group">
+            <h4>Percepção</h4>
+            <Checkbox label="Visual" formData={formData} handleCheckbox={handleCheckbox} />
+            <Checkbox label="Auditiva" formData={formData} handleCheckbox={handleCheckbox} />
+            <Checkbox label="Tátil" formData={formData} handleCheckbox={handleCheckbox} />
+            <Checkbox label="Sinestésica" formData={formData} handleCheckbox={handleCheckbox} />
+            <Checkbox label="Temporal" formData={formData} handleCheckbox={handleCheckbox} />
+          </div>
+          <div className="print-input-group">
+            <label style={s.label}>Outros:</label>
+            <input style={s.input} name="outrosAEE" value={formData.outrosAEE} onChange={handleChange} placeholder="Outras necessidades..." />
+          </div>
+        </div>
+
+        <div className="print-block print-input-group" style={{marginTop: '25px'}}>
+          <label style={s.label}>Objetivos do AEE:</label>
+          <textarea style={{...s.input, minHeight: '120px'}} name="objetivosAEE" value={formData.objetivosAEE} onChange={handleChange} placeholder="Descreva os objetivos principais do atendimento..."></textarea>
         </div>
       </div>
 
