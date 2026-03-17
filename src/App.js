@@ -44,61 +44,77 @@ const s = {
 
 // --- CSS GLOBAL: OPÇÃO NUCLEAR CONTRA O GOOGLE CHROME ---
 const GlobalCSS = () => (
-  <style>
-    {`
-      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-      body { font-family: 'Poppins', sans-serif !important; margin: 0; background-color: #f0f4f8; overflow-x: hidden; }
-      .glass-panel { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04); border-radius: 16px; }
-      button { transition: all 0.3s ease !important; }
-      button:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); filter: brightness(1.05); }
-
-      @media screen { .print-only { display: none !important; } }
-
-      /* FORÇA BRUTA DE IMPRESSÃO (SEM CORTES, SEM PÁGINAS BRANCAS) */
+/* FORÇA BRUTA DE IMPRESSÃO (SEM CORTES, SEM PÁGINAS BRANCAS) */
       @media print {
         @page { margin: 15mm; }
 
-        /* 1. Resetar todas as travas visuais do navegador */
+        /* 1. AS SUAS REGRAS GENIAIS DE RESET */
         * {
           background: transparent !important;
           color: black !important;
           box-shadow: none !important;
           position: static !important;
           overflow: visible !important;
+          box-sizing: border-box !important;
+          backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
+          filter: none !important;
+          transform: none !important;
         }
 
-        /* 2. Matar o limite de altura que gera páginas em branco */
+        h1, h2, h3, h4, h5, h6, p, label, span {
+          margin: 0 0 5px 0 !important;
+          padding: 0 !important;
+        }
+
         html, body, #root, .print-page {
           width: 100% !important;
           height: auto !important;
           min-height: 0 !important;
-          margin: 0 !important;
-          padding: 0 !important;
           display: block !important;
         }
 
-        /* 3. Esconder coisas inúteis no papel */
         .no-print { display: none !important; }
         .print-only { display: block !important; }
 
-        /* 4. Forçar TUDO a empilhar um embaixo do outro (Mata o Grid e Flexbox inline) */
+        /* 2. ESTRUTURA DOS CARTÕES */
         div, .print-block, .glass-panel, .card-print {
           display: block !important;
           width: 100% !important;
           margin: 0 0 10px 0 !important;
-          padding: 0 !important;
           border: none !important;
-          page-break-inside: auto !important; /* Permite cortar caixas se não couber na folha */
+          /* Deixamos o cartão quebrar se for gigante, para não dar o bug da tela branca */
+          page-break-inside: auto !important; 
         }
 
-        /* O cabeçalho verde do cartão */
+        /* 🌟 3. AS SUAS REGRAS DE PAGINAÇÃO (APLICADAS COM SEGURANÇA) 🌟 */
+        
+        /* Impede que o cabeçalho fique sozinho no final de uma página */
+        h1, h2, h3, h4, .cardHeader, .sectionTitle {
+          page-break-after: avoid !important;
+          break-after: avoid !important;
+        }
+
+        /* Impede que um pequeno bloco de input ou checkbox seja cortado ao meio */
+        .print-input-group, .inputGroup, label.checkbox-row {
+          page-break-inside: avoid !important;
+          break-inside: avoid !important;
+        }
+
+        /* A sua classe para forçar quebra de página (Ex: Assinaturas em nova folha) */
+        .section-break {
+          page-break-before: always !important;
+          break-before: page !important;
+        }
+
+        /* ------------------------------------------------------------- */
+
         .card-print > div:first-child {
           border-bottom: 2px solid black !important;
           padding-bottom: 5px !important;
           margin-bottom: 10px !important;
         }
 
-        /* 5. Estilo de formulário de papel para Inputs e Textos */
         input:not([type="checkbox"]), textarea {
           border: none !important;
           border-bottom: 1px solid black !important;
@@ -112,37 +128,27 @@ const GlobalCSS = () => (
           white-space: pre-wrap !important;
         }
 
-        /* 6. Espaçamento de Textos */
         label {
           font-weight: bold !important;
           margin-top: 15px !important;
           display: block !important;
         }
 
-        /* 7. Caixinhas de Seleção */
         label.checkbox-row {
-          display: flex !important; /* Única exceção para manter a caixa ao lado do texto */
+          display: flex !important;
           align-items: center !important;
           margin: 6px 0 !important;
           font-weight: normal !important;
-          page-break-inside: avoid !important;
         }
+        
         label.checkbox-row input[type="checkbox"] {
           width: auto !important;
           margin-right: 8px !important;
           display: inline-block !important;
         }
 
-        h4 {
-          margin-top: 20px !important;
-          margin-bottom: 5px !important;
-        }
         .badge-print { border: 1px solid black !important; }
       }
-    `}
-  </style>
-);
-
 const Checkbox = ({ label, formData, handleCheckbox }) => (
   <label className="checkbox-row" style={s.checkboxContainer}>
     <input type="checkbox" checked={!!(formData.opcoes || {})[label]} onChange={() => handleCheckbox(label)} style={{ width: '18px', height: '18px', accentColor: '#10b981' }} />
