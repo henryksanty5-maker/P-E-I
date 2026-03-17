@@ -464,7 +464,7 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
     if (!formData.aluno) { alert("Preencha o nome do aluno."); return; }
     const dadosParaSalvar = { ...formData, criadoPor: formData.criadoPor || usuario.email };
     const dbKey = alunoData?.dbKey || `${formData.aluno} (PAEE)`;
-    try { await set(ref(db, `alunos/${dbKey}`), dadosParaSalvar); alert(`\u2705 Documento PAEE salvo na nuvem!`); }
+    try { await set(ref(db, `alunos/${dbKey}`), dadosParaSalvar); alert(`✅ Documento PAEE salvo na nuvem!`); }
     catch (error) { alert("Erro ao salvar."); }
   };
 
@@ -472,8 +472,8 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
     <div className="print-page" style={s.page}>
       <GlobalCSS />
       <div className="glass-panel no-print" style={s.topbar}>
-        <div><h2 style={{margin: 0, color: '#1e40af'}}>Editor de PAEE (Especialista AEE)</h2><p style={{margin:0, fontSize:'0.85rem'}}>Documento Oficial da Educa\u00e7\u00e3o Especial</p></div>
-        <div style={s.btnGroup}><button style={s.btnSecondary} onClick={onVoltar}>\u2190 Voltar</button><button style={{...s.btnPrimary, background: '#1e40af'}} onClick={salvarNoBanco}>\u2713 Salvar Nuvem</button><button style={s.btnSuccess} onClick={()=>window.print()}>\uD83D\uDDA8\uFE0F Imprimir PDF</button></div>
+        <div><h2 style={{margin: 0, color: '#1e40af'}}>Editor de PAEE (Especialista AEE)</h2><p style={{margin:0, fontSize:'0.85rem'}}>Documento Oficial da Educação Especial</p></div>
+        <div style={s.btnGroup}><button style={s.btnSecondary} onClick={onVoltar}>← Voltar</button><button style={{...s.btnPrimary, background: '#1e40af'}} onClick={salvarNoBanco}>✓ Salvar Nuvem</button><button style={s.btnSuccess} onClick={()=>window.print()}>🖨️ Imprimir PDF</button></div>
       </div>
 
       <div className="print-only" style={{ textAlign: 'center', marginBottom: '30px', borderBottom: '2px solid black', paddingBottom: '15px' }}>
