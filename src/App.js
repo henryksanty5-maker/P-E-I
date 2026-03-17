@@ -207,9 +207,14 @@ const ListaAlunos = ({ onNovoPEI, onNovoPAEE, onEditar, onLogout, usuario }) => 
 
   // 🌟 AQUI FICA A SUA LISTA VIP:
   const listaEspecialistas = [
-    'henryksanty5@gmail.com',
-    'jaqueline@escola.com',
-    'direcao@escola.com'
+'henryksanty5@gmail.com',
+'escolajac663@gmail.com',
+'mariaroselidossantosrosa@gmail.com',
+'iquinhoslp@yahoo.com.br',
+'belavista112@gmail.com'
+'adriananeri@prof.educacao.sp.gov.br',
+'rackellbonete@gmail.com',
+'educacaoredencao@gmail.com'
   ];
   
   const isEspecialista = listaEspecialistas.includes(usuario.email);
