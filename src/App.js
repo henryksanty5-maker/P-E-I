@@ -42,7 +42,6 @@ const s = {
   sectionTitle: { color: '#1e293b', marginBottom: '15px', fontSize: '1.05rem', borderBottom: '1px solid rgba(203, 213, 225, 0.5)', paddingBottom: '8px', fontWeight: '600' }
 };
 
-// --- CSS GLOBAL: OPÇÃO NUCLEAR CONTRA O GOOGLE CHROME ---
 const GlobalCSS = () => (
 /* FORÇA BRUTA DE IMPRESSÃO (SEM CORTES, SEM PÁGINAS BRANCAS) */
       @media print {
@@ -149,49 +148,6 @@ const GlobalCSS = () => (
 
         .badge-print { border: 1px solid black !important; }
       }
-const Checkbox = ({ label, formData, handleCheckbox }) => (
-  <label className="checkbox-row" style={s.checkboxContainer}>
-    <input type="checkbox" checked={!!(formData.opcoes || {})[label]} onChange={() => handleCheckbox(label)} style={{ width: '18px', height: '18px', accentColor: '#10b981' }} />
-    <span style={{ fontSize: '0.95rem', color: '#334155', fontWeight: '500' }}>{label}</span>
-  </label>
-);
-
-// 2. Tela de Login
-const LoginScreen = () => {
-  const [email, setEmail] = useState(''); const [password, setPassword] = useState('');
-  const [erro, setErro] = useState(''); const [mensagem, setMensagem] = useState('');
-
-  const handleLogin = async (e) => {
-    e.preventDefault(); setErro(''); setMensagem('');
-    try { await signInWithEmailAndPassword(auth, email, password); } 
-    catch (error) { setErro('E-mail ou senha incorretos. Tente novamente.'); }
-  };
-
-  const handleEsqueciSenha = async () => {
-    if (!email) { setErro('Digite seu e-mail acima para redefinir a senha.'); return; }
-    try { await sendPasswordResetEmail(auth, email); setMensagem('E-mail enviado!'); setErro(''); } 
-    catch (error) { setErro('Erro ao enviar e-mail.'); }
-  };
-
-  return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', padding: '20px' }}>
-      <GlobalCSS />
-      <div className="glass-panel" style={{ padding: '40px', width: '100%', maxWidth: '420px', textAlign: 'center' }}>
-        <img src="/logo_pei.png" alt="Sistema PEI/PAEE" style={{ maxWidth: '100%', height: 'auto', marginBottom: '30px', borderRadius: '12px' }} />
-        {erro && <div style={{ backgroundColor: '#fee2e2', color: '#dc2626', padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '0.9rem', fontWeight: '500' }}>{erro}</div>}
-        {mensagem && <div style={{ backgroundColor: '#d1fae5', color: '#065f46', padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '0.9rem', fontWeight: '500' }}>{mensagem}</div>}
-        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <input type="email" placeholder="E-mail institucional" value={email} onChange={(e) => setEmail(e.target.value)} style={s.input} required />
-          <input type="password" placeholder="Senha de acesso" value={password} onChange={(e) => setPassword(e.target.value)} style={s.input} required />
-          <button type="submit" style={{...s.btnPrimary, padding: '14px', fontSize: '1.05rem'}}>Acessar Plataforma</button>
-        </form>
-        <div style={{ marginTop: '25px' }}>
-          <button type="button" onClick={handleEsqueciSenha} style={{ background: 'none', border: 'none', color: '#10b981', cursor: 'pointer', fontWeight: '500' }}>Esqueci minha senha</button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 // 3. Tela de Lista de Alunos (DASHBOARD)
 const ListaAlunos = ({ onNovoPEI, onNovoPAEE, onEditar, onLogout, usuario }) => {
