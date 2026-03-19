@@ -290,6 +290,7 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
   const estadoInicial = { tipoDocumento: 'PEI', aluno: '', nascimento: '', anoSerie: '', turma: '', responsaveis: '', diagnostico: '', cid: '', crm: '', resultadoAvaliacao: '', rotinaFamiliar: '', fatoresAmbientais: '', resumoAluno: '', campoLinguagem: '', campoMatematica: '', anexos: {}, conteudos: {}, diario: {}, opcoes: {} };
   const [formData, setFormData] = useState(() => { return alunoData ? { ...estadoInicial, ...alunoData, anexos: alunoData.anexos || {} } : estadoInicial; });
   const [aEnviar, setAEnviar] = useState(false);
+  const [zoomImg, setZoomImg] = useState(null); // ESTADO DO ZOOM
   const disciplinas = ['Língua Portuguesa', 'Matemática', 'Ciências', 'História', 'Geografia', 'Artes', 'Educação Física', 'Inglês', 'Informática'];
   const bimestres = ['1º Bimestre', '2º Bimestre', '3º Bimestre', '4º Bimestre'];
 
@@ -311,9 +312,9 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
     reader.onload = (event) => {
       const img = new Image();
       img.onload = () => {
-        const canvas = document.createElement('canvas'); const scaleSize = 700 / img.width; canvas.width = 700; canvas.height = img.height * scaleSize;
+        const canvas = document.createElement('canvas'); const scaleSize = 900 / img.width; canvas.width = 900; canvas.height = img.height * scaleSize;
         const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        setFormData(prev => ({ ...prev, anexos: { ...(prev.anexos || {}), [campoID]: canvas.toDataURL('image/jpeg', 0.6) } }));
+        setFormData(prev => ({ ...prev, anexos: { ...(prev.anexos || {}), [campoID]: canvas.toDataURL('image/jpeg', 0.7) } }));
         setAEnviar(false);
       }; img.src = event.target.result;
     }; reader.readAsDataURL(file);
@@ -323,11 +324,18 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
     setFormData(prev => { const novosAnexos = { ...(prev.anexos || {}) }; delete novosAnexos[campoID]; return { ...prev, anexos: novosAnexos }; });
   };
 
+  // COMPONENTE DE FOTO COM ZOOM ADICIONADO
   const FileUpload = ({ label, campoID }) => (
-    <div className="no-print" style={s.uploadBox}>
+    <div className="no-print print-block" style={s.uploadBox}>
       {formData.anexos && formData.anexos[campoID] ? (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <img src={formData.anexos[campoID]} alt="Anexo" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '8px', border: '1px solid #a7f3d0' }} />
+          <img 
+            src={formData.anexos[campoID]} 
+            alt="Anexo" 
+            title="Clique para ampliar"
+            onClick={() => setZoomImg(formData.anexos[campoID])}
+            style={{ maxWidth: '100%', maxHeight: '250px', borderRadius: '8px', border: '1px solid #a7f3d0', cursor: 'zoom-in' }} 
+          />
           <button type="button" onClick={() => removerAnexo(campoID)} style={{ marginTop: '12px', padding: '8px 16px', backgroundColor: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}>Remover Imagem</button>
         </div>
       ) : (
@@ -357,7 +365,7 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
       <div className="glass-panel card-print">
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>A</span> Identificação do Aluno</div>
         <div className="print-block" style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: '30px' }}>
-          <div className="no-print"><FileUpload label="Selecionar Foto" campoID="foto_perfil" /></div>
+          <div className="no-print"><FileUpload label="Foto do Aluno" campoID="foto_perfil" /></div>
           <div className="print-block" style={s.grid2}>
             <div className="print-input-group"><label style={s.label}>Nome do Aluno *</label><input style={s.input} name="aluno" value={formData.aluno} onChange={handleChange} /></div>
             <div className="print-input-group"><label style={s.label}>Data de Nascimento</label><input style={s.input} name="nascimento" value={formData.nascimento} onChange={handleChange} /></div>
@@ -437,11 +445,19 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
           {['Professor(a)', 'Coordenação', 'Responsáveis'].map(r => (<div key={r} style={{ flex: 1, textAlign: 'center', margin: '0 10px' }}><div style={{ borderBottom: '1px solid black', height: '30px' }}></div><p>{r}</p></div>))}
         </div>
       </div>
+
+      {/* JANELA DE ZOOM DO PEI */}
+      {zoomImg && (
+        <div className="no-print" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', cursor: 'zoom-out' }} onClick={() => setZoomImg(null)}>
+          <img src={zoomImg} alt="Zoom" style={{ maxWidth: '90%', maxHeight: '90%', borderRadius: '8px', border: '3px solid white', boxShadow: '0 10px 25px rgba(0,0,0,0.5)' }} />
+          <p style={{ color: 'white', marginTop: '15px', fontWeight: 'bold', fontSize: '1.1rem' }}>Clique em qualquer lugar para fechar</p>
+        </div>
+      )}
     </div>
   );
 };
 
-// 4B. NOVO FORMULÁRIO: PAEE (AGORA 100% COMPLETO E COM FOTOS)
+// 4B. NOVO FORMULÁRIO: PAEE
 const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
   const estadoInicial = {
     tipoDocumento: 'PAEE', aluno: '', nascimento: '', sexo: '',
@@ -458,6 +474,7 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
   };
   const [formData, setFormData] = useState(() => { return alunoData ? { ...estadoInicial, ...alunoData, anexos: alunoData.anexos || {} } : estadoInicial; });
   const [aEnviar, setAEnviar] = useState(false);
+  const [zoomImg, setZoomImg] = useState(null); // ESTADO DO ZOOM DO PAEE
 
   const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   const handleCheckbox = (opcao) => setFormData(prev => ({ ...prev, opcoes: { ...(prev.opcoes || {}), [opcao]: !(prev.opcoes || {})[opcao] } }));
@@ -470,16 +487,15 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
     catch (error) { alert("Erro ao salvar."); }
   };
 
-  // --- FUNÇÕES DE FOTO IMPORTADAS DO PEI ---
   const handleFileUpload = (e, campoID) => {
     const file = e.target.files[0]; if (!file) return;
     setAEnviar(true); const reader = new FileReader();
     reader.onload = (event) => {
       const img = new Image();
       img.onload = () => {
-        const canvas = document.createElement('canvas'); const scaleSize = 700 / img.width; canvas.width = 700; canvas.height = img.height * scaleSize;
+        const canvas = document.createElement('canvas'); const scaleSize = 900 / img.width; canvas.width = 900; canvas.height = img.height * scaleSize;
         const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        setFormData(prev => ({ ...prev, anexos: { ...(prev.anexos || {}), [campoID]: canvas.toDataURL('image/jpeg', 0.6) } }));
+        setFormData(prev => ({ ...prev, anexos: { ...(prev.anexos || {}), [campoID]: canvas.toDataURL('image/jpeg', 0.7) } }));
         setAEnviar(false);
       }; img.src = event.target.result;
     }; reader.readAsDataURL(file);
@@ -489,11 +505,18 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
     setFormData(prev => { const novosAnexos = { ...(prev.anexos || {}) }; delete novosAnexos[campoID]; return { ...prev, anexos: novosAnexos }; });
   };
 
+  // COMPONENTE DE FOTO COM ZOOM ADICIONADO
   const FileUpload = ({ label, campoID }) => (
     <div className="no-print print-block" style={s.uploadBox}>
       {formData.anexos && formData.anexos[campoID] ? (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <img src={formData.anexos[campoID]} alt="Anexo" style={{ maxWidth: '100%', maxHeight: '250px', borderRadius: '8px', border: '1px solid #a7f3d0' }} />
+          <img 
+            src={formData.anexos[campoID]} 
+            alt="Anexo" 
+            title="Clique para ampliar"
+            onClick={() => setZoomImg(formData.anexos[campoID])}
+            style={{ maxWidth: '100%', maxHeight: '250px', borderRadius: '8px', border: '1px solid #a7f3d0', cursor: 'zoom-in' }} 
+          />
           <button type="button" onClick={() => removerAnexo(campoID)} style={{ marginTop: '12px', padding: '8px 16px', backgroundColor: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}>Remover Imagem</button>
         </div>
       ) : (
@@ -520,7 +543,6 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
         <h1 style={{ marginTop: '20px', fontSize: '1.4rem' }}>PLANO DE ATENDIMENTO EDUCACIONAL ESPECIALIZADO - PAEE</h1>
       </div>
 
-      {/* ===== SEÇÃO I: INFORMAÇÕES DO ESTUDANTE ===== */}
       <div className="glass-panel card-print">
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>I</span> Informações do Estudante</div>
         <div className="print-block" style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: '30px' }}>
@@ -562,7 +584,6 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
         <div className="print-input-group" style={{marginTop: '20px'}}><label style={s.label}>II – Informações identificadas no Estudo de Caso</label><textarea style={{...s.input, minHeight: '80px'}} name="estudoDeCaso" value={formData.estudoDeCaso} onChange={handleChange}></textarea></div>
       </div>
 
-      {/* ===== SEÇÃO III: APOIOS, RECURSOS E SERVIÇOS ===== */}
       <div className="glass-panel card-print">
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>III</span> Apoios, Recursos e Serviços</div>
         <div className="print-block" style={s.grid2}>
@@ -587,7 +608,6 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
         <div className="print-input-group" style={{marginTop: '20px'}}><label style={s.label}>Quais medidas a escola deve implementar para superar as barreiras identificadas no Estudo de Caso?</label><textarea style={{...s.input, minHeight: '80px'}} name="medidasEscola" value={formData.medidasEscola} onChange={handleChange}></textarea></div>
       </div>
 
-      {/* ===== SEÇÃO IV: PERFIL DO ALUNO ===== */}
       <div className="glass-panel card-print">
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>IV</span> Perfil do Aluno</div>
         <div className="print-block" style={s.grid2}>
@@ -645,7 +665,6 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
         </div>
       </div>
 
-      {/* ===== SEÇÃO IV.B: HABILIDADES PARA APRENDER E ESTRATÉGIAS DIDÁTICAS ===== */}
       <div className="glass-panel card-print">
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>IV.B</span> Habilidades para Aprender e Estratégias Didáticas</div>
         <div className="print-block" style={s.grid2}>
@@ -690,7 +709,6 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
         </div>
       </div>
 
-      {/* ===== SEÇÃO V: ORGANIZAÇÃO DO AEE ===== */}
       <div className="glass-panel card-print">
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>V</span> Organização do AEE</div>
         <div className="print-block" style={s.grid2}>
@@ -773,34 +791,9 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
         </div>
       </div>
 
-      {/* ===== SEÇÃO VI: TRABALHO DO AEE ===== */}
       <div className="glass-panel card-print">
-        <div style={s.cardHeader}><span className="badge-print" style={s.badge}>VI</span> Trabalho do AEE</div>
-        <div className="print-block" style={s.grid2}>
-          <div className="print-input-group">
-            <h4>Trabalho do AEE</h4>
-            <Checkbox label="Atenção" formData={formData} handleCheckbox={handleCheckbox} />
-            <Checkbox label="Concentração" formData={formData} handleCheckbox={handleCheckbox} />
-            <Checkbox label="Raciocínio lógico" formData={formData} handleCheckbox={handleCheckbox} />
-            <Checkbox label="Sociabilidade" formData={formData} handleCheckbox={handleCheckbox} />
-            <Checkbox label="Área emocional / afetiva" formData={formData} handleCheckbox={handleCheckbox} />
-            <Checkbox label="Atividade de vida autônoma" formData={formData} handleCheckbox={handleCheckbox} />
-            <Checkbox label="Funções executivas" formData={formData} handleCheckbox={handleCheckbox} />
-            <Checkbox label="Freio inibitório" formData={formData} handleCheckbox={handleCheckbox} />
-            <Checkbox label="Desenho" formData={formData} handleCheckbox={handleCheckbox} />
-            <Checkbox label="Uso de tecnologia assistiva" formData={formData} handleCheckbox={handleCheckbox} />
-          </div>
-          <div className="print-input-group">
-            <h4>Aprendizagem</h4>
-            <Checkbox label="Compreensão do Alfabeto" formData={formData} handleCheckbox={handleCheckbox} />
-            <Checkbox label="Compreensão dos Números" formData={formData} handleCheckbox={handleCheckbox} />
-            <Checkbox label="Compreensão da Leitura" formData={formData} handleCheckbox={handleCheckbox} />
-            <Checkbox label="Compreensão da produção textual" formData={formData} handleCheckbox={handleCheckbox} />
-            <Checkbox label="Compreensão das operações matemáticas" formData={formData} handleCheckbox={handleCheckbox} />
-            <Checkbox label="Desenvolvimento das fases da escrita" formData={formData} handleCheckbox={handleCheckbox} />
-          </div>
-        </div>
-        <div className="print-block" style={{...s.grid2, marginTop: '15px'}}>
+        <div style={s.cardHeader}><span className="badge-print" style={s.badge}>VI</span> Áreas de Desenvolvimento (Foco do AEE)</div>
+        <div className="print-block" style={s.grid3}>
           <div className="print-input-group">
             <h4>Coordenação Motora</h4>
             <Checkbox label="Coordenação motora grossa" formData={formData} handleCheckbox={handleCheckbox} />
@@ -808,15 +801,6 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
             <Checkbox label="Coordenação grafomotora" formData={formData} handleCheckbox={handleCheckbox} />
             <Checkbox label="Esquema corporal" formData={formData} handleCheckbox={handleCheckbox} />
           </div>
-          <div className="print-input-group">
-            <h4>Lateralidade e Noções Espaciais</h4>
-            <Checkbox label="Direita e esquerda" formData={formData} handleCheckbox={handleCheckbox} />
-            <Checkbox label="Pequeno e grande / Perto e Longe" formData={formData} handleCheckbox={handleCheckbox} />
-            <Checkbox label="Em cima e embaixo / Fora e dentro" formData={formData} handleCheckbox={handleCheckbox} />
-            <Checkbox label="Cheio e vazio / Fechado e aberto" formData={formData} handleCheckbox={handleCheckbox} />
-          </div>
-        </div>
-        <div className="print-block" style={{...s.grid3, marginTop: '15px'}}>
           <div className="print-input-group">
             <h4>Comunicação e Linguagem</h4>
             <Checkbox label="Compreensão verbal" formData={formData} handleCheckbox={handleCheckbox} />
@@ -829,27 +813,48 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
             <Checkbox label="Memória auditiva" formData={formData} handleCheckbox={handleCheckbox} />
             <Checkbox label="Memória verbal e numérica" formData={formData} handleCheckbox={handleCheckbox} />
           </div>
+        </div>
+
+        <div className="print-block" style={{...s.grid2, marginTop: '15px'}}>
+          <div className="print-input-group">
+            <h4>Aprendizagem</h4>
+            <Checkbox label="Compreensão do Alfabeto" formData={formData} handleCheckbox={handleCheckbox} />
+            <Checkbox label="Compreensão dos Números" formData={formData} handleCheckbox={handleCheckbox} />
+            <Checkbox label="Compreensão da Leitura" formData={formData} handleCheckbox={handleCheckbox} />
+            <Checkbox label="Compreensão da produção textual" formData={formData} handleCheckbox={handleCheckbox} />
+            <Checkbox label="Compreensão das operações matemáticas" formData={formData} handleCheckbox={handleCheckbox} />
+            <Checkbox label="Desenvolvimento das fases da escrita" formData={formData} handleCheckbox={handleCheckbox} />
+          </div>
+          <div className="print-input-group">
+            <h4>Lateralidade e Noções Espaciais</h4>
+            <Checkbox label="Direita e esquerda" formData={formData} handleCheckbox={handleCheckbox} />
+            <Checkbox label="Pequeno e grande / Perto e Longe" formData={formData} handleCheckbox={handleCheckbox} />
+            <Checkbox label="Em cima e embaixo / Fora e dentro" formData={formData} handleCheckbox={handleCheckbox} />
+            <Checkbox label="Cheio e vazio / Fechado e aberto" formData={formData} handleCheckbox={handleCheckbox} />
+          </div>
+        </div>
+
+        <div className="print-block" style={{...s.grid2, marginTop: '15px'}}>
           <div className="print-input-group">
             <h4>Percepção</h4>
-            <Checkbox label="Visual (percepção)" formData={formData} handleCheckbox={handleCheckbox} />
-            <Checkbox label="Auditiva (percepção)" formData={formData} handleCheckbox={handleCheckbox} />
-            <Checkbox label="Tátil (percepção)" formData={formData} handleCheckbox={handleCheckbox} />
+            <Checkbox label="Visual" formData={formData} handleCheckbox={handleCheckbox} />
+            <Checkbox label="Auditiva" formData={formData} handleCheckbox={handleCheckbox} />
+            <Checkbox label="Tátil" formData={formData} handleCheckbox={handleCheckbox} />
             <Checkbox label="Sinestésica" formData={formData} handleCheckbox={handleCheckbox} />
             <Checkbox label="Temporal" formData={formData} handleCheckbox={handleCheckbox} />
           </div>
+          <div className="print-input-group">
+            <label style={s.label}>Outros:</label>
+            <input style={s.input} name="outrosAEE" value={formData.outrosAEE} onChange={handleChange} placeholder="Outras necessidades..." />
+          </div>
         </div>
-        <div className="print-block" style={{marginTop: '15px'}}>
-          <div className="print-input-group"><label style={s.label}>Outros:</label><input style={s.input} name="outrosAEE" value={formData.outrosAEE} onChange={handleChange} placeholder="Outras necessidades..." /></div>
-        </div>
-        
-        {/* RELATÓRIO FINAL */}
+
         <div className="print-block print-input-group" style={{marginTop: '25px'}}>
           <label style={s.label}>Relatório Final:</label>
           <textarea style={{...s.input, minHeight: '120px'}} name="objetivosAEE" value={formData.objetivosAEE} onChange={handleChange} placeholder="Descreva o relatório final do atendimento..."></textarea>
         </div>
       </div>
 
-      {/* NOVA SEÇÃO: MOMENTOS AEE */}
       <div className="glass-panel card-print section-break">
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>VII</span> Momentos AEE</div>
         <div className="print-block" style={s.grid2}>
@@ -863,6 +868,14 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
           {['Diretor(a)', 'Coordenador(a)', 'Prof. AEE', 'Prof. Regente', 'Responsável'].map(role => (<div key={role} style={{ flex: '1', minWidth: '130px', textAlign: 'center' }}><div style={{ borderBottom: '1px solid black', marginBottom: '10px', height: '30px' }}></div><p style={{ fontWeight: 'bold', margin: 0, fontSize: '9pt' }}>{role}</p></div>))}
         </div>
       </div>
+
+      {/* JANELA DE ZOOM DO PAEE */}
+      {zoomImg && (
+        <div className="no-print" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', cursor: 'zoom-out' }} onClick={() => setZoomImg(null)}>
+          <img src={zoomImg} alt="Zoom" style={{ maxWidth: '90%', maxHeight: '90%', borderRadius: '8px', border: '3px solid white', boxShadow: '0 10px 25px rgba(0,0,0,0.5)' }} />
+          <p style={{ color: 'white', marginTop: '15px', fontWeight: 'bold', fontSize: '1.1rem' }}>Clique em qualquer lugar para fechar</p>
+        </div>
+      )}
     </div>
   );
 };
