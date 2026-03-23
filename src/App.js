@@ -42,7 +42,6 @@ const s = {
   sectionTitle: { color: '#1e293b', marginBottom: '15px', fontSize: '1.05rem', borderBottom: '1px solid rgba(203, 213, 225, 0.5)', paddingBottom: '8px', fontWeight: '600' }
 };
 
-// --- CSS GLOBAL: A FUSÃO DE IMPRESSÃO PERFEITA ---
 const GlobalCSS = () => (
   <style>
     {`
@@ -50,103 +49,26 @@ const GlobalCSS = () => (
       body { font-family: 'Poppins', sans-serif !important; margin: 0; background-color: #f0f4f8; overflow-x: hidden; }
       .glass-panel { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04); border-radius: 16px; }
       button { transition: all 0.3s ease !important; }
-      button:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); filter: brightness(1.05); }
+      button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); filter: brightness(1.05); }
+      button:disabled { cursor: not-allowed; opacity: 0.7; }
 
       @media screen { .print-only { display: none !important; } }
-
-      /* IMPRESSÃO BLINDADA */
       @media print {
         @page { margin: 15mm; }
-
-        * {
-          background: transparent !important;
-          color: black !important;
-          box-shadow: none !important;
-          position: static !important;
-          overflow: visible !important;
-          box-sizing: border-box !important;
-          backdrop-filter: none !important;
-          -webkit-backdrop-filter: none !important;
-          filter: none !important;
-          transform: none !important;
-        }
-
-        h1, h2, h3, h4, h5, h6, p, label, span {
-          margin: 0 0 5px 0 !important;
-          padding: 0 !important;
-        }
-
-        html, body, #root, .print-page {
-          width: 100% !important;
-          height: auto !important;
-          min-height: 0 !important;
-          display: block !important;
-        }
-
+        * { background: transparent !important; color: black !important; box-shadow: none !important; position: static !important; overflow: visible !important; box-sizing: border-box !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; filter: none !important; transform: none !important; }
+        h1, h2, h3, h4, h5, h6, p, label, span { margin: 0 0 5px 0 !important; padding: 0 !important; }
+        html, body, #root, .print-page { width: 100% !important; height: auto !important; min-height: 0 !important; display: block !important; }
         .no-print { display: none !important; }
         .print-only { display: block !important; }
-
-        div, .print-block, .glass-panel, .card-print {
-          display: block !important;
-          width: 100% !important;
-          margin: 0 0 10px 0 !important;
-          border: none !important;
-          page-break-inside: auto !important;
-        }
-
-        h1, h2, h3, h4, .cardHeader, .sectionTitle {
-          page-break-after: avoid !important;
-          break-after: avoid !important;
-        }
-
-        .print-input-group, .inputGroup, label.checkbox-row {
-          page-break-inside: avoid !important;
-          break-inside: avoid !important;
-        }
-
-        .section-break {
-          page-break-before: always !important;
-          break-before: page !important;
-        }
-
-        .card-print > div:first-child {
-          border-bottom: 2px solid black !important;
-          padding-bottom: 5px !important;
-          margin-bottom: 10px !important;
-        }
-
-        input:not([type="checkbox"]), textarea {
-          border: none !important;
-          border-bottom: 1px solid black !important;
-          border-radius: 0 !important;
-          width: 100% !important;
-          padding: 2px 0 5px 0 !important;
-          font-family: Arial, sans-serif !important;
-          font-size: 11pt !important;
-          height: auto !important;
-          min-height: 25px !important;
-          white-space: pre-wrap !important;
-        }
-
-        label {
-          font-weight: bold !important;
-          margin-top: 15px !important;
-          display: block !important;
-        }
-
-        label.checkbox-row {
-          display: flex !important;
-          align-items: center !important;
-          margin: 6px 0 !important;
-          font-weight: normal !important;
-        }
-        
-        label.checkbox-row input[type="checkbox"] {
-          width: auto !important;
-          margin-right: 8px !important;
-          display: inline-block !important;
-        }
-
+        div, .print-block, .glass-panel, .card-print { display: block !important; width: 100% !important; margin: 0 0 10px 0 !important; border: none !important; page-break-inside: auto !important; }
+        h1, h2, h3, h4, .cardHeader, .sectionTitle { page-break-after: avoid !important; break-after: avoid !important; }
+        .print-input-group, .inputGroup, label.checkbox-row { page-break-inside: avoid !important; break-inside: avoid !important; }
+        .section-break { page-break-before: always !important; break-before: page !important; }
+        .card-print > div:first-child { border-bottom: 2px solid black !important; padding-bottom: 5px !important; margin-bottom: 10px !important; }
+        input:not([type="checkbox"]), textarea { border: none !important; border-bottom: 1px solid black !important; border-radius: 0 !important; width: 100% !important; padding: 2px 0 5px 0 !important; font-family: Arial, sans-serif !important; font-size: 11pt !important; height: auto !important; min-height: 25px !important; white-space: pre-wrap !important; }
+        label { font-weight: bold !important; margin-top: 15px !important; display: block !important; }
+        label.checkbox-row { display: flex !important; align-items: center !important; margin: 6px 0 !important; font-weight: normal !important; }
+        label.checkbox-row input[type="checkbox"] { width: auto !important; margin-right: 8px !important; display: inline-block !important; }
         .badge-print { border: 1px solid black !important; }
       }
     `}
@@ -198,20 +120,14 @@ const LoginScreen = () => {
   );
 };
 
-// 3. Tela de Lista de Alunos (DASHBOARD)
+// 3. Tela de Lista de Alunos
 const ListaAlunos = ({ onNovoPEI, onNovoPAEE, onEditar, onLogout, usuario }) => {
   const [alunos, setAlunos] = useState([]);
 
-  // 🌟 AQUI FICA A SUA LISTA VIP:
   const listaEspecialistas = [
-    'henryksanty5@gmail.com',
-    'escolajac663@gmail.com',
-    'mariaroselidossantosrosa@gmail.com',
-    'iquinhoslp@yahoo.com.br',
-    'belavista112@gmail.com',
-    'adriananeri@prof.educacao.sp.gov.br',
-    'rackellbonete@gmail.com',
-    'educacaoredencao@gmail.com'
+    'henryksanty5@gmail.com', 'escolajac663@gmail.com', 'mariaroselidossantosrosa@gmail.com',
+    'iquinhoslp@yahoo.com.br', 'belavista112@gmail.com', 'adriananeri@prof.educacao.sp.gov.br',
+    'rackellbonete@gmail.com', 'educacaoredencao@gmail.com'
   ];
   
   const isEspecialista = listaEspecialistas.includes(usuario.email);
@@ -288,33 +204,71 @@ const ListaAlunos = ({ onNovoPEI, onNovoPAEE, onEditar, onLogout, usuario }) => 
 // 4A. FORMULÁRIO PEI 
 const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
   const estadoInicial = { tipoDocumento: 'PEI', aluno: '', nascimento: '', anoSerie: '', turma: '', responsaveis: '', diagnostico: '', cid: '', crm: '', resultadoAvaliacao: '', rotinaFamiliar: '', fatoresAmbientais: '', resumoAluno: '', campoLinguagem: '', campoMatematica: '', anexos: {}, conteudos: {}, diario: {}, opcoes: {} };
-  const [formData, setFormData] = useState(() => { return alunoData ? { ...estadoInicial, ...alunoData, anexos: alunoData.anexos || {} } : estadoInicial; });
+  
+  const [formData, setFormData] = useState(() => { 
+    if (alunoData) return { ...estadoInicial, ...alunoData, anexos: alunoData.anexos || {} };
+    try {
+      const rascunho = localStorage.getItem('rascunhoPEI');
+      if (rascunho) return JSON.parse(rascunho);
+    } catch(e) {}
+    return estadoInicial; 
+  });
+  
   const [aEnviar, setAEnviar] = useState(false);
-  const [zoomImg, setZoomImg] = useState(null); // ESTADO DO ZOOM
+  const [salvando, setSalvando] = useState(false); // ESTADO DO BOTÃO ANTI-PÂNICO
+  const [zoomImg, setZoomImg] = useState(null);
   const disciplinas = ['Língua Portuguesa', 'Matemática', 'Ciências', 'História', 'Geografia', 'Artes', 'Educação Física', 'Inglês', 'Informática'];
   const bimestres = ['1º Bimestre', '2º Bimestre', '3º Bimestre', '4º Bimestre'];
+
+  useEffect(() => {
+    if (!alunoData) {
+      try { localStorage.setItem('rascunhoPEI', JSON.stringify(formData)); } 
+      catch (e) { console.warn("Rascunho cheio demais"); }
+    }
+  }, [formData, alunoData]);
+
+  const limparRascunho = () => {
+    if(window.confirm("Deseja apagar tudo e começar um formulário em branco?")) {
+      setFormData(estadoInicial);
+      localStorage.removeItem('rascunhoPEI');
+    }
+  };
 
   const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   const handleCheckbox = (opcao) => setFormData(prev => ({ ...prev, opcoes: { ...(prev.opcoes || {}), [opcao]: !(prev.opcoes || {})[opcao] } }));
   const handleNestedText = (cat, chave, valor) => setFormData(prev => ({ ...prev, [cat]: { ...(prev[cat] || {}), [chave]: valor } }));
 
+  // FILTRO ANTI-ERRO E PROTEÇÃO DE TIMEOUT
   const salvarNoBanco = async () => {
-    if (!formData.aluno) { alert("Preencha o nome do aluno."); return; }
-    const dadosParaSalvar = { ...formData, criadoPor: formData.criadoPor || usuario.email };
-    const dbKey = alunoData?.dbKey || `${formData.aluno} (PEI)`; 
-    try { await set(ref(db, `alunos/${dbKey}`), dadosParaSalvar); alert(`✅ PEI salvo na nuvem!`); } 
-    catch (error) { alert("Erro ao salvar."); }
+    if (!formData.aluno) { alert("Preencha o nome do aluno para salvar."); return; }
+    setSalvando(true);
+    try {
+      const dadosParaSalvar = { ...formData, criadoPor: formData.criadoPor || usuario.email };
+      const nomeLimpo = formData.aluno.replace(/[.#$\[\]]/g, ' '); 
+      const dbKey = alunoData?.dbKey || `${nomeLimpo} (PEI)`; 
+      
+      await set(ref(db, `alunos/${dbKey}`), dadosParaSalvar); 
+      alert(`✅ PEI salvo na nuvem com sucesso!`); 
+      localStorage.removeItem('rascunhoPEI');
+    } 
+    catch (error) { 
+      alert(`Erro de conexão com a escola! 🚨\nNão feche a página! Seus dados estão seguros no rascunho automático.\nTente salvar novamente em alguns segundos.`); 
+    }
+    finally {
+      setSalvando(false);
+    }
   };
 
+  // COMPRESSÃO AGRESSIVA (600px e 40% qualidade) PARA SALVAR MAIS RÁPIDO
   const handleFileUpload = (e, campoID) => {
     const file = e.target.files[0]; if (!file) return;
     setAEnviar(true); const reader = new FileReader();
     reader.onload = (event) => {
       const img = new Image();
       img.onload = () => {
-        const canvas = document.createElement('canvas'); const scaleSize = 900 / img.width; canvas.width = 900; canvas.height = img.height * scaleSize;
+        const canvas = document.createElement('canvas'); const scaleSize = 600 / img.width; canvas.width = 600; canvas.height = img.height * scaleSize;
         const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        setFormData(prev => ({ ...prev, anexos: { ...(prev.anexos || {}), [campoID]: canvas.toDataURL('image/jpeg', 0.7) } }));
+        setFormData(prev => ({ ...prev, anexos: { ...(prev.anexos || {}), [campoID]: canvas.toDataURL('image/jpeg', 0.4) } }));
         setAEnviar(false);
       }; img.src = event.target.result;
     }; reader.readAsDataURL(file);
@@ -324,25 +278,18 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
     setFormData(prev => { const novosAnexos = { ...(prev.anexos || {}) }; delete novosAnexos[campoID]; return { ...prev, anexos: novosAnexos }; });
   };
 
-  // COMPONENTE DE FOTO COM ZOOM ADICIONADO
   const FileUpload = ({ label, campoID }) => (
     <div className="no-print print-block" style={s.uploadBox}>
       {formData.anexos && formData.anexos[campoID] ? (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <img 
-            src={formData.anexos[campoID]} 
-            alt="Anexo" 
-            title="Clique para ampliar"
-            onClick={() => setZoomImg(formData.anexos[campoID])}
-            style={{ maxWidth: '100%', maxHeight: '250px', borderRadius: '8px', border: '1px solid #a7f3d0', cursor: 'zoom-in' }} 
-          />
+          <img src={formData.anexos[campoID]} alt="Anexo" title="Clique para ampliar" onClick={() => setZoomImg(formData.anexos[campoID])} style={{ maxWidth: '100%', maxHeight: '250px', borderRadius: '8px', border: '1px solid #a7f3d0', cursor: 'zoom-in' }} />
           <button type="button" onClick={() => removerAnexo(campoID)} style={{ marginTop: '12px', padding: '8px 16px', backgroundColor: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}>Remover Imagem</button>
         </div>
       ) : (
         <>
           <span style={{ fontSize: '2rem' }}>📷</span><p style={{ margin: '8px 0', fontWeight: '600', color: '#059669' }}>{label}</p>
           <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, campoID)} disabled={aEnviar} />
-          {aEnviar && <span style={{color: '#ef4444', display: 'block', marginTop: '8px'}}>Processando...</span>}
+          {aEnviar && <span style={{color: '#ef4444', display: 'block', marginTop: '8px'}}>Comprimindo imagem...</span>}
         </>
       )}
     </div>
@@ -353,7 +300,13 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
       <GlobalCSS />
       <div className="glass-panel no-print" style={s.topbar}>
         <div><h2 style={{margin: 0, color: '#0f172a'}}>Editor de PEI</h2></div>
-        <div style={s.btnGroup}><button style={s.btnSecondary} onClick={onVoltar}>← Voltar</button><button style={s.btnPrimary} onClick={salvarNoBanco}>✓ Salvar Nuvem</button><button style={s.btnSuccess} onClick={()=>window.print()}>🖨️ Imprimir PDF</button></div>
+        <div style={s.btnGroup}>
+          <button style={s.btnSecondary} onClick={onVoltar} disabled={salvando}>← Voltar</button>
+          {!alunoData && <button style={{...s.btnSecondary, color: '#dc2626', borderColor: '#fecaca'}} onClick={limparRascunho} disabled={salvando}>Limpar Formulário</button>}
+          {/* BOTÃO ANTI-PÂNICO AQUI */}
+          <button style={s.btnPrimary} onClick={salvarNoBanco} disabled={salvando}>{salvando ? '⏳ Salvando...' : '✓ Salvar Nuvem'}</button>
+          <button style={s.btnSuccess} onClick={()=>window.print()} disabled={salvando}>🖨️ Imprimir PDF</button>
+        </div>
       </div>
 
       <div className="print-only" style={{ textAlign: 'center', marginBottom: '30px', borderBottom: '2px solid black', paddingBottom: '15px' }}>
@@ -446,7 +399,6 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
         </div>
       </div>
 
-      {/* JANELA DE ZOOM DO PEI */}
       {zoomImg && (
         <div className="no-print" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', cursor: 'zoom-out' }} onClick={() => setZoomImg(null)}>
           <img src={zoomImg} alt="Zoom" style={{ maxWidth: '90%', maxHeight: '90%', borderRadius: '8px', border: '3px solid white', boxShadow: '0 10px 25px rgba(0,0,0,0.5)' }} />
@@ -457,7 +409,7 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
   );
 };
 
-// 4B. NOVO FORMULÁRIO: PAEE
+// 4B. NOVO FORMULÁRIO: PAEE (SALVA-VIDAS E COMPRESSÃO INCLUÍDOS)
 const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
   const estadoInicial = {
     tipoDocumento: 'PAEE', aluno: '', nascimento: '', sexo: '',
@@ -472,30 +424,68 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
     qtdAtivCopiadas: '', observacoesEstrategias: '', outrosAEE: '', 
     objetivosAEE: '', opcoes: {}, textos: {}, anexos: {}
   };
-  const [formData, setFormData] = useState(() => { return alunoData ? { ...estadoInicial, ...alunoData, anexos: alunoData.anexos || {} } : estadoInicial; });
+  
+  const [formData, setFormData] = useState(() => { 
+    if (alunoData) return { ...estadoInicial, ...alunoData, anexos: alunoData.anexos || {} };
+    try {
+      const rascunho = localStorage.getItem('rascunhoPAEE');
+      if (rascunho) return JSON.parse(rascunho);
+    } catch(e) {}
+    return estadoInicial; 
+  });
+  
   const [aEnviar, setAEnviar] = useState(false);
-  const [zoomImg, setZoomImg] = useState(null); // ESTADO DO ZOOM DO PAEE
+  const [salvando, setSalvando] = useState(false); // ESTADO DO BOTÃO ANTI-PÂNICO
+  const [zoomImg, setZoomImg] = useState(null); 
+
+  useEffect(() => {
+    if (!alunoData) {
+      try { localStorage.setItem('rascunhoPAEE', JSON.stringify(formData)); } 
+      catch (e) { console.warn("Rascunho cheio demais"); }
+    }
+  }, [formData, alunoData]);
+
+  const limparRascunho = () => {
+    if(window.confirm("Deseja apagar tudo e começar um formulário em branco?")) {
+      setFormData(estadoInicial);
+      localStorage.removeItem('rascunhoPAEE');
+    }
+  };
 
   const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   const handleCheckbox = (opcao) => setFormData(prev => ({ ...prev, opcoes: { ...(prev.opcoes || {}), [opcao]: !(prev.opcoes || {})[opcao] } }));
 
+  // FILTRO ANTI-ERRO E PROTEÇÃO DE TIMEOUT PARA PAEE
   const salvarNoBanco = async () => {
     if (!formData.aluno) { alert("Preencha o nome do aluno."); return; }
-    const dadosParaSalvar = { ...formData, criadoPor: formData.criadoPor || usuario.email };
-    const dbKey = alunoData?.dbKey || `${formData.aluno} (PAEE)`;
-    try { await set(ref(db, `alunos/${dbKey}`), dadosParaSalvar); alert(`✅ Documento PAEE salvo na nuvem!`); }
-    catch (error) { alert("Erro ao salvar."); }
+    setSalvando(true);
+    try {
+      const dadosParaSalvar = { ...formData, criadoPor: formData.criadoPor || usuario.email };
+      const nomeLimpo = formData.aluno.replace(/[.#$\[\]]/g, ' '); 
+      const dbKey = alunoData?.dbKey || `${nomeLimpo} (PAEE)`;
+      
+      await set(ref(db, `alunos/${dbKey}`), dadosParaSalvar); 
+      alert(`✅ Documento PAEE salvo na nuvem com sucesso!`); 
+      localStorage.removeItem('rascunhoPAEE');
+    } 
+    catch (error) { 
+      alert(`Erro de conexão com a escola! 🚨\nNão feche a página! Seus dados estão seguros no rascunho automático.\nTente salvar novamente em alguns segundos.`); 
+    }
+    finally {
+      setSalvando(false);
+    }
   };
 
+  // COMPRESSÃO AGRESSIVA (600px e 40% qualidade)
   const handleFileUpload = (e, campoID) => {
     const file = e.target.files[0]; if (!file) return;
     setAEnviar(true); const reader = new FileReader();
     reader.onload = (event) => {
       const img = new Image();
       img.onload = () => {
-        const canvas = document.createElement('canvas'); const scaleSize = 900 / img.width; canvas.width = 900; canvas.height = img.height * scaleSize;
+        const canvas = document.createElement('canvas'); const scaleSize = 600 / img.width; canvas.width = 600; canvas.height = img.height * scaleSize;
         const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        setFormData(prev => ({ ...prev, anexos: { ...(prev.anexos || {}), [campoID]: canvas.toDataURL('image/jpeg', 0.7) } }));
+        setFormData(prev => ({ ...prev, anexos: { ...(prev.anexos || {}), [campoID]: canvas.toDataURL('image/jpeg', 0.4) } }));
         setAEnviar(false);
       }; img.src = event.target.result;
     }; reader.readAsDataURL(file);
@@ -505,25 +495,18 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
     setFormData(prev => { const novosAnexos = { ...(prev.anexos || {}) }; delete novosAnexos[campoID]; return { ...prev, anexos: novosAnexos }; });
   };
 
-  // COMPONENTE DE FOTO COM ZOOM ADICIONADO
   const FileUpload = ({ label, campoID }) => (
     <div className="no-print print-block" style={s.uploadBox}>
       {formData.anexos && formData.anexos[campoID] ? (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <img 
-            src={formData.anexos[campoID]} 
-            alt="Anexo" 
-            title="Clique para ampliar"
-            onClick={() => setZoomImg(formData.anexos[campoID])}
-            style={{ maxWidth: '100%', maxHeight: '250px', borderRadius: '8px', border: '1px solid #a7f3d0', cursor: 'zoom-in' }} 
-          />
+          <img src={formData.anexos[campoID]} alt="Anexo" title="Clique para ampliar" onClick={() => setZoomImg(formData.anexos[campoID])} style={{ maxWidth: '100%', maxHeight: '250px', borderRadius: '8px', border: '1px solid #a7f3d0', cursor: 'zoom-in' }} />
           <button type="button" onClick={() => removerAnexo(campoID)} style={{ marginTop: '12px', padding: '8px 16px', backgroundColor: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}>Remover Imagem</button>
         </div>
       ) : (
         <>
           <span style={{ fontSize: '2rem' }}>📷</span><p style={{ margin: '8px 0', fontWeight: '600', color: '#059669' }}>{label}</p>
           <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, campoID)} disabled={aEnviar} />
-          {aEnviar && <span style={{color: '#ef4444', display: 'block', marginTop: '8px'}}>Processando...</span>}
+          {aEnviar && <span style={{color: '#ef4444', display: 'block', marginTop: '8px'}}>Comprimindo imagem...</span>}
         </>
       )}
     </div>
@@ -534,7 +517,13 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
       <GlobalCSS />
       <div className="glass-panel no-print" style={s.topbar}>
         <div><h2 style={{margin: 0, color: '#1e40af'}}>Editor de PAEE (Especialista AEE)</h2><p style={{margin:0, fontSize:'0.85rem'}}>Documento Oficial da Educação Especial</p></div>
-        <div style={s.btnGroup}><button style={s.btnSecondary} onClick={onVoltar}>← Voltar</button><button style={{...s.btnPrimary, background: '#1e40af'}} onClick={salvarNoBanco}>✓ Salvar Nuvem</button><button style={s.btnSuccess} onClick={()=>window.print()}>🖨️ Imprimir PDF</button></div>
+        <div style={s.btnGroup}>
+          <button style={s.btnSecondary} onClick={onVoltar} disabled={salvando}>← Voltar</button>
+          {!alunoData && <button style={{...s.btnSecondary, color: '#dc2626', borderColor: '#fecaca'}} onClick={limparRascunho} disabled={salvando}>Limpar Formulário</button>}
+          {/* BOTÃO ANTI-PÂNICO AQUI */}
+          <button style={{...s.btnPrimary, background: '#1e40af'}} onClick={salvarNoBanco} disabled={salvando}>{salvando ? '⏳ Salvando...' : '✓ Salvar Nuvem'}</button>
+          <button style={s.btnSuccess} onClick={()=>window.print()} disabled={salvando}>🖨️ Imprimir PDF</button>
+        </div>
       </div>
 
       <div className="print-only" style={{ textAlign: 'center', marginBottom: '30px', borderBottom: '2px solid black', paddingBottom: '15px' }}>
@@ -574,7 +563,6 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
           <Checkbox label="Nível 3" formData={formData} handleCheckbox={handleCheckbox} />
         </div>
 
-        {/* FOTO DO LAUDO MÉDICO */}
         <div className="print-input-group" style={{marginTop: '20px'}}>
           <label style={s.label}>Laudo Médico / Diagnóstico:</label>
           <FileUpload label="Anexar Foto do Laudo" campoID="laudo_medico" />
@@ -869,7 +857,6 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
         </div>
       </div>
 
-      {/* JANELA DE ZOOM DO PAEE */}
       {zoomImg && (
         <div className="no-print" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', cursor: 'zoom-out' }} onClick={() => setZoomImg(null)}>
           <img src={zoomImg} alt="Zoom" style={{ maxWidth: '90%', maxHeight: '90%', borderRadius: '8px', border: '3px solid white', boxShadow: '0 10px 25px rgba(0,0,0,0.5)' }} />
