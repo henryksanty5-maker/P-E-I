@@ -75,21 +75,10 @@ const GlobalCSS = () => (
   </style>
 );
 
-// --- COMPONENTE MÁGICO PARA TEXTOS GRANDES (RESOLVE O BUG DE CORTE DO CHROME) ---
 const TextareaPrint = ({ value, onChange, name, placeholder, minHeight = '120px' }) => (
   <div style={{ width: '100%' }}>
-    <textarea
-      className="no-print"
-      style={{ ...s.input, minHeight, width: '100%', resize: 'vertical' }}
-      name={name}
-      value={value || ''}
-      onChange={onChange}
-      placeholder={placeholder}
-    />
-    {/* Na impressão, a textarea esconde-se e entra esta DIV inteligente que quebra de página naturalmente! */}
-    <div className="print-only" style={{ whiteSpace: 'pre-wrap', borderBottom: '1px solid black', width: '100%', padding: '5px 0', minHeight: '25px', color: 'black' }}>
-      {value || ''}
-    </div>
+    <textarea className="no-print" style={{ ...s.input, minHeight, width: '100%', resize: 'vertical' }} name={name} value={value || ''} onChange={onChange} placeholder={placeholder} />
+    <div className="print-only" style={{ whiteSpace: 'pre-wrap', borderBottom: '1px solid black', width: '100%', padding: '5px 0', minHeight: '25px', color: 'black' }}>{value || ''}</div>
   </div>
 );
 
@@ -256,20 +245,24 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
   const handleCheckbox = (opcao) => setFormData(prev => ({ ...prev, opcoes: { ...(prev.opcoes || {}), [opcao]: !(prev.opcoes || {})[opcao] } }));
   const handleNestedText = (cat, chave, valor) => setFormData(prev => ({ ...prev, [cat]: { ...(prev[cat] || {}), [chave]: valor } }));
 
+  // ATUALIZAÇÃO: LIMPADOR DE FANTASMAS (UNDEFINED) E EXIBIÇÃO DO ERRO REAL
   const salvarNoBanco = async () => {
     if (!formData.aluno) { alert("Preencha o nome do aluno para salvar."); return; }
     setSalvando(true);
     try {
       const dadosParaSalvar = { ...formData, criadoPor: formData.criadoPor || usuario.email };
+      // Limpa dados vazios/undefined que quebram o Firebase
+      const dadosLimpos = JSON.parse(JSON.stringify(dadosParaSalvar)); 
+
       const nomeLimpo = formData.aluno.replace(/[.#$\[\]]/g, ' '); 
       const dbKey = alunoData?.dbKey || `${nomeLimpo} (PEI)`; 
       
-      await set(ref(db, `alunos/${dbKey}`), dadosParaSalvar); 
+      await set(ref(db, `alunos/${dbKey}`), dadosLimpos); 
       alert(`✅ PEI salvo na nuvem com sucesso!`); 
       localStorage.removeItem('rascunhoPEI');
     } 
     catch (error) { 
-      alert(`Erro de conexão com a escola! 🚨\nNão feche a página! Seus dados estão seguros no rascunho automático.\nTente salvar novamente em alguns segundos.`); 
+      alert(`Erro técnico reportado pelo Firebase: ${error.message}\n\n🚨 Fique tranquilo! Seus dados estão salvos no rascunho automático no seu computador.\nAtualize a página e tente salvar novamente em alguns instantes.`); 
     }
     finally {
       setSalvando(false);
@@ -360,14 +353,8 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
           <div className="print-input-group"><Checkbox label="Acompanhamento terapêutico?" formData={formData} handleCheckbox={handleCheckbox} /></div>
         </div>
         <div className="print-block" style={{...s.grid2, marginTop: '20px'}}>
-          <div className="print-input-group">
-            <label style={s.label}>Campo de Experiência: Linguagem</label>
-            <TextareaPrint name="campoLinguagem" value={formData.campoLinguagem} onChange={handleChange} placeholder="Objetivos para a área da linguagem..." />
-          </div>
-          <div className="print-input-group">
-            <label style={s.label}>Campo de Experiência: Matemática</label>
-            <TextareaPrint name="campoMatematica" value={formData.campoMatematica} onChange={handleChange} placeholder="Objetivos para a área da matemática..." />
-          </div>
+          <div className="print-input-group"><label style={s.label}>Campo de Experiência: Linguagem</label><TextareaPrint name="campoLinguagem" value={formData.campoLinguagem} onChange={handleChange} placeholder="Objetivos para a área da linguagem..." /></div>
+          <div className="print-input-group"><label style={s.label}>Campo de Experiência: Matemática</label><TextareaPrint name="campoMatematica" value={formData.campoMatematica} onChange={handleChange} placeholder="Objetivos para a área da matemática..." /></div>
         </div>
         <div className="print-block" style={{ marginTop: '20px' }}><h4>Especialistas que acompanham o aluno:</h4><div className="print-block" style={s.grid3}><Checkbox label="Neurologista" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Psicólogo" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Fonoaudiólogo" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Psicopedagogo" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Terapeuta Ocupacional" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="ABA / TCC" formData={formData} handleCheckbox={handleCheckbox} /></div></div>
       </div>
@@ -375,17 +362,13 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
       <div className="glass-panel card-print">
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>D</span> Avaliação Diagnóstica</div>
         <div className="print-block" style={s.grid2}>
-          <div className="print-input-group">
-            <label style={s.label}>Resultado da Avaliação</label>
-            <TextareaPrint name="resultadoAvaliacao" value={formData.resultadoAvaliacao} onChange={handleChange} placeholder="Descreva os resultados..." />
-          </div>
+          <div className="print-input-group"><label style={s.label}>Resultado da Avaliação</label><TextareaPrint name="resultadoAvaliacao" value={formData.resultadoAvaliacao} onChange={handleChange} placeholder="Descreva os resultados..." /></div>
           <div className="print-input-group"><label style={s.label}>Evidência / Avaliação</label><FileUpload label="Anexar Avaliação" campoID="avaliacao_diagnostica" /></div>
         </div>
       </div>
 
       <div className="glass-panel card-print">
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>E</span> Adaptações por Disciplina</div>
-        {/* MUDANÇA: Agora é uma coluna 100% larga (display: flex column) para caber o ano todo confortavelmente */}
         <div className="print-block" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {disciplinas.map((disc) => (
             <div key={disc} className="print-block" style={{ border: '1px solid rgba(203, 213, 225, 0.5)', padding: '18px', backgroundColor: 'rgba(209, 250, 229, 0.2)' }}>
@@ -395,13 +378,7 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
                 <Checkbox label={`${disc} - Introdução de conteúdos alternativos`} formData={formData} handleCheckbox={handleCheckbox} />
               </div>
               <label style={s.label}>Conteúdo Ministrado (Registro Anual):</label>
-              {/* TextareaPrint resolve o corte de página! */}
-              <TextareaPrint
-                minHeight="150px"
-                value={(formData.conteudos || {})[disc]}
-                onChange={(e) => handleNestedText('conteudos', disc, e.target.value)}
-                placeholder={`Registre aqui todo o conteúdo planejado para ${disc} ao longo do ano...`}
-              />
+              <TextareaPrint minHeight="150px" value={(formData.conteudos || {})[disc]} onChange={(e) => handleNestedText('conteudos', disc, e.target.value)} placeholder={`Registre aqui todo o conteúdo planejado para ${disc}...`} />
             </div>
           ))}
         </div>
@@ -414,20 +391,12 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
 
       <div className="glass-panel card-print">
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>I</span> Diário do Aluno (Acompanhamento)</div>
-        {/* MUDANÇA: Coluna 100% larga para o Diário também */}
         <div className="print-block" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {bimestres.map((bim, index) => (
             <div key={bim} className="print-block" style={{ border: '1px solid rgba(203, 213, 225, 0.5)', padding: '18px', backgroundColor: 'rgba(209, 250, 229, 0.2)' }}>
               <h4 style={{ margin: '0 0 12px 0', color: '#065f46' }}>{bim}</h4>
-              <TextareaPrint
-                minHeight="120px"
-                value={(formData.diario || {})[bim]}
-                onChange={(e) => handleNestedText('diario', bim, e.target.value)}
-                placeholder="Evolução, observações e conquistas..."
-              />
-              <div style={{ marginTop: '15px' }}>
-                <FileUpload label="Anexar Evidência / Atividade" campoID={`diario_bimestre_${index+1}`} />
-              </div>
+              <TextareaPrint minHeight="120px" value={(formData.diario || {})[bim]} onChange={(e) => handleNestedText('diario', bim, e.target.value)} placeholder="Evolução, observações e conquistas..." />
+              <div style={{ marginTop: '15px' }}><FileUpload label="Anexar Evidência / Atividade" campoID={`diario_bimestre_${index+1}`} /></div>
             </div>
           ))}
         </div>
@@ -435,10 +404,7 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
       
       <div className="glass-panel card-print section-break">
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>J</span> Revisão Final</div>
-        <div className="print-input-group">
-          <label style={s.label}>Resumo do Aluno</label>
-          <TextareaPrint name="resumoAluno" value={formData.resumoAluno} onChange={handleChange} placeholder="Considerações finais..." minHeight="150px" />
-        </div>
+        <div className="print-input-group"><label style={s.label}>Resumo do Aluno</label><TextareaPrint name="resumoAluno" value={formData.resumoAluno} onChange={handleChange} placeholder="Considerações finais..." minHeight="150px" /></div>
         <div className="print-only" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '60px' }}>
           {['Professor(a)', 'Coordenação', 'Responsáveis'].map(r => (<div key={r} style={{ flex: 1, textAlign: 'center', margin: '0 10px' }}><div style={{ borderBottom: '1px solid black', height: '30px' }}></div><p>{r}</p></div>))}
         </div>
@@ -454,7 +420,7 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
   );
 };
 
-// 4B. NOVO FORMULÁRIO: PAEE
+// 4B. NOVO FORMULÁRIO: PAEE 
 const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
   const estadoInicial = {
     tipoDocumento: 'PAEE', aluno: '', nascimento: '', sexo: '',
@@ -500,20 +466,23 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
   const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   const handleCheckbox = (opcao) => setFormData(prev => ({ ...prev, opcoes: { ...(prev.opcoes || {}), [opcao]: !(prev.opcoes || {})[opcao] } }));
 
+  // ATUALIZAÇÃO: LIMPADOR DE FANTASMAS (UNDEFINED) E EXIBIÇÃO DO ERRO REAL
   const salvarNoBanco = async () => {
     if (!formData.aluno) { alert("Preencha o nome do aluno."); return; }
     setSalvando(true);
     try {
       const dadosParaSalvar = { ...formData, criadoPor: formData.criadoPor || usuario.email };
+      const dadosLimpos = JSON.parse(JSON.stringify(dadosParaSalvar)); // Limpeza mágica anti-erro
+
       const nomeLimpo = formData.aluno.replace(/[.#$\[\]]/g, ' '); 
       const dbKey = alunoData?.dbKey || `${nomeLimpo} (PAEE)`;
       
-      await set(ref(db, `alunos/${dbKey}`), dadosParaSalvar); 
+      await set(ref(db, `alunos/${dbKey}`), dadosLimpos); 
       alert(`✅ Documento PAEE salvo na nuvem com sucesso!`); 
       localStorage.removeItem('rascunhoPAEE');
     } 
     catch (error) { 
-      alert(`Erro de conexão com a escola! 🚨\nNão feche a página! Seus dados estão seguros no rascunho automático.\nTente salvar novamente em alguns segundos.`); 
+      alert(`Erro técnico reportado pelo Firebase: ${error.message}\n\n🚨 Fique tranquilo! Seus dados estão salvos no rascunho automático no seu computador.\nAtualize a página e tente salvar novamente em alguns instantes.`); 
     }
     finally {
       setSalvando(false);
@@ -746,7 +715,7 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
           </div>
           <div className="print-input-group">
             <h4>Observações</h4>
-            <TextareaPrint name="observacoesEstrategias" value={formData.observacoesEstrategias} onChange={handleChange} placeholder="Observações sobre estratégias..." minHeight="150px" />
+            <TextareaPrint name="observacoesEstrategias" value={formData.observacoesEstrategias} onChange={handleChange} placeholder="Observações sobre estratégias e habilidades..." minHeight="180px" />
           </div>
         </div>
       </div>
@@ -893,7 +862,7 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
 
         <div className="print-block print-input-group" style={{marginTop: '25px'}}>
           <label style={s.label}>Relatório Final:</label>
-          <TextareaPrint name="objetivosAEE" value={formData.objetivosAEE} onChange={handleChange} minHeight="150px" placeholder="Descreva o relatório final..." />
+          <TextareaPrint name="objetivosAEE" value={formData.objetivosAEE} onChange={handleChange} placeholder="Descreva o relatório final do atendimento..." minHeight="150px" />
         </div>
       </div>
 
