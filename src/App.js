@@ -17,6 +17,19 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
+// 🌟 NOVO: VARREDURA PROFUNDA ANTI-ERROS DO FIREBASE 🌟
+// Esta função caça fantasmas e limpa qualquer ponto, barra ou símbolo proibido de Rascunhos antigos!
+const sanitizeFirebaseKeys = (obj) => {
+  if (typeof obj !== 'object' || obj === null) return obj;
+  if (Array.isArray(obj)) return obj.map(sanitizeFirebaseKeys);
+  const newObj = {};
+  for (let key in obj) {
+    const safeKey = key.replace(/[.#$\[\]\/]/g, '_');
+    newObj[safeKey] = sanitizeFirebaseKeys(obj[key]);
+  }
+  return newObj;
+};
+
 // --- ESTILOS MODERNOS ---
 const s = {
   page: { minHeight: '100vh', padding: '30px 20px', color: '#1e293b' },
@@ -82,12 +95,15 @@ const TextareaPrint = ({ value, onChange, name, placeholder, minHeight = '120px'
   </div>
 );
 
-const Checkbox = ({ label, formData, handleCheckbox }) => (
-  <label className="checkbox-row" style={s.checkboxContainer}>
-    <input type="checkbox" checked={!!(formData.opcoes || {})[label]} onChange={() => handleCheckbox(label)} style={{ width: '18px', height: '18px', accentColor: '#10b981' }} />
-    <span style={{ fontSize: '0.95rem', color: '#334155', fontWeight: '500' }}>{label}</span>
-  </label>
-);
+const Checkbox = ({ label, formData, handleCheckbox }) => {
+  const safeKey = label.replace(/[.#$\[\]\/]/g, '_');
+  return (
+    <label className="checkbox-row" style={s.checkboxContainer}>
+      <input type="checkbox" checked={!!(formData.opcoes || {})[safeKey]} onChange={() => handleCheckbox(safeKey)} style={{ width: '18px', height: '18px', accentColor: '#10b981' }} />
+      <span style={{ fontSize: '0.95rem', color: '#334155', fontWeight: '500' }}>{label}</span>
+    </label>
+  );
+};
 
 // 2. Tela de Login
 const LoginScreen = () => {
@@ -245,16 +261,16 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
   const handleCheckbox = (opcao) => setFormData(prev => ({ ...prev, opcoes: { ...(prev.opcoes || {}), [opcao]: !(prev.opcoes || {})[opcao] } }));
   const handleNestedText = (cat, chave, valor) => setFormData(prev => ({ ...prev, [cat]: { ...(prev[cat] || {}), [chave]: valor } }));
 
-  // ATUALIZAÇÃO: LIMPADOR DE FANTASMAS (UNDEFINED) E EXIBIÇÃO DO ERRO REAL
   const salvarNoBanco = async () => {
     if (!formData.aluno) { alert("Preencha o nome do aluno para salvar."); return; }
     setSalvando(true);
     try {
       const dadosParaSalvar = { ...formData, criadoPor: formData.criadoPor || usuario.email };
-      // Limpa dados vazios/undefined que quebram o Firebase
-      const dadosLimpos = JSON.parse(JSON.stringify(dadosParaSalvar)); 
+      
+      // 🌟 LIMPEZA PROFUNDA: Varrer o Rascunho inteiro e curar erros
+      const dadosLimpos = sanitizeFirebaseKeys(JSON.parse(JSON.stringify(dadosParaSalvar))); 
 
-      const nomeLimpo = formData.aluno.replace(/[.#$\[\]]/g, ' '); 
+      const nomeLimpo = formData.aluno.replace(/[.#$\[\]\/]/g, ' '); 
       const dbKey = alunoData?.dbKey || `${nomeLimpo} (PEI)`; 
       
       await set(ref(db, `alunos/${dbKey}`), dadosLimpos); 
@@ -466,15 +482,16 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
   const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   const handleCheckbox = (opcao) => setFormData(prev => ({ ...prev, opcoes: { ...(prev.opcoes || {}), [opcao]: !(prev.opcoes || {})[opcao] } }));
 
-  // ATUALIZAÇÃO: LIMPADOR DE FANTASMAS (UNDEFINED) E EXIBIÇÃO DO ERRO REAL
   const salvarNoBanco = async () => {
     if (!formData.aluno) { alert("Preencha o nome do aluno."); return; }
     setSalvando(true);
     try {
       const dadosParaSalvar = { ...formData, criadoPor: formData.criadoPor || usuario.email };
-      const dadosLimpos = JSON.parse(JSON.stringify(dadosParaSalvar)); // Limpeza mágica anti-erro
+      
+      // 🌟 LIMPEZA PROFUNDA: Varrer o Rascunho inteiro e curar erros
+      const dadosLimpos = sanitizeFirebaseKeys(JSON.parse(JSON.stringify(dadosParaSalvar))); 
 
-      const nomeLimpo = formData.aluno.replace(/[.#$\[\]]/g, ' '); 
+      const nomeLimpo = formData.aluno.replace(/[.#$\[\]\/]/g, ' '); 
       const dbKey = alunoData?.dbKey || `${nomeLimpo} (PAEE)`;
       
       await set(ref(db, `alunos/${dbKey}`), dadosLimpos); 
@@ -715,7 +732,7 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
           </div>
           <div className="print-input-group">
             <h4>Observações</h4>
-            <TextareaPrint name="observacoesEstrategias" value={formData.observacoesEstrategias} onChange={handleChange} placeholder="Observações sobre estratégias e habilidades..." minHeight="180px" />
+            <TextareaPrint name="observacoesEstrategias" value={formData.observacoesEstrategias} onChange={handleChange} placeholder="Observações sobre estratégias..." minHeight="180px" />
           </div>
         </div>
       </div>
