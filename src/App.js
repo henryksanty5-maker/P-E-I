@@ -144,7 +144,7 @@ const LoginScreen = () => {
 };
 
 // 3. Tela de Lista de Alunos
-const ListaAlunos = ({ onNovoPEI, onNovoPAEE, onEditar, onLogout, usuario }) => {
+const ListaAlunos = ({ onNovoPEI, onNovoPAEE, onEditar, onImportar, onLogout, usuario }) => {
   const [alunos, setAlunos] = useState([]);
 
   const listaEspecialistas = [
@@ -185,6 +185,7 @@ const ListaAlunos = ({ onNovoPEI, onNovoPAEE, onEditar, onLogout, usuario }) => 
         <div style={s.btnGroup}>
           <button style={s.btnPrimary} onClick={onNovoPEI}>+ Novo PEI</button>
           {isEspecialista && <button style={s.btnEspecial} onClick={onNovoPAEE}>+ Novo PAEE</button>}
+          {isEspecialista && <button style={{...s.btnEspecial, background: 'linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%)'}} onClick={onImportar}>📂 Importar do Word</button>}
           <button style={s.btnDanger} onClick={onLogout}>Sair</button>
         </div>
       </div>
@@ -270,16 +271,10 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
       // 🌟 LIMPEZA PROFUNDA: Varrer o Rascunho inteiro e curar erros
       const dadosLimpos = sanitizeFirebaseKeys(JSON.parse(JSON.stringify(dadosParaSalvar))); 
 
-      let dbRef;
-      if (alunoData?.dbKey) {
-        // Editando registro existente - mantém a chave original
-        dbRef = ref(db, `alunos/${alunoData.dbKey}`);
-      } else {
-        // Novo registro - gera chave única via push() para nunca sobrescrever outro aluno
-        dbRef = push(ref(db, 'alunos'));
-      }
+      const nomeLimpo = formData.aluno.replace(/[.#$\[\]\/]/g, ' '); 
+      const dbKey = alunoData?.dbKey || `${nomeLimpo} (PEI)`; 
       
-      await set(dbRef, dadosLimpos); 
+      await set(ref(db, `alunos/${dbKey}`), dadosLimpos); 
       alert(`✅ PEI salvo na nuvem com sucesso!`); 
       localStorage.removeItem('rascunhoPEI');
     } 
@@ -497,16 +492,10 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
       // 🌟 LIMPEZA PROFUNDA: Varrer o Rascunho inteiro e curar erros
       const dadosLimpos = sanitizeFirebaseKeys(JSON.parse(JSON.stringify(dadosParaSalvar))); 
 
-      let dbRef;
-      if (alunoData?.dbKey) {
-        // Editando registro existente - mantém a chave original
-        dbRef = ref(db, `alunos/${alunoData.dbKey}`);
-      } else {
-        // Novo registro - gera chave única via push() para nunca sobrescrever outro aluno
-        dbRef = push(ref(db, 'alunos'));
-      }
+      const nomeLimpo = formData.aluno.replace(/[.#$\[\]\/]/g, ' '); 
+      const dbKey = alunoData?.dbKey || `${nomeLimpo} (PAEE)`;
       
-      await set(dbRef, dadosLimpos); 
+      await set(ref(db, `alunos/${dbKey}`), dadosLimpos); 
       alert(`✅ Documento PAEE salvo na nuvem com sucesso!`); 
       localStorage.removeItem('rascunhoPAEE');
     } 
@@ -919,16 +908,332 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
   );
 };
 
+
+// 4C. IMPORTADOR DE PAEE via Word + Claude AI
+const ImportadorPAEE = ({ onVoltar, usuario }) => {
+  const [arquivos, setArquivos] = useState([]);
+  const [processando, setProcessando] = useState(false);
+  const [resultados, setResultados] = useState([]);
+  const [salvando, setSalvando] = useState({});
+  const [salvos, setSalvos] = useState({});
+  const [erros, setErros] = useState({});
+
+  const lerArquivoComoBase64 = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
+  const extrairDadosComClaude = async (base64, nomeArquivo) => {
+    const prompt = `Você é um assistente especializado em educação especial brasileira. 
+Analise este documento PAEE (Plano de Atendimento Educacional Especializado) e extraia TODOS os dados preenchidos.
+Retorne SOMENTE um JSON válido com esta estrutura exata (sem markdown, sem explicações):
+{
+  "tipoDocumento": "PAEE",
+  "aluno": "nome completo do aluno",
+  "nascimento": "data de nascimento",
+  "sexo": "Feminino ou Masculino",
+  "escola": "nome da escola",
+  "turno": "turno",
+  "turma": "turma",
+  "anoSerie": "ano/serie",
+  "informacoesEstudante": "texto da seção I - Informações do Estudante",
+  "estudoDeCaso": "texto do Estudo de Caso",
+  "aeeComplementar": "texto AEE complementar",
+  "medidasEscola": "medidas para superar barreiras",
+  "assuntoPreferencia": "assunto de preferência",
+  "quaisFixacao": "fixações do aluno",
+  "organizacaoAtendimentos": "quantos atendimentos por semana",
+  "organizacaoTempo": "tempo de atendimento",
+  "qualDiagnostico": "diagnóstico se houver",
+  "medicamentos": "medicações em uso",
+  "tipoFonte": "tipo de fonte preferida",
+  "qtdAtivImpressas": "quantidade de atividades impressas",
+  "qtdAtivCopiadas": "quantidade de atividades copiadas",
+  "observacoesEstrategias": "observações sobre estratégias",
+  "outrosAEE": "outros aspectos",
+  "objetivosAEE": "objetivos do AEE",
+  "opcoes": {
+    "Deficiência Intelectual": true_ou_false,
+    "Deficiência Visual": true_ou_false,
+    "Deficiência Física": true_ou_false,
+    "Deficiência Auditiva_Surdez": true_ou_false,
+    "Surdocegueira": true_ou_false,
+    "Deficiência Múltipla": true_ou_false,
+    "Altas habilidades_superdotação": true_ou_false,
+    "Transtorno do Espectro Autista": true_ou_false,
+    "Nível 1": true_ou_false,
+    "Nível 2": true_ou_false,
+    "Nível 3": true_ou_false,
+    "Recursos Pedagógicos_ de Acessibilidade e de T_A_": true_ou_false,
+    "Professor de Libras ou Professor interlocutor de Libras": true_ou_false,
+    "Professor Instrutor-mediador ou Guia-intérprete": true_ou_false,
+    "Serviço de Profissional de Apoio Escolar": true_ou_false,
+    "Alimentação_ no cotidiano escolar": true_ou_false,
+    "Higiene pessoal_ íntima e bucal _ uso do banheiro": true_ou_false,
+    "Locomoção nos ambientes escolares": true_ou_false,
+    "Autocuidado no cotidiano escolar": true_ou_false,
+    "Mediação e auxílio à superação de desafios escolares": true_ou_false,
+    "Suporte à comunicação e à interação social": true_ou_false,
+    "Instrumentos para oportunizar a socialização": true_ou_false,
+    "Apresenta fala": true_ou_false,
+    "Tem comunicação verbal": true_ou_false,
+    "Apresenta comunicação não verbal": true_ou_false,
+    "Apresenta linguagem oral constituída": true_ou_false,
+    "Apresenta ecolalias": true_ou_false,
+    "Aponta (para expressar o que quer e o que não quer)": true_ou_false,
+    "Faz uso de comunicação alternativa e aumentativa": true_ou_false,
+    "Usa gestos para se comunicar": true_ou_false,
+    "Brinca com os colegas": true_ou_false,
+    "Prefere adultos": true_ou_false,
+    "Resiste a interação e procura isolar-se": true_ou_false,
+    "Imita os colegas": true_ou_false,
+    "Apresenta Autoagressão": true_ou_false,
+    "Apresenta fixação por brinquedos_objetos": true_ou_false,
+    "Veste-se sozinho": true_ou_false,
+    "Faz uso do banheiro com autonomia": true_ou_false,
+    "Alimenta-se com autonomia": true_ou_false,
+    "Individual": true_ou_false,
+    "Coletivo": true_ou_false,
+    "Apoio": true_ou_false,
+    "Avaliação": true_ou_false,
+    "Não tem diagnóstico": true_ou_false,
+    "Sim_ tem diagnóstico": true_ou_false,
+    "Permanece sentado na cadeira ou no chão": true_ou_false,
+    "Necessita de uma mediação do educador_mediador ou terapeuta": true_ou_false,
+    "Atenção": true_ou_false,
+    "Concentração": true_ou_false,
+    "Sociabilidade": true_ou_false,
+    "Coordenação motora grossa": true_ou_false,
+    "Coordenação motora fina": true_ou_false,
+    "Coordenação grafomotora": true_ou_false,
+    "Compreensão verbal": true_ou_false,
+    "Compreensão do Alfabeto": true_ou_false,
+    "Compreensão dos Números": true_ou_false,
+    "Compreensão da Leitura": true_ou_false,
+    "Memória visual": true_ou_false,
+    "Memória auditiva": true_ou_false
+  }
+}
+Preencha apenas os campos que estiverem marcados ou preenchidos no documento. Para checkboxes não marcados use false. Para campos de texto vazios use string vazia "".`;
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4000,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
+            { type: 'text', text: prompt }
+          ]
+        }]
+      })
+    });
+
+    if (!response.ok) throw new Error(`Erro na API: ${response.status}`);
+    const data = await response.json();
+    const texto = data.content[0]?.text || '';
+    const jsonMatch = texto.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('Claude não retornou JSON válido');
+    return JSON.parse(jsonMatch[0]);
+  };
+
+  const processarArquivos = async () => {
+    if (arquivos.length === 0) { alert('Selecione ao menos um arquivo Word (.docx) ou PDF.'); return; }
+    setProcessando(true);
+    setResultados([]);
+    const novosResultados = [];
+
+    for (let i = 0; i < arquivos.length; i++) {
+      const arquivo = arquivos[i];
+      try {
+        const base64 = await lerArquivoComoBase64(arquivo);
+        const mediaType = arquivo.name.endsWith('.pdf') ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+        const dados = await extrairDadosComClaude(base64, arquivo.name);
+        novosResultados.push({ 
+          nomeArquivo: arquivo.name, 
+          dados: { ...dados, criadoPor: usuario.email }, 
+          status: 'ok' 
+        });
+      } catch (err) {
+        novosResultados.push({ nomeArquivo: arquivo.name, dados: null, status: 'erro', mensagem: err.message });
+      }
+      setResultados([...novosResultados]);
+    }
+    setProcessando(false);
+  };
+
+  const salvarAluno = async (idx) => {
+    const resultado = resultados[idx];
+    if (!resultado?.dados) return;
+    setSalvando(prev => ({ ...prev, [idx]: true }));
+    try {
+      const sanitize = (obj) => {
+        if (typeof obj !== 'object' || obj === null) return obj;
+        if (Array.isArray(obj)) return obj.map(sanitize);
+        const out = {};
+        for (let k in obj) { out[k.replace(/[.#$\[\]\/]/g, '_')] = sanitize(obj[k]); }
+        return out;
+      };
+      const dadosLimpos = sanitize(JSON.parse(JSON.stringify(resultado.dados)));
+      const novoRef = push(ref(db, 'alunos'));
+      await set(novoRef, dadosLimpos);
+      setSalvos(prev => ({ ...prev, [idx]: true }));
+    } catch (err) {
+      setErros(prev => ({ ...prev, [idx]: err.message }));
+    }
+    setSalvando(prev => ({ ...prev, [idx]: false }));
+  };
+
+  const salvarTodos = async () => {
+    for (let i = 0; i < resultados.length; i++) {
+      if (resultados[i].status === 'ok' && !salvos[i]) await salvarAluno(i);
+    }
+  };
+
+  const okCount = resultados.filter(r => r.status === 'ok').length;
+  const salvoCount = Object.values(salvos).filter(Boolean).length;
+
+  return (
+    <div style={s.page}>
+      <GlobalCSS />
+      <div className="glass-panel no-print" style={s.topbar}>
+        <div>
+          <h2 style={{ margin: 0, color: '#7c3aed' }}>📂 Importar PAEEs do Word / PDF</h2>
+          <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>O Claude lê os documentos e cadastra automaticamente</p>
+        </div>
+        <div style={s.btnGroup}>
+          <button style={s.btnSecondary} onClick={onVoltar}>← Voltar</button>
+          {okCount > 0 && salvoCount < okCount && (
+            <button style={{ ...s.btnPrimary, background: '#7c3aed' }} onClick={salvarTodos}>
+              ✅ Salvar Todos ({okCount - salvoCount} pendentes)
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="glass-panel" style={{ ...s.card, borderLeft: '4px solid #7c3aed' }}>
+        <div style={s.cardHeader}><span style={{ ...s.badge, background: '#ede9fe', color: '#7c3aed' }}>1</span> Selecione os arquivos PAEE</div>
+        <p style={{ color: '#64748b', marginBottom: '16px', fontSize: '0.95rem' }}>
+          Selecione um ou vários arquivos <strong>.docx</strong> ou <strong>.pdf</strong> dos PAEEs preenchidos. O Claude irá ler cada documento e extrair os dados automaticamente.
+        </p>
+        <input
+          type="file"
+          accept=".docx,.pdf"
+          multiple
+          onChange={(e) => setArquivos(Array.from(e.target.files))}
+          style={{ display: 'block', marginBottom: '16px', fontSize: '0.95rem' }}
+        />
+        {arquivos.length > 0 && (
+          <div style={{ marginBottom: '16px' }}>
+            <p style={{ fontWeight: '600', marginBottom: '8px' }}>{arquivos.length} arquivo(s) selecionado(s):</p>
+            {arquivos.map((f, i) => (
+              <div key={i} style={{ fontSize: '0.85rem', color: '#334155', padding: '4px 8px', background: '#f8fafc', borderRadius: '4px', marginBottom: '4px' }}>
+                📄 {f.name} <span style={{ color: '#94a3b8' }}>({(f.size / 1024).toFixed(0)} KB)</span>
+              </div>
+            ))}
+          </div>
+        )}
+        <button
+          style={{ ...s.btnPrimary, background: processando ? '#94a3b8' : '#7c3aed', padding: '12px 28px', fontSize: '1rem' }}
+          onClick={processarArquivos}
+          disabled={processando || arquivos.length === 0}
+        >
+          {processando ? '⏳ Lendo documentos com IA...' : '🤖 Extrair dados com Claude'}
+        </button>
+      </div>
+
+      {processando && (
+        <div className="glass-panel" style={{ ...s.card, textAlign: 'center', padding: '40px' }}>
+          <div style={{ fontSize: '2.5rem', marginBottom: '16px' }}>🧠</div>
+          <p style={{ fontWeight: '600', fontSize: '1.1rem', color: '#7c3aed' }}>Claude está lendo os PAEEs...</p>
+          <p style={{ color: '#64748b' }}>Isso pode levar alguns segundos por arquivo. Por favor, aguarde.</p>
+        </div>
+      )}
+
+      {resultados.length > 0 && (
+        <div>
+          <h2 style={{ color: '#0f172a', marginBottom: '20px', fontSize: '1.4rem' }}>
+            Resultados da Extração — {salvoCount}/{okCount} salvos
+          </h2>
+          {resultados.map((res, idx) => (
+            <div key={idx} className="glass-panel" style={{ ...s.card, borderLeft: res.status === 'ok' ? (salvos[idx] ? '4px solid #10b981' : '4px solid #7c3aed') : '4px solid #ef4444', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+                <div>
+                  <p style={{ margin: '0 0 4px 0', fontWeight: '700', fontSize: '1rem' }}>📄 {res.nomeArquivo}</p>
+                  {res.status === 'ok' && <p style={{ margin: 0, fontSize: '1.2rem', fontWeight: '700', color: '#059669' }}>{res.dados.aluno || '(nome não identificado)'}</p>}
+                  {res.status === 'erro' && <p style={{ margin: 0, color: '#dc2626', fontSize: '0.9rem' }}>❌ Erro: {res.mensagem}</p>}
+                </div>
+                {res.status === 'ok' && (
+                  <div>
+                    {salvos[idx] ? (
+                      <span style={{ background: '#d1fae5', color: '#065f46', padding: '8px 16px', borderRadius: '8px', fontWeight: '600' }}>✅ Salvo no Firebase!</span>
+                    ) : (
+                      <button
+                        style={{ ...s.btnPrimary, background: '#7c3aed' }}
+                        onClick={() => salvarAluno(idx)}
+                        disabled={salvando[idx]}
+                      >
+                        {salvando[idx] ? '⏳ Salvando...' : '💾 Salvar no Firebase'}
+                      </button>
+                    )}
+                    {erros[idx] && <p style={{ color: '#dc2626', fontSize: '0.8rem', marginTop: '6px' }}>Erro: {erros[idx]}</p>}
+                  </div>
+                )}
+              </div>
+
+              {res.status === 'ok' && res.dados && (
+                <div style={{ marginTop: '20px', background: '#f8fafc', borderRadius: '10px', padding: '16px' }}>
+                  <div style={s.grid3}>
+                    <div><span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: '600' }}>NASCIMENTO</span><p style={{ margin: '4px 0 0 0', fontWeight: '500' }}>{res.dados.nascimento || '—'}</p></div>
+                    <div><span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: '600' }}>TURMA / ANO</span><p style={{ margin: '4px 0 0 0', fontWeight: '500' }}>{res.dados.turma || '—'} · {res.dados.anoSerie || '—'}</p></div>
+                    <div><span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: '600' }}>DIAGNÓSTICO</span><p style={{ margin: '4px 0 0 0', fontWeight: '500' }}>{res.dados.qualDiagnostico || '—'}</p></div>
+                    <div><span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: '600' }}>TURNO</span><p style={{ margin: '4px 0 0 0', fontWeight: '500' }}>{res.dados.turno || '—'}</p></div>
+                    <div><span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: '600' }}>ATENDIMENTOS</span><p style={{ margin: '4px 0 0 0', fontWeight: '500' }}>{res.dados.organizacaoAtendimentos || '—'}</p></div>
+                    <div><span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: '600' }}>TEMPO</span><p style={{ margin: '4px 0 0 0', fontWeight: '500' }}>{res.dados.organizacaoTempo || '—'}</p></div>
+                  </div>
+                  {res.dados.opcoes && Object.keys(res.dados.opcoes).filter(k => res.dados.opcoes[k]).length > 0 && (
+                    <div style={{ marginTop: '14px' }}>
+                      <span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: '600' }}>OPÇÕES MARCADAS</span>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '6px' }}>
+                        {Object.keys(res.dados.opcoes).filter(k => res.dados.opcoes[k]).map(k => (
+                          <span key={k} style={{ background: '#ede9fe', color: '#7c3aed', padding: '3px 10px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: '500' }}>{k.replace(/_/g, ' ')}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {res.dados.objetivosAEE && (
+                    <div style={{ marginTop: '14px' }}>
+                      <span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: '600' }}>OBJETIVOS DO AEE</span>
+                      <p style={{ margin: '4px 0 0 0', fontSize: '0.9rem', color: '#334155' }}>{res.dados.objetivosAEE.substring(0, 200)}{res.dados.objetivosAEE.length > 200 ? '...' : ''}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 // 5. COMPONENTE PRINCIPAL
 export default function App() {
   const [usuario, setUsuario] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [telaAtiva, setTelaAtiva] = useState('lista'); 
   const [alunoEditando, setAlunoEditando] = useState(null);
+  const [telaImportar, setTelaImportar] = useState(false);
 
   useEffect(() => { const unsubscribe = onAuthStateChanged(auth, (user) => { setUsuario(user); setCarregando(false); }); return () => unsubscribe(); }, []);
   
   const fazerLogout = () => signOut(auth);
+  const irParaImportar = () => { setTelaImportar(true); setTelaAtiva('lista'); };
   const irParaNovoPEI = () => { localStorage.removeItem('rascunhoPEI'); setAlunoEditando(null); setTelaAtiva('formularioPEI'); };
   const irParaNovoPAEE = () => { localStorage.removeItem('rascunhoPAEE'); setAlunoEditando(null); setTelaAtiva('formularioPAEE'); };
   const irParaEditar = (aluno) => { setAlunoEditando(aluno); setTelaAtiva(aluno.tipoDocumento === 'PAEE' ? 'formularioPAEE' : 'formularioPEI'); };
@@ -936,7 +1241,8 @@ export default function App() {
   if (carregando) return <div style={{ textAlign: 'center', marginTop: '50px' }}>A carregar o ambiente pedagógico...</div>;
   if (!usuario) return <LoginScreen />;
   
-  if (telaAtiva === 'lista') return <ListaAlunos onNovoPEI={irParaNovoPEI} onNovoPAEE={irParaNovoPAEE} onEditar={irParaEditar} onLogout={fazerLogout} usuario={usuario} />;
+  if (telaImportar) return <ImportadorPAEE onVoltar={() => setTelaImportar(false)} usuario={usuario} />;
+  if (telaAtiva === 'lista') return <ListaAlunos onNovoPEI={irParaNovoPEI} onNovoPAEE={irParaNovoPAEE} onEditar={irParaEditar} onImportar={irParaImportar} onLogout={fazerLogout} usuario={usuario} />;
   if (telaAtiva === 'formularioPAEE') return <SistemaPAEE alunoData={alunoEditando} onVoltar={() => setTelaAtiva('lista')} usuario={usuario} />;
   return <SistemaPEI alunoData={alunoEditando} onVoltar={() => setTelaAtiva('lista')} usuario={usuario} />;
 }
