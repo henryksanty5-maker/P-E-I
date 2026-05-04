@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from 'firebase/auth';
-import { getDatabase, ref, set, onValue, remove } from 'firebase/database';
+import { getDatabase, ref, set, push, onValue, remove } from 'firebase/database';
 
 // 1. Configuração do Firebase
 const firebaseConfig = {
@@ -270,10 +270,16 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
       // 🌟 LIMPEZA PROFUNDA: Varrer o Rascunho inteiro e curar erros
       const dadosLimpos = sanitizeFirebaseKeys(JSON.parse(JSON.stringify(dadosParaSalvar))); 
 
-      const nomeLimpo = formData.aluno.replace(/[.#$\[\]\/]/g, ' '); 
-      const dbKey = alunoData?.dbKey || `${nomeLimpo} (PEI)`; 
+      let dbRef;
+      if (alunoData?.dbKey) {
+        // Editando registro existente - mantém a chave original
+        dbRef = ref(db, `alunos/${alunoData.dbKey}`);
+      } else {
+        // Novo registro - gera chave única via push() para nunca sobrescrever outro aluno
+        dbRef = push(ref(db, 'alunos'));
+      }
       
-      await set(ref(db, `alunos/${dbKey}`), dadosLimpos); 
+      await set(dbRef, dadosLimpos); 
       alert(`✅ PEI salvo na nuvem com sucesso!`); 
       localStorage.removeItem('rascunhoPEI');
     } 
@@ -491,10 +497,16 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
       // 🌟 LIMPEZA PROFUNDA: Varrer o Rascunho inteiro e curar erros
       const dadosLimpos = sanitizeFirebaseKeys(JSON.parse(JSON.stringify(dadosParaSalvar))); 
 
-      const nomeLimpo = formData.aluno.replace(/[.#$\[\]\/]/g, ' '); 
-      const dbKey = alunoData?.dbKey || `${nomeLimpo} (PAEE)`;
+      let dbRef;
+      if (alunoData?.dbKey) {
+        // Editando registro existente - mantém a chave original
+        dbRef = ref(db, `alunos/${alunoData.dbKey}`);
+      } else {
+        // Novo registro - gera chave única via push() para nunca sobrescrever outro aluno
+        dbRef = push(ref(db, 'alunos'));
+      }
       
-      await set(ref(db, `alunos/${dbKey}`), dadosLimpos); 
+      await set(dbRef, dadosLimpos); 
       alert(`✅ Documento PAEE salvo na nuvem com sucesso!`); 
       localStorage.removeItem('rascunhoPAEE');
     } 
@@ -917,8 +929,8 @@ export default function App() {
   useEffect(() => { const unsubscribe = onAuthStateChanged(auth, (user) => { setUsuario(user); setCarregando(false); }); return () => unsubscribe(); }, []);
   
   const fazerLogout = () => signOut(auth);
-  const irParaNovoPEI = () => { setAlunoEditando(null); setTelaAtiva('formularioPEI'); };
-  const irParaNovoPAEE = () => { setAlunoEditando(null); setTelaAtiva('formularioPAEE'); };
+  const irParaNovoPEI = () => { localStorage.removeItem('rascunhoPEI'); setAlunoEditando(null); setTelaAtiva('formularioPEI'); };
+  const irParaNovoPAEE = () => { localStorage.removeItem('rascunhoPAEE'); setAlunoEditando(null); setTelaAtiva('formularioPAEE'); };
   const irParaEditar = (aluno) => { setAlunoEditando(aluno); setTelaAtiva(aluno.tipoDocumento === 'PAEE' ? 'formularioPAEE' : 'formularioPEI'); };
 
   if (carregando) return <div style={{ textAlign: 'center', marginTop: '50px' }}>A carregar o ambiente pedagógico...</div>;
