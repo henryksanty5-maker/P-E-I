@@ -1001,7 +1001,7 @@ Retorne SOMENTE um objeto JSON válido, sem markdown, sem explicações, apenas 
 Preencha os campos de texto com o conteúdo encontrado no documento. Para checkboxes marcados com X ou preenchidos use true, para desmarcados use false.`;
 
 // 4C. IMPORTADOR DE PAEE via Word + Claude AI
-const GEMINI_MODEL = 'gemini-1.5-flash';
+const GEMINI_MODEL = 'gemini-2.0-flash';
 const GEMINI_URL = (key) => `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${key}`;
 
 // Carrega mammoth.js dinamicamente para ler arquivos .docx
