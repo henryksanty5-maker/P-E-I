@@ -1001,7 +1001,8 @@ Retorne SOMENTE um objeto JSON válido, sem markdown, sem explicações, apenas 
 Preencha os campos de texto com o conteúdo encontrado no documento. Para checkboxes marcados com X ou preenchidos use true, para desmarcados use false.`;
 
 // 4C. IMPORTADOR DE PAEE via Word + Claude AI
-const ANTHROPIC_VERSION = '2023-06-01';
+const GEMINI_MODEL = 'gemini-1.5-flash';
+const GEMINI_URL = (key) => `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${key}`;
 
 // Carrega mammoth.js dinamicamente para ler arquivos .docx
 const carregarMammoth = () => new Promise((resolve, reject) => {
@@ -1013,6 +1014,98 @@ const carregarMammoth = () => new Promise((resolve, reject) => {
   document.head.appendChild(script);
 });
 
+const PROMPT_EXTRACAO = `Você é um assistente especializado em educação especial brasileira.
+Analise este documento PAEE e extraia TODOS os dados preenchidos.
+Retorne SOMENTE um objeto JSON válido, sem markdown, sem blocos de código, apenas o JSON puro:
+{
+  "tipoDocumento": "PAEE",
+  "aluno": "",
+  "nascimento": "",
+  "sexo": "",
+  "escola": "",
+  "turno": "",
+  "turma": "",
+  "anoSerie": "",
+  "informacoesEstudante": "",
+  "estudoDeCaso": "",
+  "aeeComplementar": "",
+  "medidasEscola": "",
+  "assuntoPreferencia": "",
+  "quaisFixacao": "",
+  "organizacaoAtendimentos": "",
+  "organizacaoTempo": "",
+  "qualDiagnostico": "",
+  "medicamentos": "",
+  "tipoFonte": "",
+  "qtdAtivImpressas": "",
+  "qtdAtivCopiadas": "",
+  "observacoesEstrategias": "",
+  "outrosAEE": "",
+  "objetivosAEE": "",
+  "opcoes": {
+    "Deficiência Intelectual": false,
+    "Deficiência Visual": false,
+    "Deficiência Física": false,
+    "Deficiência Auditiva_Surdez": false,
+    "Surdocegueira": false,
+    "Deficiência Múltipla": false,
+    "Altas habilidades_superdotação": false,
+    "Transtorno do Espectro Autista": false,
+    "Nível 1": false,
+    "Nível 2": false,
+    "Nível 3": false,
+    "Recursos Pedagógicos_ de Acessibilidade e de T_A_": false,
+    "Professor de Libras ou Professor interlocutor de Libras": false,
+    "Professor Instrutor-mediador ou Guia-intérprete": false,
+    "Serviço de Profissional de Apoio Escolar": false,
+    "Alimentação_ no cotidiano escolar": false,
+    "Higiene pessoal_ íntima e bucal _ uso do banheiro": false,
+    "Locomoção nos ambientes escolares": false,
+    "Autocuidado no cotidiano escolar": false,
+    "Mediação e auxílio à superação de desafios escolares": false,
+    "Suporte à comunicação e à interação social": false,
+    "Instrumentos para oportunizar a socialização": false,
+    "Apresenta fala": false,
+    "Tem comunicação verbal": false,
+    "Apresenta comunicação não verbal": false,
+    "Apresenta ecolalias": false,
+    "Aponta (para expressar o que quer e o que não quer)": false,
+    "Faz uso de comunicação alternativa e aumentativa": false,
+    "Usa gestos para se comunicar": false,
+    "Brinca com os colegas": false,
+    "Prefere adultos": false,
+    "Resiste a interação e procura isolar-se": false,
+    "Imita os colegas": false,
+    "Apresenta Autoagressão": false,
+    "Apresenta fixação por brinquedos_objetos": false,
+    "Veste-se sozinho": false,
+    "Faz uso do banheiro com autonomia": false,
+    "Alimenta-se com autonomia": false,
+    "Individual": false,
+    "Coletivo": false,
+    "Apoio": false,
+    "Avaliação": false,
+    "Sim_ tem diagnóstico": false,
+    "Não tem diagnóstico": false,
+    "Permanece sentado na cadeira ou no chão": false,
+    "Necessita de uma mediação do educador_mediador ou terapeuta": false,
+    "Atenção": false,
+    "Concentração": false,
+    "Sociabilidade": false,
+    "Coordenação motora grossa": false,
+    "Coordenação motora fina": false,
+    "Coordenação grafomotora": false,
+    "Compreensão verbal": false,
+    "Compreensão do Alfabeto": false,
+    "Compreensão dos Números": false,
+    "Compreensão da Leitura": false,
+    "Memória visual": false,
+    "Memória auditiva": false
+  }
+}
+Preencha os campos de texto com o conteúdo encontrado. Para checkboxes marcados com X use true, desmarcados use false.`;
+
+// 4C. IMPORTADOR DE PAEE via Gemini AI (gratuito)
 const ImportadorPAEE = ({ onVoltar, usuario }) => {
   const [arquivos, setArquivos] = useState([]);
   const [processando, setProcessando] = useState(false);
@@ -1020,15 +1113,14 @@ const ImportadorPAEE = ({ onVoltar, usuario }) => {
   const [salvando, setSalvando] = useState({});
   const [salvos, setSalvos] = useState({});
   const [erros, setErros] = useState({});
-  const [apiKey, setApiKey] = useState(() => localStorage.getItem('anthropic_api_key') || '');
+  const [apiKey, setApiKey] = useState(() => localStorage.getItem('gemini_api_key') || '');
   const [mostrarChave, setMostrarChave] = useState(false);
 
   const salvarChave = (val) => {
     setApiKey(val);
-    localStorage.setItem('anthropic_api_key', val);
+    localStorage.setItem('gemini_api_key', val);
   };
 
-  // Extrai texto de .docx usando mammoth.js
   const lerDocx = async (file) => {
     const mammoth = await carregarMammoth();
     const arrayBuffer = await file.arrayBuffer();
@@ -1036,68 +1128,53 @@ const ImportadorPAEE = ({ onVoltar, usuario }) => {
     return result.value;
   };
 
-  // Lê PDF como base64
-  const lerPdfBase64 = (file) => new Promise((resolve, reject) => {
+  const lerBase64 = (file) => new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => resolve(e.target.result.split(',')[1]);
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
 
-  const extrairDadosComClaude = async (arquivo) => {
-    if (!apiKey.trim()) throw new Error('Chave da API não configurada. Preencha o campo acima.');
+  const extrairDadosComGemini = async (arquivo) => {
+    if (!apiKey.trim()) throw new Error('Chave da API não configurada.');
 
     const isPdf = arquivo.name.toLowerCase().endsWith('.pdf');
-    const isDocx = arquivo.name.toLowerCase().endsWith('.docx');
-
-    let messageContent;
+    let parts;
 
     if (isPdf) {
-      const base64 = await lerPdfBase64(arquivo);
-      messageContent = [
-        { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
-        { type: 'text', text: PROMPT_EXTRACAO }
-      ];
-    } else if (isDocx) {
-      const texto = await lerDocx(arquivo);
-      if (!texto.trim()) throw new Error('Arquivo .docx vazio ou sem texto legível.');
-      messageContent = [
-        { type: 'text', text: `CONTEÚDO DO DOCUMENTO PAEE:\n\n${texto}\n\n---\n\n${PROMPT_EXTRACAO}` }
+      const base64 = await lerBase64(arquivo);
+      parts = [
+        { text: PROMPT_EXTRACAO },
+        { inline_data: { mime_type: 'application/pdf', data: base64 } }
       ];
     } else {
-      throw new Error('Formato não suportado. Use .docx ou .pdf');
+      const texto = await lerDocx(arquivo);
+      if (!texto.trim()) throw new Error('Arquivo .docx vazio ou sem texto legível.');
+      parts = [{ text: `DOCUMENTO PAEE:\n\n${texto}\n\n---\n\n${PROMPT_EXTRACAO}` }];
     }
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch(GEMINI_URL(apiKey.trim()), {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey.trim(),
-        'anthropic-version': ANTHROPIC_VERSION,
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 4000,
-        messages: [{ role: 'user', content: messageContent }]
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts }] })
     });
 
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
-      throw new Error(`API retornou ${response.status}: ${err?.error?.message || response.statusText}`);
+      throw new Error(`Gemini retornou ${response.status}: ${err?.error?.message || response.statusText}`);
     }
 
     const data = await response.json();
-    const texto = data.content?.find(b => b.type === 'text')?.text || '';
-    const jsonMatch = texto.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('Resposta inválida da IA. Tente novamente.');
+    const texto = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const limpo = texto.replace(/```json|```/g, '').trim();
+    const jsonMatch = limpo.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('IA não retornou JSON válido. Tente novamente.');
     return JSON.parse(jsonMatch[0]);
   };
 
   const processarArquivos = async () => {
     if (arquivos.length === 0) { alert('Selecione ao menos um arquivo.'); return; }
-    if (!apiKey.trim()) { alert('Preencha a Chave da API da Anthropic antes de continuar.'); return; }
+    if (!apiKey.trim()) { alert('Cole a sua chave do Google AI Studio antes de continuar.'); return; }
     setProcessando(true);
     setResultados([]);
     const novosResultados = [];
@@ -1105,7 +1182,7 @@ const ImportadorPAEE = ({ onVoltar, usuario }) => {
     for (let i = 0; i < arquivos.length; i++) {
       const arquivo = arquivos[i];
       try {
-        const dados = await extrairDadosComClaude(arquivo);
+        const dados = await extrairDadosComGemini(arquivo);
         novosResultados.push({ nomeArquivo: arquivo.name, dados: { ...dados, criadoPor: usuario.email }, status: 'ok' });
       } catch (err) {
         novosResultados.push({ nomeArquivo: arquivo.name, dados: null, status: 'erro', mensagem: err.message });
@@ -1152,7 +1229,7 @@ const ImportadorPAEE = ({ onVoltar, usuario }) => {
       <div className="glass-panel no-print" style={s.topbar}>
         <div>
           <h2 style={{ margin: 0, color: '#7c3aed' }}>📂 Importar PAEEs do Word / PDF</h2>
-          <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>O Claude lê e cadastra automaticamente</p>
+          <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>Powered by Google Gemini (gratuito)</p>
         </div>
         <div style={s.btnGroup}>
           <button style={s.btnSecondary} onClick={onVoltar}>← Voltar</button>
@@ -1164,34 +1241,35 @@ const ImportadorPAEE = ({ onVoltar, usuario }) => {
         </div>
       </div>
 
-      {/* Configuração da API Key */}
-      <div className="glass-panel" style={{ ...s.card, borderLeft: '4px solid #f59e0b', marginBottom: '20px' }}>
-        <div style={s.cardHeader}><span style={{ ...s.badge, background: '#fef3c7', color: '#92400e' }}>🔑</span> Chave da API Anthropic</div>
-        <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '12px' }}>
-          Necessária para que o Claude leia os documentos. Obtenha em{' '}
-          <a href="https://console.anthropic.com" target="_blank" rel="noreferrer" style={{ color: '#7c3aed' }}>console.anthropic.com</a>.
-          A chave fica salva no seu navegador.
+      {/* Chave da API */}
+      <div className="glass-panel" style={{ ...s.card, borderLeft: '4px solid #f59e0b' }}>
+        <div style={s.cardHeader}><span style={{ ...s.badge, background: '#fef3c7', color: '#92400e' }}>🔑</span> Chave do Google AI Studio (gratuita)</div>
+        <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '4px' }}>
+          Obtenha gratuitamente em{' '}
+          <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" style={{ color: '#7c3aed', fontWeight: '600' }}>
+            aistudio.google.com/app/apikey
+          </a>{' '}→ clique em <strong>"Create API Key"</strong>. A chave fica salva no seu navegador.
         </p>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginTop: '12px' }}>
           <input
             type={mostrarChave ? 'text' : 'password'}
-            placeholder="sk-ant-api03-..."
+            placeholder="AIzaSy..."
             value={apiKey}
             onChange={(e) => salvarChave(e.target.value)}
             style={{ ...s.input, flex: 1, fontFamily: 'monospace', fontSize: '0.9rem' }}
           />
           <button style={s.btnSecondary} onClick={() => setMostrarChave(v => !v)}>
-            {mostrarChave ? '🙈 Ocultar' : '👁 Ver'}
+            {mostrarChave ? '🙈' : '👁'}
           </button>
         </div>
         {apiKey && <p style={{ color: '#10b981', fontSize: '0.85rem', marginTop: '8px', fontWeight: '600' }}>✓ Chave configurada</p>}
       </div>
 
       {/* Seleção de arquivos */}
-      <div className="glass-panel" style={{ ...s.card, borderLeft: '4px solid #7c3aed' }}>
+      <div className="glass-panel" style={{ ...s.card, borderLeft: '4px solid #7c3aed', marginTop: '20px' }}>
         <div style={s.cardHeader}><span style={{ ...s.badge, background: '#ede9fe', color: '#7c3aed' }}>1</span> Selecione os arquivos PAEE</div>
         <p style={{ color: '#64748b', marginBottom: '16px', fontSize: '0.95rem' }}>
-          Selecione um ou vários arquivos <strong>.docx</strong> ou <strong>.pdf</strong>. O Claude extrai os dados automaticamente.
+          Selecione um ou vários <strong>.docx</strong> ou <strong>.pdf</strong>. O Gemini extrai os dados automaticamente.
         </p>
         <input type="file" accept=".docx,.pdf" multiple
           onChange={(e) => { setArquivos(Array.from(e.target.files)); setResultados([]); setSalvos({}); setErros({}); }}
@@ -1208,21 +1286,21 @@ const ImportadorPAEE = ({ onVoltar, usuario }) => {
         <button
           style={{ ...s.btnPrimary, background: processando ? '#94a3b8' : '#7c3aed', padding: '12px 28px', fontSize: '1rem', cursor: processando ? 'not-allowed' : 'pointer' }}
           onClick={processarArquivos} disabled={processando || arquivos.length === 0}>
-          {processando ? '⏳ Lendo documentos...' : '🤖 Extrair dados com Claude'}
+          {processando ? '⏳ Lendo documentos...' : '🤖 Extrair dados com Gemini'}
         </button>
       </div>
 
       {processando && (
-        <div className="glass-panel" style={{ ...s.card, textAlign: 'center', padding: '40px' }}>
+        <div className="glass-panel" style={{ ...s.card, textAlign: 'center', padding: '40px', marginTop: '20px' }}>
           <div style={{ fontSize: '2.5rem', marginBottom: '16px' }}>🧠</div>
-          <p style={{ fontWeight: '600', fontSize: '1.1rem', color: '#7c3aed' }}>Claude está lendo os PAEEs...</p>
+          <p style={{ fontWeight: '600', fontSize: '1.1rem', color: '#7c3aed' }}>Gemini está lendo os PAEEs...</p>
           <p style={{ color: '#64748b' }}>Processando {arquivos.length} arquivo(s). Aguarde.</p>
         </div>
       )}
 
       {resultados.length > 0 && (
-        <div>
-          <h2 style={{ color: '#0f172a', margin: '30px 0 20px 0', fontSize: '1.4rem' }}>
+        <div style={{ marginTop: '30px' }}>
+          <h2 style={{ color: '#0f172a', marginBottom: '20px', fontSize: '1.4rem' }}>
             Resultados — {salvoCount}/{okCount} salvos
           </h2>
           {resultados.map((res, idx) => (
@@ -1236,9 +1314,9 @@ const ImportadorPAEE = ({ onVoltar, usuario }) => {
                 {res.status === 'ok' && (
                   <div>
                     {salvos[idx]
-                      ? <span style={{ background: '#d1fae5', color: '#065f46', padding: '8px 16px', borderRadius: '8px', fontWeight: '600' }}>✅ Salvo!</span>
+                      ? <span style={{ background: '#d1fae5', color: '#065f46', padding: '8px 16px', borderRadius: '8px', fontWeight: '600' }}>✅ Salvo no Firebase!</span>
                       : <button style={{ ...s.btnPrimary, background: '#7c3aed' }} onClick={() => salvarAluno(idx)} disabled={salvando[idx]}>
-                          {salvando[idx] ? '⏳...' : '💾 Salvar no Firebase'}
+                          {salvando[idx] ? '⏳ Salvando...' : '💾 Salvar no Firebase'}
                         </button>
                     }
                     {erros[idx] && <p style={{ color: '#dc2626', fontSize: '0.8rem', marginTop: '6px' }}>Erro: {erros[idx]}</p>}
