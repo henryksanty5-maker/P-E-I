@@ -227,7 +227,7 @@ const ListaAlunos = ({ onNovoPEI, onNovoPAEE, onEditar, onImportar, onLogout, us
 
 // 4A. FORMULÁRIO PEI 
 const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
-  const estadoInicial = { tipoDocumento: 'PEI', aluno: '', nascimento: '', anoSerie: '', turma: '', responsaveis: '', diagnostico: '', cid: '', crm: '', resultadoAvaliacao: '', rotinaFamiliar: '', fatoresAmbientais: '', resumoAluno: '', campoLinguagem: '', campoMatematica: '', anexos: {}, conteudos: {}, diario: {}, opcoes: {} };
+  const estadoInicial = { tipoDocumento: 'PEI', aluno: '', nascimento: '', anoSerie: '', turma: '', responsaveis: '', diagnostico: '', cid: '', crm: '', resultadoAvaliacao: '', rotinaFamiliar: '', fatoresAmbientais: '', resumoAluno: '', anexos: {}, conteudos: {}, diario: {}, opcoes: {} };
   
   const [formData, setFormData] = useState(() => { 
     if (alunoData) return { ...estadoInicial, ...alunoData, anexos: alunoData.anexos || {} };
@@ -1001,7 +1001,7 @@ Retorne SOMENTE um objeto JSON válido, sem markdown, sem explicações, apenas 
 Preencha os campos de texto com o conteúdo encontrado no documento. Para checkboxes marcados com X ou preenchidos use true, para desmarcados use false.`;
 
 // 4C. IMPORTADOR DE PAEE via Word + Claude AI
-const GEMINI_MODEL = 'gemini-2.0-flash-lite';
+const GEMINI_MODEL = 'gemini-2.0-flash';
 const GEMINI_URL = (key) => `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${key}`;
 
 // Carrega mammoth.js dinamicamente para ler arquivos .docx
