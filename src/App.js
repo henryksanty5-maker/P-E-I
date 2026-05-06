@@ -369,10 +369,6 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
           <div className="print-input-group"><Checkbox label="O aluno utiliza medicação?" formData={formData} handleCheckbox={handleCheckbox} /><FileUpload label="Anexar Receita" campoID="receita_medica" /></div>
           <div className="print-input-group"><Checkbox label="Acompanhamento terapêutico?" formData={formData} handleCheckbox={handleCheckbox} /></div>
         </div>
-        <div className="print-block" style={{...s.grid2, marginTop: '20px'}}>
-          <div className="print-input-group"><label style={s.label}>Campo de Experiência: Linguagem</label><TextareaPrint name="campoLinguagem" value={formData.campoLinguagem} onChange={handleChange} placeholder="Objetivos para a área da linguagem..." /></div>
-          <div className="print-input-group"><label style={s.label}>Campo de Experiência: Matemática</label><TextareaPrint name="campoMatematica" value={formData.campoMatematica} onChange={handleChange} placeholder="Objetivos para a área da matemática..." /></div>
-        </div>
         <div className="print-block" style={{ marginTop: '20px' }}><h4>Especialistas que acompanham o aluno:</h4><div className="print-block" style={s.grid3}><Checkbox label="Neurologista" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Psicólogo" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Fonoaudiólogo" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Psicopedagogo" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Terapeuta Ocupacional" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="ABA / TCC" formData={formData} handleCheckbox={handleCheckbox} /></div></div>
       </div>
 
