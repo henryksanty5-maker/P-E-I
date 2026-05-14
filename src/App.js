@@ -61,8 +61,13 @@ const s = {
 const GlobalCSS = () => (
   <style>
     {`
-      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-      body { font-family: 'Poppins', sans-serif !important; margin: 0; background-color: #f0f4f8; overflow-x: hidden; }
+      @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+      body { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important; margin: 0; background-color: #f0f4f8; overflow-x: hidden; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; letter-spacing: -0.01em; }
+      h1, h2, h3, h4, h5, h6 { letter-spacing: -0.02em; }
+      input, textarea, button, select { font-family: inherit !important; }
+      input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus, input[type="date"]:focus, input[type="tel"]:focus, textarea:focus { outline: none; border-color: #10b981 !important; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12) !important; }
+      ::spelling-error { text-decoration: wavy underline #ef4444; }
+      ::grammar-error { text-decoration: wavy underline #f59e0b; }
       .glass-panel { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04); border-radius: 16px; }
       button { transition: all 0.3s ease !important; }
       button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); filter: brightness(1.05); }
@@ -112,6 +117,7 @@ const Checkbox = ({ label, formData, handleCheckbox, accentColor = '#10b981' }) 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const [erro, setErro] = useState(''); const [mensagem, setMensagem] = useState('');
 
   const handleLogin = async (e) => {
@@ -122,9 +128,21 @@ const LoginScreen = () => {
 
   const handleEsqueciSenha = async () => {
     if (!email) { setErro('Digite seu e-mail acima para redefinir a senha.'); return; }
-    try { await sendPasswordResetEmail(auth, email); setMensagem('E-mail enviado!'); setErro(''); } 
+    try { await sendPasswordResetEmail(auth, email); setMensagem('E-mail enviado! Verifique sua caixa de entrada.'); setErro(''); } 
     catch (error) { setErro('Erro ao enviar e-mail.'); }
   };
+
+  // Ícones de olho (SVG inline — não depende de biblioteca externa)
+  const IconeOlhoAberto = () => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+    </svg>
+  );
+  const IconeOlhoFechado = () => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>
+    </svg>
+  );
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', padding: '20px' }}>
@@ -134,8 +152,33 @@ const LoginScreen = () => {
         {erro && <div style={{ backgroundColor: '#fee2e2', color: '#dc2626', padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '0.9rem', fontWeight: '500' }}>{erro}</div>}
         {mensagem && <div style={{ backgroundColor: '#d1fae5', color: '#065f46', padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '0.9rem', fontWeight: '500' }}>{mensagem}</div>}
         <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <input type="email" placeholder="E-mail institucional" value={email} onChange={(e) => setEmail(e.target.value)} style={s.input} required />
-          <input type="password" placeholder="Senha de acesso" value={password} onChange={(e) => setPassword(e.target.value)} style={s.input} required />
+          <input type="email" placeholder="E-mail institucional" value={email} onChange={(e) => setEmail(e.target.value)} style={s.input} required autoComplete="email" />
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <input
+              type={mostrarSenha ? 'text' : 'password'}
+              placeholder="Senha de acesso"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={{ ...s.input, paddingRight: '50px', width: '100%', boxSizing: 'border-box' }}
+              required
+              autoComplete="current-password"
+              spellCheck="false"
+            />
+            <button
+              type="button"
+              onClick={() => setMostrarSenha(v => !v)}
+              aria-label={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
+              title={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha para conferir'}
+              style={{
+                position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)',
+                background: 'transparent', border: 'none', cursor: 'pointer',
+                padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: mostrarSenha ? '#10b981' : '#64748b', borderRadius: '8px'
+              }}
+            >
+              {mostrarSenha ? <IconeOlhoAberto /> : <IconeOlhoFechado />}
+            </button>
+          </div>
           <button type="submit" style={{...s.btnPrimary, padding: '14px', fontSize: '1.05rem'}}>Acessar Plataforma</button>
         </form>
         <div style={{ marginTop: '25px' }}>
@@ -1716,6 +1759,12 @@ export default function App() {
   const [telaImportar, setTelaImportar] = useState(false);
 
   useEffect(() => { const unsubscribe = onAuthStateChanged(auth, (user) => { setUsuario(user); setCarregando(false); }); return () => unsubscribe(); }, []);
+
+  // Ativa corretor ortográfico em português em todo o sistema
+  useEffect(() => {
+    document.documentElement.setAttribute('lang', 'pt-BR');
+    document.body.setAttribute('spellcheck', 'true');
+  }, []);
   
   const fazerLogout = () => signOut(auth);
   const irParaImportar = () => { setTelaImportar(true); setTelaAtiva('lista'); };
