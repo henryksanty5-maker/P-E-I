@@ -17,8 +17,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-// 🌟 NOVO: VARREDURA PROFUNDA ANTI-ERROS DO FIREBASE 🌟
-// Esta função caça fantasmas e limpa qualquer ponto, barra ou símbolo proibido de Rascunhos antigos!
+// 🌟 VARREDURA PROFUNDA ANTI-ERROS DO FIREBASE 🌟
 const sanitizeFirebaseKeys = (obj) => {
   if (typeof obj !== 'object' || obj === null) return obj;
   if (Array.isArray(obj)) return obj.map(sanitizeFirebaseKeys);
@@ -42,9 +41,12 @@ const s = {
   btnSecondary: { background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)', color: '#334155', border: '1px solid #cbd5e1', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' },
   btnDanger: { background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)', color: '#dc2626', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' },
   btnEspecial: { background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' },
+  btnInfantil: { background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' },
   card: { padding: '28px', marginBottom: '24px' },
   cardHeader: { color: '#059669', fontSize: '1.25rem', fontWeight: '700', borderBottom: '2px solid rgba(16, 185, 129, 0.1)', paddingBottom: '12px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px' },
+  cardHeaderEI: { color: '#d97706', fontSize: '1.25rem', fontWeight: '700', borderBottom: '2px solid rgba(245, 158, 11, 0.15)', paddingBottom: '12px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px' },
   badge: { background: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)', color: '#065f46', padding: '6px 12px', borderRadius: '6px', fontSize: '0.9rem', fontWeight: 'bold' },
+  badgeEI: { background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)', color: '#92400e', padding: '6px 12px', borderRadius: '6px', fontSize: '0.9rem', fontWeight: 'bold' },
   grid2: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' },
   grid3: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px' },
   inputGroup: { display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' },
@@ -52,6 +54,7 @@ const s = {
   input: { padding: '12px', border: '1px solid rgba(203, 213, 225, 0.6)', borderRadius: '8px', width: '100%', boxSizing: 'border-box', backgroundColor: 'rgba(255, 255, 255, 0.9)', outline: 'none', fontSize: '0.95rem' },
   checkboxContainer: { display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px', cursor: 'pointer', padding: '6px 8px', borderRadius: '6px' },
   uploadBox: { border: '2px dashed #a7f3d0', borderRadius: '12px', padding: '20px', textAlign: 'center', backgroundColor: 'rgba(209, 250, 229, 0.4)', marginTop: '10px' },
+  uploadBoxEI: { border: '2px dashed #fcd34d', borderRadius: '12px', padding: '20px', textAlign: 'center', backgroundColor: 'rgba(254, 243, 199, 0.4)', marginTop: '10px' },
   sectionTitle: { color: '#1e293b', marginBottom: '15px', fontSize: '1.05rem', borderBottom: '1px solid rgba(203, 213, 225, 0.5)', paddingBottom: '8px', fontWeight: '600' }
 };
 
@@ -95,11 +98,11 @@ const TextareaPrint = ({ value, onChange, name, placeholder, minHeight = '120px'
   </div>
 );
 
-const Checkbox = ({ label, formData, handleCheckbox }) => {
+const Checkbox = ({ label, formData, handleCheckbox, accentColor = '#10b981' }) => {
   const safeKey = label.replace(/[.#$\[\]\/]/g, '_');
   return (
     <label className="checkbox-row" style={s.checkboxContainer}>
-      <input type="checkbox" checked={!!(formData.opcoes || {})[safeKey]} onChange={() => handleCheckbox(safeKey)} style={{ width: '18px', height: '18px', accentColor: '#10b981' }} />
+      <input type="checkbox" checked={!!(formData.opcoes || {})[safeKey]} onChange={() => handleCheckbox(safeKey)} style={{ width: '18px', height: '18px', accentColor }} />
       <span style={{ fontSize: '0.95rem', color: '#334155', fontWeight: '500' }}>{label}</span>
     </label>
   );
@@ -144,7 +147,7 @@ const LoginScreen = () => {
 };
 
 // 3. Tela de Lista de Alunos
-const ListaAlunos = ({ onNovoPEI, onNovoPAEE, onEditar, onImportar, onLogout, usuario }) => {
+const ListaAlunos = ({ onNovoPEI, onNovoPEI_EI, onNovoPAEE, onEditar, onImportar, onLogout, usuario }) => {
   const [alunos, setAlunos] = useState([]);
 
   const listaEspecialistas = [
@@ -171,6 +174,12 @@ const ListaAlunos = ({ onNovoPEI, onNovoPAEE, onEditar, onImportar, onLogout, us
     if(window.confirm(`Tem certeza que deseja excluir este documento?`)) { await remove(ref(db, `alunos/${dbKey}`)); }
   };
 
+  const getBadgeStyle = (tipo) => {
+    if (tipo === 'PAEE') return { bg: '#dbeafe', color: '#1e40af' };
+    if (tipo === 'PEI-EI') return { bg: '#fef3c7', color: '#92400e' };
+    return { bg: '#d1fae5', color: '#065f46' };
+  };
+
   return (
     <div style={s.page}>
       <GlobalCSS />
@@ -184,6 +193,7 @@ const ListaAlunos = ({ onNovoPEI, onNovoPAEE, onEditar, onImportar, onLogout, us
         </div>
         <div style={s.btnGroup}>
           <button style={s.btnPrimary} onClick={onNovoPEI}>+ Novo PEI</button>
+          <button style={s.btnInfantil} onClick={onNovoPEI_EI}>+ Novo PEI Infantil</button>
           {isEspecialista && <button style={s.btnEspecial} onClick={onNovoPAEE}>+ Novo PAEE</button>}
           {isEspecialista && <button style={{...s.btnEspecial, background: 'linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%)'}} onClick={onImportar}>📂 Importar do Word</button>}
           <button style={s.btnDanger} onClick={onLogout}>Sair</button>
@@ -198,27 +208,30 @@ const ListaAlunos = ({ onNovoPEI, onNovoPAEE, onEditar, onImportar, onLogout, us
         </div>
       ) : (
         <div className="print-block" style={s.grid3}>
-          {alunos.map((aluno) => (
-            <div key={aluno.dbKey} className="glass-panel" style={{...s.card, marginBottom: '0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between'}}>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                  <h3 style={{ color: '#059669', margin: '0', fontSize: '1.3rem' }}>{aluno.aluno}</h3>
-                  <span style={{ padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', backgroundColor: aluno.tipoDocumento === 'PAEE' ? '#dbeafe' : '#d1fae5', color: aluno.tipoDocumento === 'PAEE' ? '#1e40af' : '#065f46' }}>
-                    {aluno.tipoDocumento || 'PEI'}
-                  </span>
+          {alunos.map((aluno) => {
+            const badge = getBadgeStyle(aluno.tipoDocumento);
+            return (
+              <div key={aluno.dbKey} className="glass-panel" style={{...s.card, marginBottom: '0', display: 'flex', flexDirection: 'column', justifyContent: 'space-between'}}>
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                    <h3 style={{ color: '#059669', margin: '0', fontSize: '1.3rem' }}>{aluno.aluno}</h3>
+                    <span style={{ padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', backgroundColor: badge.bg, color: badge.color }}>
+                      {aluno.tipoDocumento || 'PEI'}
+                    </span>
+                  </div>
+                  <div style={{ backgroundColor: 'rgba(209, 250, 229, 0.4)', padding: '12px', borderRadius: '8px', marginBottom: '15px' }}>
+                    <p style={{ margin: '0 0 5px 0', fontSize: '0.9rem' }}><strong>Turma:</strong> {aluno.anoSerie || '-'} {aluno.turma}</p>
+                    <p style={{ margin: '0', fontSize: '0.9rem' }}><strong>Diagnóstico:</strong> {aluno.diagnostico || 'Não informado'}</p>
+                  </div>
+                  <p style={{ margin: '0 0 20px 0', fontSize: '0.75rem', color: '#94a3b8' }}>Criado por: {aluno.criadoPor}</p>
                 </div>
-                <div style={{ backgroundColor: 'rgba(209, 250, 229, 0.4)', padding: '12px', borderRadius: '8px', marginBottom: '15px' }}>
-                  <p style={{ margin: '0 0 5px 0', fontSize: '0.9rem' }}><strong>Turma:</strong> {aluno.anoSerie || '-'} {aluno.turma}</p>
-                  <p style={{ margin: '0', fontSize: '0.9rem' }}><strong>Diagnóstico:</strong> {aluno.diagnostico || 'Não informado'}</p>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button style={{...s.btnSecondary, flex: '1', backgroundColor: 'white'}} onClick={() => onEditar(aluno)}>Abrir / Editar</button>
+                  <button style={{...s.btnDanger, padding: '10px'}} onClick={() => deletarAluno(aluno.dbKey)}>Excluir</button>
                 </div>
-                <p style={{ margin: '0 0 20px 0', fontSize: '0.75rem', color: '#94a3b8' }}>Criado por: {aluno.criadoPor}</p>
               </div>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button style={{...s.btnSecondary, flex: '1', backgroundColor: 'white'}} onClick={() => onEditar(aluno)}>Abrir / Editar</button>
-                <button style={{...s.btnDanger, padding: '10px'}} onClick={() => deletarAluno(aluno.dbKey)}>Excluir</button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
@@ -267,13 +280,9 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
     setSalvando(true);
     try {
       const dadosParaSalvar = { ...formData, criadoPor: formData.criadoPor || usuario.email };
-      
-      // 🌟 LIMPEZA PROFUNDA: Varrer o Rascunho inteiro e curar erros
       const dadosLimpos = sanitizeFirebaseKeys(JSON.parse(JSON.stringify(dadosParaSalvar))); 
-
       const nomeLimpo = formData.aluno.replace(/[.#$\[\]\/]/g, ' '); 
       const dbKey = alunoData?.dbKey || `${nomeLimpo} (PEI)`; 
-      
       await set(ref(db, `alunos/${dbKey}`), dadosLimpos); 
       alert(`✅ PEI salvo na nuvem com sucesso!`); 
       localStorage.removeItem('rascunhoPEI');
@@ -336,7 +345,7 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
 
       <div className="print-only" style={{ textAlign: 'center', marginBottom: '30px', borderBottom: '2px solid black', paddingBottom: '15px' }}>
         <h2 style={{ margin: '0 0 5px 0', fontSize: '1.2rem' }}>PREFEITURA MUNICIPAL DE REDENÇÃO DA SERRA</h2>
-        <h3 style={{ margin: '0 0 5px 0', fontSize: '1rem' }}>EMEIEF “PROFESSORA EDNA REGINA DE OLIVEIRA E SILVA”</h3>
+        <h3 style={{ margin: '0 0 5px 0', fontSize: '1rem' }}>EMEIEF "PROFESSORA EDNA REGINA DE OLIVEIRA E SILVA"</h3>
         <h1 style={{ marginTop: '20px', fontSize: '1.4rem' }}>PLANO EDUCACIONAL INDIVIDUALIZADO – PEI</h1>
       </div>
 
@@ -433,7 +442,451 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
   );
 };
 
-// 4B. NOVO FORMULÁRIO: PAEE 
+// 4B. NOVO FORMULÁRIO: PEI EDUCAÇÃO INFANTIL
+const SistemaPEI_EI = ({ alunoData, onVoltar, usuario }) => {
+  const estadoInicial = {
+    tipoDocumento: 'PEI-EI',
+    aluno: '',
+    nascimento: '',
+    anoSerie: '2ª Etapa',
+    turma: 'B',
+    responsaveis: '',
+    diagnostico: '',
+    cid: '',
+    medico: '',
+    crm: '',
+    especificidades: '',
+    qualMedicacao: '',
+    frequenciaTerapia: '',
+    outrosEspecialistas: '',
+    relatorioAvaliacao: '',
+    rotinaFamiliar: '',
+    descricaoCompetenciasEF: '',
+    descricaoCompetenciasET: '',
+    organizativasEF: '',
+    organizativasET: '',
+    temporalidadeDescricao: '',
+    anexos: {},
+    camposEI: {},
+    disciplinasEI: {},
+    opcoes: {}
+  };
+  
+  const [formData, setFormData] = useState(() => { 
+    if (alunoData) return { ...estadoInicial, ...alunoData, anexos: alunoData.anexos || {} };
+    try {
+      const rascunho = localStorage.getItem('rascunhoPEI_EI');
+      if (rascunho) return JSON.parse(rascunho);
+    } catch(e) {}
+    return estadoInicial; 
+  });
+  
+  const [aEnviar, setAEnviar] = useState(false);
+  const [salvando, setSalvando] = useState(false);
+  const [zoomImg, setZoomImg] = useState(null);
+
+  const camposExperiencia = [
+    { id: 'EF', nome: 'Escuta, Fala, Pensamento e Imaginação', icone: '🗣️' },
+    { id: 'ET', nome: 'Espaços, Tempos, Quantidades, Relações e Transformações', icone: '🔢' }
+  ];
+  const disciplinas = ['Educação Física', 'Espanhol', 'Música', 'Informática'];
+  const bimestres = ['1º Bimestre', '2º Bimestre', '3º Bimestre', '4º Bimestre'];
+  const bimestresKey = ['1B', '2B', '3B', '4B'];
+
+  useEffect(() => {
+    if (!alunoData) {
+      try { localStorage.setItem('rascunhoPEI_EI', JSON.stringify(formData)); } 
+      catch (e) { console.warn("Rascunho cheio demais"); }
+    }
+  }, [formData, alunoData]);
+
+  const limparRascunho = () => {
+    if(window.confirm("Deseja apagar tudo e começar um formulário em branco?")) {
+      setFormData(estadoInicial);
+      localStorage.removeItem('rascunhoPEI_EI');
+    }
+  };
+
+  const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleCheckbox = (opcao) => setFormData(prev => ({ ...prev, opcoes: { ...(prev.opcoes || {}), [opcao]: !(prev.opcoes || {})[opcao] } }));
+  
+  const handleCampoEI = (campoId, chave, valor) => {
+    setFormData(prev => ({
+      ...prev,
+      camposEI: {
+        ...(prev.camposEI || {}),
+        [campoId]: {
+          ...((prev.camposEI || {})[campoId] || {}),
+          [chave]: valor
+        }
+      }
+    }));
+  };
+  
+  const handleDisciplinaEI = (disciplina, chave, valor) => {
+    setFormData(prev => ({
+      ...prev,
+      disciplinasEI: {
+        ...(prev.disciplinasEI || {}),
+        [disciplina]: {
+          ...((prev.disciplinasEI || {})[disciplina] || {}),
+          [chave]: valor
+        }
+      }
+    }));
+  };
+
+  const salvarNoBanco = async () => {
+    if (!formData.aluno) { alert("Preencha o nome do aluno para salvar."); return; }
+    setSalvando(true);
+    try {
+      const dadosParaSalvar = { ...formData, criadoPor: formData.criadoPor || usuario.email };
+      const dadosLimpos = sanitizeFirebaseKeys(JSON.parse(JSON.stringify(dadosParaSalvar))); 
+      const nomeLimpo = formData.aluno.replace(/[.#$\[\]\/]/g, ' '); 
+      const dbKey = alunoData?.dbKey || `${nomeLimpo} (PEI-EI)`; 
+      await set(ref(db, `alunos/${dbKey}`), dadosLimpos); 
+      alert(`✅ PEI Educação Infantil salvo na nuvem com sucesso!`); 
+      localStorage.removeItem('rascunhoPEI_EI');
+    } 
+    catch (error) { 
+      alert(`Erro técnico reportado pelo Firebase: ${error.message}\n\n🚨 Seus dados estão salvos no rascunho automático no seu computador. Atualize a página e tente novamente.`); 
+    }
+    finally {
+      setSalvando(false);
+    }
+  };
+
+  const handleFileUpload = (e, campoID) => {
+    const file = e.target.files[0]; if (!file) return;
+    setAEnviar(true); const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas'); const scaleSize = 600 / img.width; canvas.width = 600; canvas.height = img.height * scaleSize;
+        const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        setFormData(prev => ({ ...prev, anexos: { ...(prev.anexos || {}), [campoID]: canvas.toDataURL('image/jpeg', 0.4) } }));
+        setAEnviar(false);
+      }; img.src = event.target.result;
+    }; reader.readAsDataURL(file);
+  };
+
+  const removerAnexo = (campoID) => {
+    setFormData(prev => { const novosAnexos = { ...(prev.anexos || {}) }; delete novosAnexos[campoID]; return { ...prev, anexos: novosAnexos }; });
+  };
+
+  const FileUpload = ({ label, campoID }) => (
+    <div className="no-print print-block" style={s.uploadBoxEI}>
+      {formData.anexos && formData.anexos[campoID] ? (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <img src={formData.anexos[campoID]} alt="Anexo" title="Clique para ampliar" onClick={() => setZoomImg(formData.anexos[campoID])} style={{ maxWidth: '100%', maxHeight: '250px', borderRadius: '8px', border: '1px solid #fcd34d', cursor: 'zoom-in' }} />
+          <button type="button" onClick={() => removerAnexo(campoID)} style={{ marginTop: '12px', padding: '8px 16px', backgroundColor: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}>Remover Imagem</button>
+        </div>
+      ) : (
+        <>
+          <span style={{ fontSize: '2rem' }}>📷</span><p style={{ margin: '8px 0', fontWeight: '600', color: '#d97706' }}>{label}</p>
+          <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, campoID)} disabled={aEnviar} />
+          {aEnviar && <span style={{color: '#ef4444', display: 'block', marginTop: '8px'}}>Comprimindo imagem...</span>}
+        </>
+      )}
+    </div>
+  );
+
+  const CheckboxEI = (props) => <Checkbox {...props} accentColor="#f59e0b" />;
+
+  return (
+    <div className="print-page" style={s.page}>
+      <GlobalCSS />
+      <div className="glass-panel no-print" style={s.topbar}>
+        <div>
+          <h2 style={{margin: 0, color: '#d97706'}}>Editor de PEI – Educação Infantil</h2>
+          <p style={{margin:0, fontSize:'0.85rem', color:'#92400e'}}>Plano de Ensino Individualizado (BNCC - Educação Infantil)</p>
+        </div>
+        <div style={s.btnGroup}>
+          <button style={s.btnSecondary} onClick={onVoltar} disabled={salvando}>← Voltar</button>
+          {!alunoData && <button style={{...s.btnSecondary, color: '#dc2626', borderColor: '#fecaca'}} onClick={limparRascunho} disabled={salvando}>Limpar Formulário</button>}
+          <button style={s.btnInfantil} onClick={salvarNoBanco} disabled={salvando}>{salvando ? '⏳ Salvando...' : '✓ Salvar Nuvem'}</button>
+          <button style={s.btnSuccess} onClick={()=>window.print()} disabled={salvando}>🖨️ Imprimir PDF</button>
+        </div>
+      </div>
+
+      <div className="print-only" style={{ textAlign: 'center', marginBottom: '30px', borderBottom: '2px solid black', paddingBottom: '15px' }}>
+        <h2 style={{ margin: '0 0 5px 0', fontSize: '1.2rem' }}>EDUCAÇÃO INFANTIL PROFESSORA EDNA REGINA DE OLIVEIRA E SILVA</h2>
+        <h3 style={{ margin: '0 0 5px 0', fontSize: '1rem' }}>REDENÇÃO DA SERRA</h3>
+        <h1 style={{ marginTop: '20px', fontSize: '1.4rem' }}>PLANO EDUCACIONAL INDIVIDUALIZADO – PEI</h1>
+        <h3 style={{ marginTop: '5px', fontSize: '1rem' }}>EDUCAÇÃO INFANTIL</h3>
+      </div>
+
+      {/* SEÇÃO A - IDENTIFICAÇÃO */}
+      <div className="glass-panel card-print">
+        <div style={s.cardHeaderEI}><span className="badge-print" style={s.badgeEI}>A</span> Identificação do Aluno</div>
+        <div className="print-block" style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: '30px' }}>
+          <div className="no-print"><FileUpload label="Foto do Aluno" campoID="foto_perfil" /></div>
+          <div className="print-block" style={s.grid2}>
+            <div className="print-input-group"><label style={s.label}>Nome do Aluno *</label><input style={s.input} name="aluno" value={formData.aluno} onChange={handleChange} /></div>
+            <div className="print-input-group"><label style={s.label}>Responsáveis</label><input style={s.input} name="responsaveis" value={formData.responsaveis} onChange={handleChange} /></div>
+            <div className="print-input-group"><label style={s.label}>Data de Nascimento</label><input style={s.input} name="nascimento" value={formData.nascimento} onChange={handleChange} /></div>
+            <div className="print-input-group"><label style={s.label}>Ano/Série</label><input style={s.input} name="anoSerie" value={formData.anoSerie} onChange={handleChange} placeholder="2ª Etapa" /></div>
+            <div className="print-input-group"><label style={s.label}>Turma</label><input style={s.input} name="turma" value={formData.turma} onChange={handleChange} placeholder="B" /></div>
+          </div>
+        </div>
+      </div>
+
+      {/* SEÇÃO B - INFORMAÇÕES CLÍNICAS */}
+      <div className="glass-panel card-print">
+        <div style={s.cardHeaderEI}><span className="badge-print" style={s.badgeEI}>B</span> Informações Clínicas</div>
+        <div className="print-block" style={s.grid2}>
+          <div className="print-input-group"><label style={s.label}>Diagnóstico(s)</label><input style={s.input} name="diagnostico" value={formData.diagnostico} onChange={handleChange} /></div>
+          <div className="print-input-group"><label style={s.label}>CID(s)</label><input style={s.input} name="cid" value={formData.cid} onChange={handleChange} /></div>
+          <div className="print-input-group"><label style={s.label}>Médico(s)</label><input style={s.input} name="medico" value={formData.medico} onChange={handleChange} /></div>
+          <div className="print-input-group"><label style={s.label}>CRM</label><input style={s.input} name="crm" value={formData.crm} onChange={handleChange} /></div>
+        </div>
+        <div className="print-input-group" style={{marginTop: '15px'}}>
+          <label style={s.label}>Foto do Laudo Médico</label>
+          <FileUpload label="Anexar Laudo Médico" campoID="laudo_medico" />
+        </div>
+        <div className="print-input-group" style={{marginTop: '15px'}}>
+          <label style={s.label}>Especificidades do Aluno</label>
+          <TextareaPrint name="especificidades" value={formData.especificidades} onChange={handleChange} placeholder="Descreva as especificidades observadas..." minHeight="140px" />
+        </div>
+      </div>
+
+      {/* SEÇÃO C - MEDICAÇÃO */}
+      <div className="glass-panel card-print">
+        <div style={s.cardHeaderEI}><span className="badge-print" style={s.badgeEI}>C</span> Medicação</div>
+        <div className="print-block" style={s.grid2}>
+          <div className="print-input-group">
+            <label style={s.label}>Prescrição de medicamento(s):</label>
+            <div style={{display: 'flex', gap: '20px', flexWrap: 'wrap'}}>
+              <CheckboxEI label="Sim - utiliza medicação" formData={formData} handleCheckbox={handleCheckbox} />
+              <CheckboxEI label="Não utiliza medicação" formData={formData} handleCheckbox={handleCheckbox} />
+            </div>
+            <label style={s.label}>Qual(is)?</label>
+            <TextareaPrint name="qualMedicacao" value={formData.qualMedicacao} onChange={handleChange} placeholder="Nome dos medicamentos, dosagem, horários..." minHeight="100px" />
+          </div>
+          <div className="print-input-group">
+            <label style={s.label}>Foto da Receita</label>
+            <FileUpload label="Anexar Receita Médica" campoID="receita_medica" />
+          </div>
+        </div>
+      </div>
+
+      {/* SEÇÃO D - ACOMPANHAMENTO TERAPÊUTICO */}
+      <div className="glass-panel card-print">
+        <div style={s.cardHeaderEI}><span className="badge-print" style={s.badgeEI}>D</span> Acompanhamento Terapêutico</div>
+        <div className="print-block" style={s.grid2}>
+          <div className="print-input-group">
+            <label style={s.label}>Indicação para acompanhamento:</label>
+            <div style={{display: 'flex', gap: '20px', flexWrap: 'wrap'}}>
+              <CheckboxEI label="Sim - tem acompanhamento" formData={formData} handleCheckbox={handleCheckbox} />
+              <CheckboxEI label="Não tem acompanhamento" formData={formData} handleCheckbox={handleCheckbox} />
+            </div>
+          </div>
+          <div className="print-input-group">
+            <label style={s.label}>Frequência</label>
+            <input style={s.input} name="frequenciaTerapia" value={formData.frequenciaTerapia} onChange={handleChange} placeholder="Ex: semanal, quinzenal..." />
+          </div>
+        </div>
+        <h4 style={s.sectionTitle}>Especialistas que acompanham o aluno:</h4>
+        <div className="print-block print-input-group" style={s.grid3}>
+          <CheckboxEI label="Neurologista" formData={formData} handleCheckbox={handleCheckbox} />
+          <CheckboxEI label="Neuropediatra" formData={formData} handleCheckbox={handleCheckbox} />
+          <CheckboxEI label="Psiquiatra" formData={formData} handleCheckbox={handleCheckbox} />
+          <CheckboxEI label="Psicólogo" formData={formData} handleCheckbox={handleCheckbox} />
+          <CheckboxEI label="Fonoaudiólogo" formData={formData} handleCheckbox={handleCheckbox} />
+          <CheckboxEI label="Psicopedagogo" formData={formData} handleCheckbox={handleCheckbox} />
+          <CheckboxEI label="Terapeuta Ocupacional" formData={formData} handleCheckbox={handleCheckbox} />
+          <CheckboxEI label="Psicomotricista" formData={formData} handleCheckbox={handleCheckbox} />
+          <CheckboxEI label="ABA - Análise do Comportamento Aplicada" formData={formData} handleCheckbox={handleCheckbox} />
+        </div>
+        <div className="print-input-group" style={{marginTop: '15px'}}>
+          <label style={s.label}>Outros profissionais / observações:</label>
+          <TextareaPrint name="outrosEspecialistas" value={formData.outrosEspecialistas} onChange={handleChange} placeholder="Outros profissionais que acompanham, observações..." minHeight="100px" />
+        </div>
+      </div>
+
+      {/* SEÇÃO E - AVALIAÇÃO DIAGNÓSTICA */}
+      <div className="glass-panel card-print">
+        <div style={s.cardHeaderEI}><span className="badge-print" style={s.badgeEI}>E</span> Avaliação Diagnóstica</div>
+        <div className="print-block" style={{background: 'rgba(254, 243, 199, 0.4)', padding: '15px', borderRadius: '10px', marginBottom: '20px', borderLeft: '4px solid #f59e0b'}}>
+          <p style={{margin: '0 0 8px 0', fontWeight: '600', color: '#92400e'}}>Objetivos específicos:</p>
+          <ol style={{margin: '0', paddingLeft: '20px', color: '#451a03', fontSize: '0.9rem'}}>
+            <li>Identificar as realidades dos estudantes inseridos nesse processo de aprendizagem;</li>
+            <li>Apurar a presença ou ausência das habilidades dos alunos;</li>
+            <li>Refletir e reconhecer as causas, dificuldades e limitações de aprendizagem de cada aluno.</li>
+          </ol>
+        </div>
+        <div className="print-input-group">
+          <label style={s.label}>Relatório da Avaliação Diagnóstica</label>
+          <TextareaPrint name="relatorioAvaliacao" value={formData.relatorioAvaliacao} onChange={handleChange} placeholder="Descreva os resultados da avaliação diagnóstica..." minHeight="180px" />
+        </div>
+        <div className="print-input-group" style={{marginTop: '15px'}}>
+          <label style={s.label}>Aspectos relevantes da rotina familiar</label>
+          <TextareaPrint name="rotinaFamiliar" value={formData.rotinaFamiliar} onChange={handleChange} placeholder="Indicar os aspectos relevantes da rotina familiar..." minHeight="150px" />
+        </div>
+      </div>
+
+      {/* SEÇÃO F - CAMPOS DE EXPERIÊNCIA */}
+      {camposExperiencia.map((campo, idxCampo) => (
+        <div key={campo.id} className="glass-panel card-print section-break">
+          <div style={s.cardHeaderEI}>
+            <span className="badge-print" style={s.badgeEI}>{campo.icone}</span> 
+            Campo de Experiência: {campo.nome} ({campo.id})
+          </div>
+          
+          <h4 style={s.sectionTitle}>Adaptações aos Conteúdos e Objetivos por Bimestre</h4>
+          {bimestres.map((bim, idxBim) => (
+            <div key={bim} className="print-block" style={{ border: '1px solid rgba(252, 211, 77, 0.5)', padding: '18px', backgroundColor: 'rgba(254, 243, 199, 0.2)', marginBottom: '15px', borderRadius: '10px' }}>
+              <h5 style={{ margin: '0 0 12px 0', color: '#92400e', fontSize: '1rem' }}>{bim}</h5>
+              <div className="print-block" style={s.grid2}>
+                <div className="print-input-group">
+                  <label style={s.label}>Adaptações aos Conteúdos ({campo.id})</label>
+                  <TextareaPrint 
+                    value={(formData.camposEI?.[campo.id] || {})[`${bimestresKey[idxBim]}_conteudo`]} 
+                    onChange={(e) => handleCampoEI(campo.id, `${bimestresKey[idxBim]}_conteudo`, e.target.value)} 
+                    placeholder={`Conteúdos adaptados para ${bim}...`}
+                    minHeight="100px"
+                  />
+                </div>
+                <div className="print-input-group">
+                  <label style={s.label}>Adaptações aos Objetivos ({campo.id})</label>
+                  <TextareaPrint 
+                    value={(formData.camposEI?.[campo.id] || {})[`${bimestresKey[idxBim]}_objetivo`]} 
+                    onChange={(e) => handleCampoEI(campo.id, `${bimestresKey[idxBim]}_objetivo`, e.target.value)} 
+                    placeholder={`Objetivos adaptados para ${bim}...`}
+                    minHeight="100px"
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+
+          <div className="print-input-group" style={{marginTop: '20px'}}>
+            <label style={s.label}>Adaptações Organizativas de Procedimentos Didáticos</label>
+            <TextareaPrint 
+              name={`organizativas${campo.id}`}
+              value={formData[`organizativas${campo.id}`]} 
+              onChange={handleChange}
+              placeholder="Descreva as adaptações organizativas para este campo..."
+              minHeight="120px"
+            />
+          </div>
+
+          <h4 style={s.sectionTitle}>Resultado Final ({campo.id})</h4>
+          <div className="print-block print-input-group" style={{display: 'flex', gap: '20px', flexWrap: 'wrap'}}>
+            <CheckboxEI label={`${campo.id} - Concluído com êxito`} formData={formData} handleCheckbox={handleCheckbox} />
+            <CheckboxEI label={`${campo.id} - Suficiente`} formData={formData} handleCheckbox={handleCheckbox} />
+            <CheckboxEI label={`${campo.id} - Regular`} formData={formData} handleCheckbox={handleCheckbox} />
+            <CheckboxEI label={`${campo.id} - Insuficiente`} formData={formData} handleCheckbox={handleCheckbox} />
+          </div>
+
+          <div className="print-input-group">
+            <label style={s.label}>Descrição das competências que foram desenvolvidas</label>
+            <TextareaPrint 
+              name={`descricaoCompetencias${campo.id}`}
+              value={formData[`descricaoCompetencias${campo.id}`]} 
+              onChange={handleChange}
+              placeholder="Descreva as competências desenvolvidas neste campo de experiência..."
+              minHeight="140px"
+            />
+          </div>
+
+          <h4 style={s.sectionTitle}>Relatórios Bimestrais ({campo.id})</h4>
+          <div className="print-block" style={s.grid2}>
+            {bimestres.map((bim, idxBim) => (
+              <div key={`rel-${campo.id}-${idxBim}`} className="print-input-group" style={{ border: '1px solid rgba(252, 211, 77, 0.4)', padding: '14px', borderRadius: '8px', backgroundColor: 'rgba(254, 243, 199, 0.15)' }}>
+                <label style={{...s.label, color: '#92400e'}}>Relatório {bim}</label>
+                <TextareaPrint 
+                  value={(formData.camposEI?.[campo.id] || {})[`${bimestresKey[idxBim]}_relatorio`]} 
+                  onChange={(e) => handleCampoEI(campo.id, `${bimestresKey[idxBim]}_relatorio`, e.target.value)}
+                  placeholder={`Relatório de ${bim}...`}
+                  minHeight="120px"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      {/* SEÇÃO G - DISCIPLINAS ESPECÍFICAS */}
+      {disciplinas.map((disc) => (
+        <div key={disc} className="glass-panel card-print section-break">
+          <div style={s.cardHeaderEI}>
+            <span className="badge-print" style={s.badgeEI}>📚</span> 
+            Disciplina: {disc}
+          </div>
+          {bimestres.map((bim, idxBim) => (
+            <div key={`${disc}-${bim}`} className="print-block" style={{ border: '1px solid rgba(252, 211, 77, 0.5)', padding: '18px', backgroundColor: 'rgba(254, 243, 199, 0.2)', marginBottom: '15px', borderRadius: '10px' }}>
+              <h5 style={{ margin: '0 0 12px 0', color: '#92400e', fontSize: '1rem' }}>{bim}</h5>
+              <div className="print-block" style={s.grid2}>
+                <div className="print-input-group">
+                  <label style={s.label}>Adaptações aos Conteúdos e Objetivos</label>
+                  <TextareaPrint 
+                    value={(formData.disciplinasEI?.[disc] || {})[`${bimestresKey[idxBim]}_adaptacoes`]} 
+                    onChange={(e) => handleDisciplinaEI(disc, `${bimestresKey[idxBim]}_adaptacoes`, e.target.value)}
+                    placeholder={`Adaptações para ${bim}...`}
+                    minHeight="100px"
+                  />
+                </div>
+                <div className="print-input-group">
+                  <label style={s.label}>Relatório de Desempenho Bimestral</label>
+                  <TextareaPrint 
+                    value={(formData.disciplinasEI?.[disc] || {})[`${bimestresKey[idxBim]}_relatorio`]} 
+                    onChange={(e) => handleDisciplinaEI(disc, `${bimestresKey[idxBim]}_relatorio`, e.target.value)}
+                    placeholder={`Relatório de desempenho em ${bim}...`}
+                    minHeight="100px"
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ))}
+
+      {/* SEÇÃO H - ADAPTAÇÕES DE TEMPORALIDADE */}
+      <div className="glass-panel card-print">
+        <div style={s.cardHeaderEI}><span className="badge-print" style={s.badgeEI}>⏱️</span> Adaptações de Temporalidade</div>
+        <div className="print-input-group">
+          <CheckboxEI label="Aumento do tempo previsto para o trato de determinados objetivos/conteúdos" formData={formData} handleCheckbox={handleCheckbox} />
+          <p style={{fontSize: '0.85rem', color: '#64748b', margin: '0 0 12px 30px', fontStyle: 'italic'}}>
+            (Refere-se ao ajuste temporal possível para que o aluno adquira conhecimentos e habilidades que estão ao seu alcance, mas que dependem do ritmo próprio ou do desenvolvimento de um repertório anterior que seja indispensável para novas aprendizagens.)
+          </p>
+        </div>
+        <div className="print-input-group">
+          <label style={s.label}>Descrição / Detalhamento</label>
+          <TextareaPrint name="temporalidadeDescricao" value={formData.temporalidadeDescricao} onChange={handleChange} placeholder="Detalhe as adaptações de temporalidade aplicadas..." minHeight="150px" />
+        </div>
+        <div className="print-input-group">
+          <CheckboxEI label="Prolongamento significativo do tempo de escolarização do aluno" formData={formData} handleCheckbox={handleCheckbox} />
+        </div>
+      </div>
+
+      {/* SEÇÃO I - REVISÃO E FORMULAÇÃO (Assinaturas) */}
+      <div className="glass-panel card-print section-break">
+        <div style={s.cardHeaderEI}><span className="badge-print" style={s.badgeEI}>✍️</span> Revisão e Formulação</div>
+        <p className="no-print" style={{color: '#64748b', fontStyle: 'italic'}}>
+          As assinaturas aparecerão automaticamente na versão impressa do documento.
+        </p>
+        <div className="print-only" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '60px', flexWrap: 'wrap', gap: '20px' }}>
+          {['Professor(a)', 'Diretor(a)', 'Coordenador(a)', 'Pais / Responsável'].map(role => (
+            <div key={role} style={{ flex: '1', minWidth: '150px', textAlign: 'center' }}>
+              <div style={{ borderBottom: '1px solid black', marginBottom: '10px', height: '40px' }}></div>
+              <p style={{ fontWeight: 'bold', margin: 0, fontSize: '10pt' }}>{role}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {zoomImg && (
+        <div className="no-print" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', cursor: 'zoom-out' }} onClick={() => setZoomImg(null)}>
+          <img src={zoomImg} alt="Zoom" style={{ maxWidth: '90%', maxHeight: '90%', borderRadius: '8px', border: '3px solid white', boxShadow: '0 10px 25px rgba(0,0,0,0.5)' }} />
+          <p style={{ color: 'white', marginTop: '15px', fontWeight: 'bold', fontSize: '1.1rem' }}>Clique em qualquer lugar para fechar</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// 4C. FORMULÁRIO PAEE 
 const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
   const estadoInicial = {
     tipoDocumento: 'PAEE', aluno: '', nascimento: '', sexo: '',
@@ -484,13 +937,9 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
     setSalvando(true);
     try {
       const dadosParaSalvar = { ...formData, criadoPor: formData.criadoPor || usuario.email };
-      
-      // 🌟 LIMPEZA PROFUNDA: Varrer o Rascunho inteiro e curar erros
       const dadosLimpos = sanitizeFirebaseKeys(JSON.parse(JSON.stringify(dadosParaSalvar))); 
-
       const nomeLimpo = formData.aluno.replace(/[.#$\[\]\/]/g, ' '); 
       const dbKey = alunoData?.dbKey || `${nomeLimpo} (PAEE)`;
-      
       await set(ref(db, `alunos/${dbKey}`), dadosLimpos); 
       alert(`✅ Documento PAEE salvo na nuvem com sucesso!`); 
       localStorage.removeItem('rascunhoPAEE');
@@ -996,11 +1445,10 @@ Retorne SOMENTE um objeto JSON válido, sem markdown, sem explicações, apenas 
 }
 Preencha os campos de texto com o conteúdo encontrado no documento. Para checkboxes marcados com X ou preenchidos use true, para desmarcados use false.`;
 
-// 4C. IMPORTADOR DE PAEE via Word + Claude AI
+// 4D. IMPORTADOR DE PAEE via Word + Gemini AI
 const GEMINI_MODEL = 'gemini-2.0-flash';
 const GEMINI_URL = (key) => `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${key}`;
 
-// Carrega mammoth.js dinamicamente para ler arquivos .docx
 const carregarMammoth = () => new Promise((resolve, reject) => {
   if (window.mammoth) { resolve(window.mammoth); return; }
   const script = document.createElement('script');
@@ -1010,9 +1458,6 @@ const carregarMammoth = () => new Promise((resolve, reject) => {
   document.head.appendChild(script);
 });
 
-
-
-// 4C. IMPORTADOR DE PAEE via Gemini AI (gratuito)
 const ImportadorPAEE = ({ onVoltar, usuario }) => {
   const [arquivos, setArquivos] = useState([]);
   const [processando, setProcessando] = useState(false);
@@ -1148,7 +1593,6 @@ const ImportadorPAEE = ({ onVoltar, usuario }) => {
         </div>
       </div>
 
-      {/* Chave da API */}
       <div className="glass-panel" style={{ ...s.card, borderLeft: '4px solid #f59e0b' }}>
         <div style={s.cardHeader}><span style={{ ...s.badge, background: '#fef3c7', color: '#92400e' }}>🔑</span> Chave do Google AI Studio (gratuita)</div>
         <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '4px' }}>
@@ -1172,7 +1616,6 @@ const ImportadorPAEE = ({ onVoltar, usuario }) => {
         {apiKey && <p style={{ color: '#10b981', fontSize: '0.85rem', marginTop: '8px', fontWeight: '600' }}>✓ Chave configurada</p>}
       </div>
 
-      {/* Seleção de arquivos */}
       <div className="glass-panel" style={{ ...s.card, borderLeft: '4px solid #7c3aed', marginTop: '20px' }}>
         <div style={s.cardHeader}><span style={{ ...s.badge, background: '#ede9fe', color: '#7c3aed' }}>1</span> Selecione os arquivos PAEE</div>
         <p style={{ color: '#64748b', marginBottom: '16px', fontSize: '0.95rem' }}>
@@ -1277,14 +1720,21 @@ export default function App() {
   const fazerLogout = () => signOut(auth);
   const irParaImportar = () => { setTelaImportar(true); setTelaAtiva('lista'); };
   const irParaNovoPEI = () => { localStorage.removeItem('rascunhoPEI'); setAlunoEditando(null); setTelaAtiva('formularioPEI'); };
+  const irParaNovoPEI_EI = () => { localStorage.removeItem('rascunhoPEI_EI'); setAlunoEditando(null); setTelaAtiva('formularioPEI_EI'); };
   const irParaNovoPAEE = () => { localStorage.removeItem('rascunhoPAEE'); setAlunoEditando(null); setTelaAtiva('formularioPAEE'); };
-  const irParaEditar = (aluno) => { setAlunoEditando(aluno); setTelaAtiva(aluno.tipoDocumento === 'PAEE' ? 'formularioPAEE' : 'formularioPEI'); };
+  const irParaEditar = (aluno) => { 
+    setAlunoEditando(aluno); 
+    if (aluno.tipoDocumento === 'PAEE') setTelaAtiva('formularioPAEE');
+    else if (aluno.tipoDocumento === 'PEI-EI') setTelaAtiva('formularioPEI_EI');
+    else setTelaAtiva('formularioPEI');
+  };
 
   if (carregando) return <div style={{ textAlign: 'center', marginTop: '50px' }}>A carregar o ambiente pedagógico...</div>;
   if (!usuario) return <LoginScreen />;
   
   if (telaImportar) return <ImportadorPAEE onVoltar={() => setTelaImportar(false)} usuario={usuario} />;
-  if (telaAtiva === 'lista') return <ListaAlunos onNovoPEI={irParaNovoPEI} onNovoPAEE={irParaNovoPAEE} onEditar={irParaEditar} onImportar={irParaImportar} onLogout={fazerLogout} usuario={usuario} />;
+  if (telaAtiva === 'lista') return <ListaAlunos onNovoPEI={irParaNovoPEI} onNovoPEI_EI={irParaNovoPEI_EI} onNovoPAEE={irParaNovoPAEE} onEditar={irParaEditar} onImportar={irParaImportar} onLogout={fazerLogout} usuario={usuario} />;
   if (telaAtiva === 'formularioPAEE') return <SistemaPAEE alunoData={alunoEditando} onVoltar={() => setTelaAtiva('lista')} usuario={usuario} />;
+  if (telaAtiva === 'formularioPEI_EI') return <SistemaPEI_EI alunoData={alunoEditando} onVoltar={() => setTelaAtiva('lista')} usuario={usuario} />;
   return <SistemaPEI alunoData={alunoEditando} onVoltar={() => setTelaAtiva('lista')} usuario={usuario} />;
 }
