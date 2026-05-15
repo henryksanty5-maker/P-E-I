@@ -237,6 +237,22 @@ const GlobalCSS = () => (
           page-break-inside: avoid !important;
           break-inside: avoid !important;
         }
+
+        /* ===== REGRA FINAL: garantir que .no-print SEMPRE suma na impressão ===== */
+        /* Vem por último para vencer qualquer .print-block ou outras regras */
+        .no-print,
+        div.no-print,
+        *.no-print {
+          display: none !important;
+          visibility: hidden !important;
+          width: 0 !important;
+          height: 0 !important;
+          max-width: 0 !important;
+          max-height: 0 !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          overflow: hidden !important;
+        }
       }
     `}
   </style>
@@ -356,7 +372,7 @@ const GaleriaFotos = ({ dbKey, campoID, fotos = [], onChange, corTema = 'verde',
   };
 
   return (
-    <div className="no-print print-block" style={{ border: `2px dashed ${cor.border}`, borderRadius: '12px', padding: '15px', backgroundColor: cor.bg, marginTop: '10px' }}>
+    <div className="no-print" style={{ border: `2px dashed ${cor.border}`, borderRadius: '12px', padding: '15px', backgroundColor: cor.bg, marginTop: '10px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
         <span style={{ fontWeight: '600', color: cor.texto }}>📷 {label} {fotos.length > 0 && <span style={{ color: '#64748b', fontWeight: '400' }}>({fotos.length} foto{fotos.length !== 1 ? 's' : ''})</span>}</span>
         <label style={{ padding: '8px 16px', backgroundColor: cor.texto, color: 'white', borderRadius: '8px', cursor: enviando ? 'not-allowed' : 'pointer', fontWeight: '600', fontSize: '0.9rem', opacity: enviando ? 0.6 : 1 }}>
@@ -681,7 +697,7 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
   const getGaleria = (campoID) => (formData.galerias && formData.galerias[campoID]) || [];
 
   const FileUpload = ({ label, campoID }) => (
-    <div className="no-print print-block" style={s.uploadBox}>
+    <div className="no-print" style={s.uploadBox}>
       {formData.anexos && formData.anexos[campoID] ? (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <img src={formData.anexos[campoID]} alt="Anexo" title="Clique para ampliar" onClick={() => setZoomImg(formData.anexos[campoID])} style={{ maxWidth: '100%', maxHeight: '250px', borderRadius: '8px', border: '1px solid #a7f3d0', cursor: 'zoom-in' }} />
@@ -947,7 +963,7 @@ const SistemaPEI_EI = ({ alunoData, onVoltar, usuario }) => {
   const getGaleria = (campoID) => (formData.galerias && formData.galerias[campoID]) || [];
 
   const FileUpload = ({ label, campoID }) => (
-    <div className="no-print print-block" style={s.uploadBoxEI}>
+    <div className="no-print" style={s.uploadBoxEI}>
       {formData.anexos && formData.anexos[campoID] ? (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <img src={formData.anexos[campoID]} alt="Anexo" title="Clique para ampliar" onClick={() => setZoomImg(formData.anexos[campoID])} style={{ maxWidth: '100%', maxHeight: '250px', borderRadius: '8px', border: '1px solid #fcd34d', cursor: 'zoom-in' }} />
@@ -1348,7 +1364,7 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
   const getGaleria = (campoID) => (formData.galerias && formData.galerias[campoID]) || [];
 
   const FileUpload = ({ label, campoID }) => (
-    <div className="no-print print-block" style={s.uploadBox}>
+    <div className="no-print" style={s.uploadBox}>
       {formData.anexos && formData.anexos[campoID] ? (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <img src={formData.anexos[campoID]} alt="Anexo" title="Clique para ampliar" onClick={() => setZoomImg(formData.anexos[campoID])} style={{ maxWidth: '100%', maxHeight: '250px', borderRadius: '8px', border: '1px solid #a7f3d0', cursor: 'zoom-in' }} />
