@@ -179,31 +179,63 @@ const GlobalCSS = () => (
         }
         .badge-print { border: 1px solid black !important; }
 
-        /* ===== FOTOS DA GALERIA — tamanho controlado, 2 por linha, sem extrapolar página ===== */
-        .galeria-print {
+        /* ===== FOTOS DA GALERIA — tamanho controlado, 2 por linha, NUNCA cortar entre páginas ===== */
+        /* Alta especificidade: .print-only.galeria-print sobrescreve a regra "div { display: block !important }" acima */
+        .print-only.galeria-print {
           display: grid !important;
           grid-template-columns: 1fr 1fr !important;
-          gap: 10mm !important;
-          margin-top: 8px !important;
+          gap: 6mm !important;
+          margin-top: 6mm !important;
+          margin-bottom: 6mm !important;
+          width: 100% !important;
+          page-break-inside: auto !important;
         }
-        .galeria-print > div {
+        /* Quando há só 1 foto, deixa em coluna única ocupando toda a largura */
+        .print-only.galeria-print:has(> div:only-child) {
+          grid-template-columns: 1fr !important;
+        }
+        .print-only.galeria-print > div,
+        div.print-only.galeria-print > div {
           page-break-inside: avoid !important;
-          break-inside: avoid !important;
+          break-inside: avoid-page !important;
+          -webkit-column-break-inside: avoid !important;
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: center !important;
+          justify-content: flex-start !important;
           text-align: center !important;
+          width: 100% !important;
+          height: auto !important;
+          max-height: 100mm !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          overflow: hidden !important;
         }
-        .galeria-print img {
+        .print-only.galeria-print img,
+        div.print-only.galeria-print img {
           max-width: 100% !important;
-          max-height: 80mm !important;
           width: auto !important;
+          max-height: 85mm !important;
           height: auto !important;
           object-fit: contain !important;
+          display: block !important;
           border: 1px solid #888 !important;
+          margin: 0 auto !important;
+          page-break-inside: avoid !important;
+          break-inside: avoid !important;
         }
-        /* Imagens em geral nunca podem estourar a página */
+        .print-only.galeria-print p {
+          font-size: 9pt !important;
+          color: #444 !important;
+          margin: 2mm 0 0 0 !important;
+          page-break-before: avoid !important;
+        }
+        /* Imagens em geral (fora da galeria) também não podem estourar a página */
         img { 
           max-width: 100% !important; 
           max-height: 240mm !important; 
           page-break-inside: avoid !important;
+          break-inside: avoid !important;
         }
       }
     `}
