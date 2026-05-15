@@ -1182,23 +1182,33 @@ const SistemaPEI_EI = ({ alunoData, onVoltar, usuario }) => {
               minHeight="140px"
             />
           </div>
-
-          <h4 style={s.sectionTitle}>Relatórios Bimestrais ({campo.id})</h4>
-          <div className="print-block" style={s.grid2}>
-            {bimestres.map((bim, idxBim) => (
-              <div key={`rel-${campo.id}-${idxBim}`} className="print-input-group" style={{ border: '1px solid rgba(252, 211, 77, 0.4)', padding: '14px', borderRadius: '8px', backgroundColor: 'rgba(254, 243, 199, 0.15)' }}>
-                <label style={{...s.label, color: '#92400e'}}>Relatório {bim}</label>
-                <TextareaPrint 
-                  value={(formData.camposEI?.[campo.id] || {})[`${bimestresKey[idxBim]}_relatorio`]} 
-                  onChange={(e) => handleCampoEI(campo.id, `${bimestresKey[idxBim]}_relatorio`, e.target.value)}
-                  placeholder={`Relatório de ${bim}...`}
-                  minHeight="120px"
-                />
-              </div>
-            ))}
-          </div>
         </div>
       ))}
+
+      {/* SEÇÃO F.5 - RELATÓRIOS BIMESTRAIS GERAIS (após os dois campos de experiência) */}
+      <div className="glass-panel card-print section-break">
+        <div style={s.cardHeaderEI}>
+          <span className="badge-print" style={s.badgeEI}>📝</span> 
+          Relatórios Bimestrais
+        </div>
+        <p className="no-print" style={{color: '#64748b', fontSize: '0.9rem', marginTop: '-8px', marginBottom: '15px'}}>
+          Registre o desenvolvimento do aluno em cada bimestre, considerando os dois campos de experiência trabalhados.
+        </p>
+        <div className="print-block" style={s.grid2}>
+          {bimestres.map((bim, idxBim) => (
+            <div key={`rel-geral-${idxBim}`} className="print-input-group" style={{ border: '1px solid rgba(252, 211, 77, 0.4)', padding: '14px', borderRadius: '8px', backgroundColor: 'rgba(254, 243, 199, 0.15)' }}>
+              <label style={{...s.label, color: '#92400e'}}>Relatório {bim}</label>
+              <TextareaPrint 
+                name={`relatorioBimestre_${bimestresKey[idxBim]}`}
+                value={formData[`relatorioBimestre_${bimestresKey[idxBim]}`]} 
+                onChange={handleChange}
+                placeholder={`Relatório de ${bim}...`}
+                minHeight="140px"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* SEÇÃO G - DISCIPLINAS ESPECÍFICAS */}
       {disciplinas.map((disc) => (
@@ -1256,7 +1266,19 @@ const SistemaPEI_EI = ({ alunoData, onVoltar, usuario }) => {
       {/* SEÇÃO I - REVISÃO E FORMULAÇÃO (Assinaturas) */}
       <div className="glass-panel card-print section-break">
         <div style={s.cardHeaderEI}><span className="badge-print" style={s.badgeEI}>✍️</span> Revisão e Formulação</div>
-        <p className="no-print" style={{color: '#64748b', fontStyle: 'italic'}}>
+
+        <div className="print-input-group" style={{ marginTop: '10px' }}>
+          <label style={s.label}>Considerações Finais</label>
+          <TextareaPrint 
+            name="consideracoesFinais"
+            value={formData.consideracoesFinais} 
+            onChange={handleChange}
+            placeholder="Espaço livre para considerações finais, observações da equipe pedagógica, encaminhamentos, recomendações para o próximo ano..."
+            minHeight="200px"
+          />
+        </div>
+
+        <p className="no-print" style={{color: '#64748b', fontStyle: 'italic', marginTop: '20px'}}>
           As assinaturas aparecerão automaticamente na versão impressa do documento.
         </p>
         <div className="print-only" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '60px', flexWrap: 'wrap', gap: '20px' }}>
