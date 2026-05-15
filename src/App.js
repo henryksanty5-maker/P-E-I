@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from 'firebase/auth';
 import { getDatabase, ref, set, push, onValue, remove } from 'firebase/database';
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL, deleteObject, listAll } from 'firebase/storage';
 
 // 1. Configuração do Firebase
 const firebaseConfig = {
@@ -16,6 +17,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
+const storage = getStorage(app);
 
 // 🌟 VARREDURA PROFUNDA ANTI-ERROS DO FIREBASE 🌟
 const sanitizeFirebaseKeys = (obj) => {
@@ -75,22 +77,134 @@ const GlobalCSS = () => (
 
       @media screen { .print-only { display: none !important; } }
       @media print {
-        @page { margin: 15mm; }
-        * { background: transparent !important; color: black !important; box-shadow: none !important; position: static !important; overflow: visible !important; box-sizing: border-box !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; filter: none !important; transform: none !important; }
-        h1, h2, h3, h4, h5, h6, p, label, span { margin: 0 0 5px 0 !important; padding: 0 !important; }
-        html, body, #root, .print-page { width: 100% !important; height: auto !important; min-height: 0 !important; display: block !important; }
+        /* ===== TAMANHO DE FOLHA SULFITE (A4) ===== */
+        @page { 
+          size: A4 portrait; 
+          margin: 15mm 15mm 18mm 15mm;
+        }
+        @page :first { margin-top: 12mm; }
+
+        /* Reset visual: tira fundos coloridos, sombras, blurs (deixa preto-no-branco para impressão limpa) */
+        * { 
+          background: transparent !important; 
+          color: black !important; 
+          box-shadow: none !important; 
+          position: static !important; 
+          overflow: visible !important; 
+          box-sizing: border-box !important; 
+          backdrop-filter: none !important; 
+          -webkit-backdrop-filter: none !important; 
+          filter: none !important; 
+          transform: none !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+
+        /* Tipografia otimizada para A4 — corpo em 10.5pt cabe bem sem desperdiçar páginas */
+        html, body { 
+          font-family: 'Arial', 'Helvetica', sans-serif !important; 
+          font-size: 10.5pt !important; 
+          line-height: 1.35 !important;
+          letter-spacing: 0 !important;
+        }
+        h1 { font-size: 16pt !important; margin: 0 0 8px 0 !important; }
+        h2 { font-size: 13pt !important; margin: 12px 0 6px 0 !important; }
+        h3 { font-size: 11.5pt !important; margin: 10px 0 5px 0 !important; }
+        h4, h5, h6 { font-size: 11pt !important; margin: 8px 0 4px 0 !important; }
+        p, label, span { margin: 0 0 4px 0 !important; padding: 0 !important; }
+
+        /* Páginas e containers ocupam a largura útil da folha */
+        html, body, #root, .print-page { 
+          width: 100% !important; 
+          height: auto !important; 
+          min-height: 0 !important; 
+          display: block !important;
+          padding: 0 !important;
+          margin: 0 !important;
+        }
         .no-print { display: none !important; }
         .print-only { display: block !important; }
-        div, .print-block, .glass-panel, .card-print { display: block !important; width: 100% !important; margin: 0 0 10px 0 !important; border: none !important; page-break-inside: auto !important; }
-        h1, h2, h3, h4, .cardHeader, .sectionTitle { page-break-after: avoid !important; break-after: avoid !important; }
-        .print-input-group, .inputGroup, label.checkbox-row { page-break-inside: avoid !important; break-inside: avoid !important; }
+        div, .print-block, .glass-panel, .card-print { 
+          display: block !important; 
+          width: 100% !important; 
+          margin: 0 0 8px 0 !important; 
+          border: none !important; 
+          page-break-inside: auto !important;
+          padding: 0 !important;
+        }
+
+        /* Quebras de página inteligentes — não deixa título sozinho no fim da folha */
+        h1, h2, h3, h4, .cardHeader, .sectionTitle { 
+          page-break-after: avoid !important; 
+          break-after: avoid !important; 
+        }
+        .print-input-group, .inputGroup, label.checkbox-row { 
+          page-break-inside: avoid !important; 
+          break-inside: avoid !important; 
+        }
         .section-break { page-break-before: always !important; break-before: page !important; }
-        .card-print > div:first-child { border-bottom: 2px solid black !important; padding-bottom: 5px !important; margin-bottom: 10px !important; }
-        input:not([type="checkbox"]) { border: none !important; border-bottom: 1px solid black !important; border-radius: 0 !important; width: 100% !important; padding: 2px 0 5px 0 !important; font-family: Arial, sans-serif !important; font-size: 11pt !important; }
-        label { font-weight: bold !important; margin-top: 15px !important; display: block !important; }
-        label.checkbox-row { display: flex !important; align-items: center !important; margin: 6px 0 !important; font-weight: normal !important; }
-        label.checkbox-row input[type="checkbox"] { width: auto !important; margin-right: 8px !important; display: inline-block !important; }
+        .card-print > div:first-child { 
+          border-bottom: 1.5px solid black !important; 
+          padding-bottom: 4px !important; 
+          margin-bottom: 8px !important; 
+        }
+
+        /* Inputs como linhas pontilhadas/sublinhadas no documento impresso */
+        input:not([type="checkbox"]) { 
+          border: none !important; 
+          border-bottom: 1px solid black !important; 
+          border-radius: 0 !important; 
+          width: 100% !important; 
+          padding: 1px 0 3px 0 !important; 
+          font-family: Arial, sans-serif !important; 
+          font-size: 10.5pt !important;
+          background: transparent !important;
+        }
+        label { 
+          font-weight: bold !important; 
+          margin-top: 8px !important; 
+          display: block !important; 
+          font-size: 10pt !important;
+        }
+        label.checkbox-row { 
+          display: flex !important; 
+          align-items: center !important; 
+          margin: 4px 0 !important; 
+          font-weight: normal !important; 
+        }
+        label.checkbox-row input[type="checkbox"] { 
+          width: auto !important; 
+          margin-right: 6px !important; 
+          display: inline-block !important; 
+        }
         .badge-print { border: 1px solid black !important; }
+
+        /* ===== FOTOS DA GALERIA — tamanho controlado, 2 por linha, sem extrapolar página ===== */
+        .galeria-print {
+          display: grid !important;
+          grid-template-columns: 1fr 1fr !important;
+          gap: 10mm !important;
+          margin-top: 8px !important;
+        }
+        .galeria-print > div {
+          page-break-inside: avoid !important;
+          break-inside: avoid !important;
+          text-align: center !important;
+        }
+        .galeria-print img {
+          max-width: 100% !important;
+          max-height: 80mm !important;
+          width: auto !important;
+          height: auto !important;
+          object-fit: contain !important;
+          border: 1px solid #888 !important;
+        }
+        /* Imagens em geral nunca podem estourar a página */
+        img { 
+          max-width: 100% !important; 
+          max-height: 240mm !important; 
+          page-break-inside: avoid !important;
+        }
       }
     `}
   </style>
@@ -98,7 +212,18 @@ const GlobalCSS = () => (
 
 const TextareaPrint = ({ value, onChange, name, placeholder, minHeight = '120px' }) => (
   <div style={{ width: '100%' }}>
-    <textarea className="no-print" style={{ ...s.input, minHeight, width: '100%', resize: 'vertical' }} name={name} value={value || ''} onChange={onChange} placeholder={placeholder} />
+    <textarea
+      className="no-print"
+      style={{ ...s.input, minHeight, width: '100%', resize: 'vertical' }}
+      name={name}
+      value={value || ''}
+      onChange={onChange}
+      placeholder={placeholder}
+      lang="pt-BR"
+      spellCheck={true}
+      autoCorrect="on"
+      autoCapitalize="sentences"
+    />
     <div className="print-only" style={{ whiteSpace: 'pre-wrap', borderBottom: '1px solid black', width: '100%', padding: '5px 0', minHeight: '25px', color: 'black' }}>{value || ''}</div>
   </div>
 );
@@ -110,6 +235,151 @@ const Checkbox = ({ label, formData, handleCheckbox, accentColor = '#10b981' }) 
       <input type="checkbox" checked={!!(formData.opcoes || {})[safeKey]} onChange={() => handleCheckbox(safeKey)} style={{ width: '18px', height: '18px', accentColor }} />
       <span style={{ fontSize: '0.95rem', color: '#334155', fontWeight: '500' }}>{label}</span>
     </label>
+  );
+};
+
+// ============================================================
+// GaleriaFotos — componente reutilizável para múltiplas fotos
+// Salva no Firebase Storage; no documento PEI guarda só os URLs.
+// Props:
+//   - dbKey: identificador do documento PEI (ex.: "João Silva (PEI)")
+//   - campoID: nome do campo (ex.: "laudo_medico", "diario_bimestre_1")
+//   - fotos: array de objetos { url, path, nome } vindos do formData
+//   - onChange: função chamada quando a lista muda — recebe o novo array
+//   - corTema: 'verde' (PEI), 'ambar' (PEI-EI) ou 'azul' (PAEE)
+//   - label: texto do botão
+// ============================================================
+const GaleriaFotos = ({ dbKey, campoID, fotos = [], onChange, corTema = 'verde', label = 'Adicionar Fotos' }) => {
+  const [enviando, setEnviando] = useState(false);
+  const [progresso, setProgresso] = useState({ atual: 0, total: 0 });
+  const [zoomImg, setZoomImg] = useState(null);
+
+  const cores = {
+    verde: { border: '#a7f3d0', bg: 'rgba(209, 250, 229, 0.4)', texto: '#059669' },
+    ambar: { border: '#fcd34d', bg: 'rgba(254, 243, 199, 0.4)', texto: '#d97706' },
+    azul: { border: '#93c5fd', bg: 'rgba(219, 234, 254, 0.4)', texto: '#1d4ed8' }
+  };
+  const cor = cores[corTema] || cores.verde;
+
+  // Comprime imagem antes de enviar (mantém qualidade boa, mas reduz tamanho)
+  const comprimirImagem = (file) => new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const maxW = 1200; // largura máxima — mantém qualidade alta para leitura de laudos/receitas
+        const escala = img.width > maxW ? maxW / img.width : 1;
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width * escala;
+        canvas.height = img.height * escala;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.85);
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  const handleUpload = async (e) => {
+    const arquivos = Array.from(e.target.files);
+    if (arquivos.length === 0) return;
+    if (!dbKey) { alert('Salve o documento ao menos uma vez antes de anexar fotos (preencha o nome do aluno e clique em Salvar Nuvem).'); return; }
+
+    setEnviando(true);
+    setProgresso({ atual: 0, total: arquivos.length });
+    const novasFotos = [...fotos];
+
+    for (let i = 0; i < arquivos.length; i++) {
+      try {
+        const blob = await comprimirImagem(arquivos[i]);
+        const timestamp = Date.now() + '_' + i;
+        const nomeArquivo = `${timestamp}.jpg`;
+        const caminho = `alunos/${dbKey}/${campoID}/${nomeArquivo}`;
+        const refArquivo = sRef(storage, caminho);
+        await uploadBytes(refArquivo, blob);
+        const url = await getDownloadURL(refArquivo);
+        novasFotos.push({ url, path: caminho, nome: arquivos[i].name });
+        setProgresso({ atual: i + 1, total: arquivos.length });
+      } catch (err) {
+        alert(`Erro ao enviar "${arquivos[i].name}": ${err.message}`);
+      }
+    }
+
+    onChange(novasFotos);
+    setEnviando(false);
+    e.target.value = ''; // permite re-selecionar os mesmos arquivos
+  };
+
+  const removerFoto = async (index) => {
+    if (!window.confirm('Remover esta foto definitivamente?')) return;
+    const foto = fotos[index];
+    try {
+      if (foto.path) await deleteObject(sRef(storage, foto.path));
+    } catch (err) {
+      console.warn('Foto já removida do Storage:', err.message);
+    }
+    const novasFotos = fotos.filter((_, i) => i !== index);
+    onChange(novasFotos);
+  };
+
+  return (
+    <div className="no-print print-block" style={{ border: `2px dashed ${cor.border}`, borderRadius: '12px', padding: '15px', backgroundColor: cor.bg, marginTop: '10px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+        <span style={{ fontWeight: '600', color: cor.texto }}>📷 {label} {fotos.length > 0 && <span style={{ color: '#64748b', fontWeight: '400' }}>({fotos.length} foto{fotos.length !== 1 ? 's' : ''})</span>}</span>
+        <label style={{ padding: '8px 16px', backgroundColor: cor.texto, color: 'white', borderRadius: '8px', cursor: enviando ? 'not-allowed' : 'pointer', fontWeight: '600', fontSize: '0.9rem', opacity: enviando ? 0.6 : 1 }}>
+          + Adicionar
+          <input type="file" accept="image/*" multiple onChange={handleUpload} disabled={enviando} style={{ display: 'none' }} />
+        </label>
+      </div>
+
+      {enviando && (
+        <div style={{ padding: '12px', backgroundColor: 'white', borderRadius: '8px', marginBottom: '12px', textAlign: 'center', color: cor.texto, fontWeight: '500' }}>
+          Enviando {progresso.atual} de {progresso.total}...
+        </div>
+      )}
+
+      {fotos.length === 0 && !enviando && (
+        <div style={{ textAlign: 'center', padding: '20px', color: '#64748b' }}>Nenhuma foto anexada. Clique em "+ Adicionar" para enviar várias fotos de uma vez.</div>
+      )}
+
+      {fotos.length > 0 && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '10px' }}>
+          {fotos.map((foto, idx) => (
+            <div key={idx} style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', border: `1px solid ${cor.border}`, backgroundColor: 'white' }}>
+              <img
+                src={foto.url}
+                alt={foto.nome || `Foto ${idx + 1}`}
+                onClick={() => setZoomImg(foto.url)}
+                style={{ width: '100%', height: '120px', objectFit: 'cover', cursor: 'zoom-in', display: 'block' }}
+              />
+              <button
+                type="button"
+                onClick={() => removerFoto(idx)}
+                title="Remover esta foto"
+                style={{ position: 'absolute', top: '4px', right: '4px', width: '26px', height: '26px', borderRadius: '50%', border: 'none', backgroundColor: 'rgba(220, 38, 38, 0.9)', color: 'white', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px', lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >×</button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {zoomImg && (
+        <div onClick={() => setZoomImg(null)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'zoom-out', padding: '20px' }}>
+          <img src={zoomImg} alt="Zoom" style={{ maxWidth: '95%', maxHeight: '95%', borderRadius: '8px', boxShadow: '0 10px 25px rgba(0,0,0,0.5)' }} />
+        </div>
+      )}
+
+      {/* Versão para impressão: grade A4 — 2 fotos por linha, tamanho controlado */}
+      <div className="print-only galeria-print" style={{ marginTop: '15px' }}>
+        {fotos.map((foto, idx) => (
+          <div key={`p${idx}`}>
+            <img src={foto.url} alt={`${label} - ${idx + 1}`} />
+            <p style={{ fontSize: '9pt', color: '#444', marginTop: '3px' }}>{label} — {idx + 1}</p>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 };
 
@@ -214,7 +484,24 @@ const ListaAlunos = ({ onNovoPEI, onNovoPEI_EI, onNovoPAEE, onEditar, onImportar
   }, [usuario.email, isEspecialista]);
 
   const deletarAluno = async (dbKey) => {
-    if(window.confirm(`Tem certeza que deseja excluir este documento?`)) { await remove(ref(db, `alunos/${dbKey}`)); }
+    if(window.confirm(`Tem certeza que deseja excluir este documento?\n\nAtenção: todas as fotos anexadas também serão removidas permanentemente.`)) {
+      // 1. Remove fotos do Storage (se houver)
+      try {
+        const pastaAluno = sRef(storage, `alunos/${dbKey}`);
+        const conteudo = await listAll(pastaAluno);
+        // listAll devolve prefixes (subpastas por campoID) e items diretos
+        const todosArquivos = [...conteudo.items];
+        for (const subpasta of conteudo.prefixes) {
+          const sub = await listAll(subpasta);
+          todosArquivos.push(...sub.items);
+        }
+        await Promise.all(todosArquivos.map(arq => deleteObject(arq).catch(() => null)));
+      } catch (err) {
+        console.warn('Sem fotos no Storage ou erro ao limpar:', err.message);
+      }
+      // 2. Remove o documento do Database
+      await remove(ref(db, `alunos/${dbKey}`));
+    }
   };
 
   const getBadgeStyle = (tipo) => {
@@ -356,6 +643,11 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
     setFormData(prev => { const novosAnexos = { ...(prev.anexos || {}) }; delete novosAnexos[campoID]; return { ...prev, anexos: novosAnexos }; });
   };
 
+  // Helpers para GaleriaFotos (Firebase Storage — fotos ilimitadas)
+  const dbKeyAtual = alunoData?.dbKey || (formData.aluno ? `${formData.aluno.replace(/[.#$\[\]\/]/g, ' ')} (PEI)` : null);
+  const handleGaleria = (campoID, novasFotos) => setFormData(prev => ({ ...prev, galerias: { ...(prev.galerias || {}), [campoID]: novasFotos } }));
+  const getGaleria = (campoID) => (formData.galerias && formData.galerias[campoID]) || [];
+
   const FileUpload = ({ label, campoID }) => (
     <div className="no-print print-block" style={s.uploadBox}>
       {formData.anexos && formData.anexos[campoID] ? (
@@ -409,7 +701,7 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
       <div className="glass-panel card-print">
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>B</span> Informações Clínicas</div>
         <div className="print-block" style={s.grid3}>
-          <div className="print-input-group"><label style={s.label}>Diagnóstico</label><input style={s.input} name="diagnostico" value={formData.diagnostico} onChange={handleChange} /><FileUpload label="Anexar Laudo" campoID="laudo_medico" /></div>
+          <div className="print-input-group"><label style={s.label}>Diagnóstico</label><input style={s.input} name="diagnostico" value={formData.diagnostico} onChange={handleChange} /><GaleriaFotos dbKey={dbKeyAtual} campoID="laudo_medico" fotos={getGaleria("laudo_medico")} onChange={(f) => handleGaleria("laudo_medico", f)} corTema="verde" label="Anexar Laudo" /></div>
           <div className="print-input-group"><label style={s.label}>Códigos CID</label><input style={s.input} name="cid" value={formData.cid} onChange={handleChange} /></div>
           <div className="print-input-group"><label style={s.label}>CRM do Médico</label><input style={s.input} name="crm" value={formData.crm} onChange={handleChange} /></div>
         </div>
@@ -418,7 +710,7 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
       <div className="glass-panel card-print">
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>C</span> Medicação e Terapias</div>
         <div className="print-block" style={s.grid2}>
-          <div className="print-input-group"><Checkbox label="O aluno utiliza medicação?" formData={formData} handleCheckbox={handleCheckbox} /><FileUpload label="Anexar Receita" campoID="receita_medica" /></div>
+          <div className="print-input-group"><Checkbox label="O aluno utiliza medicação?" formData={formData} handleCheckbox={handleCheckbox} /><GaleriaFotos dbKey={dbKeyAtual} campoID="receita_medica" fotos={getGaleria("receita_medica")} onChange={(f) => handleGaleria("receita_medica", f)} corTema="verde" label="Anexar Receita" /></div>
           <div className="print-input-group"><Checkbox label="Acompanhamento terapêutico?" formData={formData} handleCheckbox={handleCheckbox} /></div>
         </div>
         <div className="print-block" style={{ marginTop: '20px' }}><h4>Especialistas que acompanham o aluno:</h4><div className="print-block" style={s.grid3}><Checkbox label="Neurologista" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Psicólogo" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Fonoaudiólogo" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Psicopedagogo" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="Terapeuta Ocupacional" formData={formData} handleCheckbox={handleCheckbox} /><Checkbox label="ABA / TCC" formData={formData} handleCheckbox={handleCheckbox} /></div></div>
@@ -428,7 +720,7 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>D</span> Avaliação Diagnóstica</div>
         <div className="print-block" style={s.grid2}>
           <div className="print-input-group"><label style={s.label}>Resultado da Avaliação</label><TextareaPrint name="resultadoAvaliacao" value={formData.resultadoAvaliacao} onChange={handleChange} placeholder="Descreva os resultados..." /></div>
-          <div className="print-input-group"><label style={s.label}>Evidência / Avaliação</label><FileUpload label="Anexar Avaliação" campoID="avaliacao_diagnostica" /></div>
+          <div className="print-input-group"><label style={s.label}>Evidência / Avaliação</label><GaleriaFotos dbKey={dbKeyAtual} campoID="avaliacao_diagnostica" fotos={getGaleria("avaliacao_diagnostica")} onChange={(f) => handleGaleria("avaliacao_diagnostica", f)} corTema="verde" label="Anexar Avaliação" /></div>
         </div>
       </div>
 
@@ -461,7 +753,7 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
             <div key={bim} className="print-block" style={{ border: '1px solid rgba(203, 213, 225, 0.5)', padding: '18px', backgroundColor: 'rgba(209, 250, 229, 0.2)' }}>
               <h4 style={{ margin: '0 0 12px 0', color: '#065f46' }}>{bim}</h4>
               <TextareaPrint minHeight="120px" value={(formData.diario || {})[bim]} onChange={(e) => handleNestedText('diario', bim, e.target.value)} placeholder="Evolução, observações e conquistas..." />
-              <div style={{ marginTop: '15px' }}><FileUpload label="Anexar Evidência / Atividade" campoID={`diario_bimestre_${index+1}`} /></div>
+              <div style={{ marginTop: '15px' }}><GaleriaFotos dbKey={dbKeyAtual} campoID={`diario_bimestre_${index+1}`} fotos={getGaleria(`diario_bimestre_${index+1}`)} onChange={(f) => handleGaleria(`diario_bimestre_${index+1}`, f)} corTema="verde" label="Anexar Evidência / Atividade" /></div>
             </div>
           ))}
         </div>
@@ -617,6 +909,11 @@ const SistemaPEI_EI = ({ alunoData, onVoltar, usuario }) => {
     setFormData(prev => { const novosAnexos = { ...(prev.anexos || {}) }; delete novosAnexos[campoID]; return { ...prev, anexos: novosAnexos }; });
   };
 
+  // Helpers para GaleriaFotos (Firebase Storage — fotos ilimitadas)
+  const dbKeyAtual = alunoData?.dbKey || (formData.aluno ? `${formData.aluno.replace(/[.#$\[\]\/]/g, ' ')} (PEI-EI)` : null);
+  const handleGaleria = (campoID, novasFotos) => setFormData(prev => ({ ...prev, galerias: { ...(prev.galerias || {}), [campoID]: novasFotos } }));
+  const getGaleria = (campoID) => (formData.galerias && formData.galerias[campoID]) || [];
+
   const FileUpload = ({ label, campoID }) => (
     <div className="no-print print-block" style={s.uploadBoxEI}>
       {formData.anexos && formData.anexos[campoID] ? (
@@ -685,7 +982,7 @@ const SistemaPEI_EI = ({ alunoData, onVoltar, usuario }) => {
         </div>
         <div className="print-input-group" style={{marginTop: '15px'}}>
           <label style={s.label}>Foto do Laudo Médico</label>
-          <FileUpload label="Anexar Laudo Médico" campoID="laudo_medico" />
+          <GaleriaFotos dbKey={dbKeyAtual} campoID="laudo_medico" fotos={getGaleria("laudo_medico")} onChange={(f) => handleGaleria("laudo_medico", f)} corTema="ambar" label="Anexar Laudo Médico" />
         </div>
         <div className="print-input-group" style={{marginTop: '15px'}}>
           <label style={s.label}>Especificidades do Aluno</label>
@@ -708,7 +1005,7 @@ const SistemaPEI_EI = ({ alunoData, onVoltar, usuario }) => {
           </div>
           <div className="print-input-group">
             <label style={s.label}>Foto da Receita</label>
-            <FileUpload label="Anexar Receita Médica" campoID="receita_medica" />
+            <GaleriaFotos dbKey={dbKeyAtual} campoID="receita_medica" fotos={getGaleria("receita_medica")} onChange={(f) => handleGaleria("receita_medica", f)} corTema="ambar" label="Anexar Receita Médica" />
           </div>
         </div>
       </div>
@@ -1013,6 +1310,11 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
     setFormData(prev => { const novosAnexos = { ...(prev.anexos || {}) }; delete novosAnexos[campoID]; return { ...prev, anexos: novosAnexos }; });
   };
 
+  // Helpers para GaleriaFotos (Firebase Storage — fotos ilimitadas)
+  const dbKeyAtual = alunoData?.dbKey || (formData.aluno ? `${formData.aluno.replace(/[.#$\[\]\/]/g, ' ')} (PAEE)` : null);
+  const handleGaleria = (campoID, novasFotos) => setFormData(prev => ({ ...prev, galerias: { ...(prev.galerias || {}), [campoID]: novasFotos } }));
+  const getGaleria = (campoID) => (formData.galerias && formData.galerias[campoID]) || [];
+
   const FileUpload = ({ label, campoID }) => (
     <div className="no-print print-block" style={s.uploadBox}>
       {formData.anexos && formData.anexos[campoID] ? (
@@ -1082,7 +1384,7 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
 
         <div className="print-input-group" style={{marginTop: '20px'}}>
           <label style={s.label}>Laudo Médico / Diagnóstico:</label>
-          <FileUpload label="Anexar Foto do Laudo" campoID="laudo_medico" />
+          <GaleriaFotos dbKey={dbKeyAtual} campoID="laudo_medico" fotos={getGaleria("laudo_medico")} onChange={(f) => handleGaleria("laudo_medico", f)} corTema="azul" label="Anexar Foto do Laudo" />
         </div>
         
         <div className="print-input-group" style={{marginTop: '20px'}}>
@@ -1375,8 +1677,8 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
       <div className="glass-panel card-print section-break">
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>VII</span> Momentos AEE</div>
         <div className="print-block" style={s.grid2}>
-          <FileUpload label="Adicionar Foto (Momento 1)" campoID="momento_aee_1" />
-          <FileUpload label="Adicionar Foto (Momento 2)" campoID="momento_aee_2" />
+          <GaleriaFotos dbKey={dbKeyAtual} campoID="momento_aee_1" fotos={getGaleria("momento_aee_1")} onChange={(f) => handleGaleria("momento_aee_1", f)} corTema="azul" label="Adicionar Foto (Momento 1)" />
+          <GaleriaFotos dbKey={dbKeyAtual} campoID="momento_aee_2" fotos={getGaleria("momento_aee_2")} onChange={(f) => handleGaleria("momento_aee_2", f)} corTema="azul" label="Adicionar Foto (Momento 2)" />
         </div>
       </div>
 
@@ -1760,10 +2062,33 @@ export default function App() {
 
   useEffect(() => { const unsubscribe = onAuthStateChanged(auth, (user) => { setUsuario(user); setCarregando(false); }); return () => unsubscribe(); }, []);
 
-  // Ativa corretor ortográfico em português em todo o sistema
+  // Ativa corretor ortográfico em português em todos os inputs de texto e textareas.
+  // Usa MutationObserver para cobrir campos renderizados depois (mudança de tela, novos cards, etc.)
   useEffect(() => {
     document.documentElement.setAttribute('lang', 'pt-BR');
-    document.body.setAttribute('spellcheck', 'true');
+
+    const aplicarCorretor = () => {
+      // Seleciona TODOS os textareas e inputs de texto (exclui password, número, data, etc.)
+      const seletor = 'textarea, input[type="text"], input[type="email"], input:not([type])';
+      document.querySelectorAll(seletor).forEach(el => {
+        // Pula o campo de senha mesmo se vier no seletor por algum motivo
+        if (el.type === 'password') return;
+        // Se o autor explicitamente desativou (autoComplete one-time-code etc.), respeita
+        if (el.getAttribute('spellcheck') === 'false') return;
+        el.setAttribute('spellcheck', 'true');
+        el.setAttribute('lang', 'pt-BR');
+        // autoCorrect/autoCapitalize ajudam em mobile (iOS/Android)
+        if (el.tagName === 'TEXTAREA') {
+          el.setAttribute('autocorrect', 'on');
+          el.setAttribute('autocapitalize', 'sentences');
+        }
+      });
+    };
+
+    aplicarCorretor();
+    const observer = new MutationObserver(aplicarCorretor);
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
   }, []);
   
   const fazerLogout = () => signOut(auth);
