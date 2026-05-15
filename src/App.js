@@ -372,62 +372,67 @@ const GaleriaFotos = ({ dbKey, campoID, fotos = [], onChange, corTema = 'verde',
   };
 
   return (
-    <div className="no-print" style={{ border: `2px dashed ${cor.border}`, borderRadius: '12px', padding: '15px', backgroundColor: cor.bg, marginTop: '10px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-        <span style={{ fontWeight: '600', color: cor.texto }}>📷 {label} {fotos.length > 0 && <span style={{ color: '#64748b', fontWeight: '400' }}>({fotos.length} foto{fotos.length !== 1 ? 's' : ''})</span>}</span>
-        <label style={{ padding: '8px 16px', backgroundColor: cor.texto, color: 'white', borderRadius: '8px', cursor: enviando ? 'not-allowed' : 'pointer', fontWeight: '600', fontSize: '0.9rem', opacity: enviando ? 0.6 : 1 }}>
-          + Adicionar
-          <input type="file" accept="image/*" multiple onChange={handleUpload} disabled={enviando} style={{ display: 'none' }} />
-        </label>
+    <>
+      {/* Widget INTERATIVO (só na tela, oculto na impressão) */}
+      <div className="no-print" style={{ border: `2px dashed ${cor.border}`, borderRadius: '12px', padding: '15px', backgroundColor: cor.bg, marginTop: '10px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+          <span style={{ fontWeight: '600', color: cor.texto }}>📷 {label} {fotos.length > 0 && <span style={{ color: '#64748b', fontWeight: '400' }}>({fotos.length} foto{fotos.length !== 1 ? 's' : ''})</span>}</span>
+          <label style={{ padding: '8px 16px', backgroundColor: cor.texto, color: 'white', borderRadius: '8px', cursor: enviando ? 'not-allowed' : 'pointer', fontWeight: '600', fontSize: '0.9rem', opacity: enviando ? 0.6 : 1 }}>
+            + Adicionar
+            <input type="file" accept="image/*" multiple onChange={handleUpload} disabled={enviando} style={{ display: 'none' }} />
+          </label>
+        </div>
+
+        {enviando && (
+          <div style={{ padding: '12px', backgroundColor: 'white', borderRadius: '8px', marginBottom: '12px', textAlign: 'center', color: cor.texto, fontWeight: '500' }}>
+            Enviando {progresso.atual} de {progresso.total}...
+          </div>
+        )}
+
+        {fotos.length === 0 && !enviando && (
+          <div style={{ textAlign: 'center', padding: '20px', color: '#64748b' }}>Nenhuma foto anexada. Clique em "+ Adicionar" para enviar várias fotos de uma vez.</div>
+        )}
+
+        {fotos.length > 0 && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '10px' }}>
+            {fotos.map((foto, idx) => (
+              <div key={idx} style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', border: `1px solid ${cor.border}`, backgroundColor: 'white' }}>
+                <img
+                  src={foto.url}
+                  alt={foto.nome || `Foto ${idx + 1}`}
+                  onClick={() => setZoomImg(foto.url)}
+                  style={{ width: '100%', height: '120px', objectFit: 'cover', cursor: 'zoom-in', display: 'block' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => removerFoto(idx)}
+                  title="Remover esta foto"
+                  style={{ position: 'absolute', top: '4px', right: '4px', width: '26px', height: '26px', borderRadius: '50%', border: 'none', backgroundColor: 'rgba(220, 38, 38, 0.9)', color: 'white', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px', lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >×</button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {zoomImg && (
+          <div onClick={() => setZoomImg(null)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'zoom-out', padding: '20px' }}>
+            <img src={zoomImg} alt="Zoom" style={{ maxWidth: '95%', maxHeight: '95%', borderRadius: '8px', boxShadow: '0 10px 25px rgba(0,0,0,0.5)' }} />
+          </div>
+        )}
       </div>
 
-      {enviando && (
-        <div style={{ padding: '12px', backgroundColor: 'white', borderRadius: '8px', marginBottom: '12px', textAlign: 'center', color: cor.texto, fontWeight: '500' }}>
-          Enviando {progresso.atual} de {progresso.total}...
-        </div>
-      )}
-
-      {fotos.length === 0 && !enviando && (
-        <div style={{ textAlign: 'center', padding: '20px', color: '#64748b' }}>Nenhuma foto anexada. Clique em "+ Adicionar" para enviar várias fotos de uma vez.</div>
-      )}
-
+      {/* Versão para IMPRESSÃO (só no print, oculta na tela) — FORA do widget no-print */}
       {fotos.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '10px' }}>
+        <div className="print-only galeria-print" style={{ marginTop: '15px' }}>
           {fotos.map((foto, idx) => (
-            <div key={idx} style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', border: `1px solid ${cor.border}`, backgroundColor: 'white' }}>
-              <img
-                src={foto.url}
-                alt={foto.nome || `Foto ${idx + 1}`}
-                onClick={() => setZoomImg(foto.url)}
-                style={{ width: '100%', height: '120px', objectFit: 'cover', cursor: 'zoom-in', display: 'block' }}
-              />
-              <button
-                type="button"
-                onClick={() => removerFoto(idx)}
-                title="Remover esta foto"
-                style={{ position: 'absolute', top: '4px', right: '4px', width: '26px', height: '26px', borderRadius: '50%', border: 'none', backgroundColor: 'rgba(220, 38, 38, 0.9)', color: 'white', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px', lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              >×</button>
+            <div key={`p${idx}`}>
+              <img src={foto.url} alt={`${label} - ${idx + 1}`} />
+              <p style={{ fontSize: '9pt', color: '#444', marginTop: '3px' }}>{label} — {idx + 1}</p>
             </div>
           ))}
         </div>
       )}
-
-      {zoomImg && (
-        <div onClick={() => setZoomImg(null)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'zoom-out', padding: '20px' }}>
-          <img src={zoomImg} alt="Zoom" style={{ maxWidth: '95%', maxHeight: '95%', borderRadius: '8px', boxShadow: '0 10px 25px rgba(0,0,0,0.5)' }} />
-        </div>
-      )}
-
-      {/* Versão para impressão: grade A4 — 2 fotos por linha, tamanho controlado */}
-      <div className="print-only galeria-print" style={{ marginTop: '15px' }}>
-        {fotos.map((foto, idx) => (
-          <div key={`p${idx}`}>
-            <img src={foto.url} alt={`${label} - ${idx + 1}`} />
-            <p style={{ fontSize: '9pt', color: '#444', marginTop: '3px' }}>{label} — {idx + 1}</p>
-          </div>
-        ))}
-      </div>
-    </div>
+    </>
   );
 };
 
