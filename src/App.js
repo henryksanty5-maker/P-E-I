@@ -2165,7 +2165,6 @@ export default function App() {
     observer.observe(document.body, { childList: true, subtree: true });
     return () => observer.disconnect();
   }, []);
-  
   const fazerLogout = () => signOut(auth);
   const irParaImportar = () => { setTelaImportar(true); setTelaAtiva('lista'); };
   const irParaNovoPEI = () => { localStorage.removeItem('rascunhoPEI'); setAlunoEditando(null); setTelaAtiva('formularioPEI'); };
