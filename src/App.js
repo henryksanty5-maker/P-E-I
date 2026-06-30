@@ -31,6 +31,27 @@ const sanitizeFirebaseKeys = (obj) => {
   return newObj;
 };
 
+// 👑 ADMIN — único e-mail com permissão de excluir documentos, restaurar e ver auditoria.
+const EMAIL_ADMIN = 'henryksanty5@gmail.com';
+
+// 🔍 TRILHA DE AUDITORIA — registra toda ação relevante sobre os documentos
+const registrarAuditoria = async ({ acao, dbKey, aluno, tipoDocumento, usuario, detalhes = '' }) => {
+  try {
+    await push(ref(db, 'auditoria'), {
+      acao,
+      dbKey: dbKey || '',
+      aluno: aluno || '',
+      tipoDocumento: tipoDocumento || '',
+      usuario: usuario || '',
+      detalhes,
+      timestamp: Date.now(),
+      dataLegivel: new Date().toLocaleString('pt-BR')
+    });
+  } catch (err) {
+    console.warn('Falha ao registrar auditoria:', err.message);
+  }
+};
+
 // --- ESTILOS MODERNOS ---
 const s = {
   page: { minHeight: '100vh', padding: '30px 20px', color: '#1e293b' },
@@ -77,182 +98,35 @@ const GlobalCSS = () => (
 
       @media screen { .print-only { display: none !important; } }
       @media print {
-        /* ===== TAMANHO DE FOLHA SULFITE (A4) ===== */
-        @page { 
-          size: A4 portrait; 
-          margin: 15mm 15mm 18mm 15mm;
-        }
+        @page { size: A4 portrait; margin: 15mm 15mm 18mm 15mm; }
         @page :first { margin-top: 12mm; }
-
-        /* Reset visual: tira fundos coloridos, sombras, blurs (deixa preto-no-branco para impressão limpa) */
-        * { 
-          background: transparent !important; 
-          color: black !important; 
-          box-shadow: none !important; 
-          position: static !important; 
-          overflow: visible !important; 
-          box-sizing: border-box !important; 
-          backdrop-filter: none !important; 
-          -webkit-backdrop-filter: none !important; 
-          filter: none !important; 
-          transform: none !important;
-          -webkit-print-color-adjust: exact !important;
-          print-color-adjust: exact !important;
-        }
-
-        /* Tipografia otimizada para A4 — corpo em 10.5pt cabe bem sem desperdiçar páginas */
-        html, body { 
-          font-family: 'Arial', 'Helvetica', sans-serif !important; 
-          font-size: 10.5pt !important; 
-          line-height: 1.35 !important;
-          letter-spacing: 0 !important;
-        }
+        * { background: transparent !important; color: black !important; box-shadow: none !important; position: static !important; overflow: visible !important; box-sizing: border-box !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; filter: none !important; transform: none !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        html, body { font-family: 'Arial', 'Helvetica', sans-serif !important; font-size: 10.5pt !important; line-height: 1.35 !important; letter-spacing: 0 !important; }
         h1 { font-size: 16pt !important; margin: 0 0 8px 0 !important; }
         h2 { font-size: 13pt !important; margin: 12px 0 6px 0 !important; }
         h3 { font-size: 11.5pt !important; margin: 10px 0 5px 0 !important; }
         h4, h5, h6 { font-size: 11pt !important; margin: 8px 0 4px 0 !important; }
         p, label, span { margin: 0 0 4px 0 !important; padding: 0 !important; }
-
-        /* Páginas e containers ocupam a largura útil da folha */
-        html, body, #root, .print-page { 
-          width: 100% !important; 
-          height: auto !important; 
-          min-height: 0 !important; 
-          display: block !important;
-          padding: 0 !important;
-          margin: 0 !important;
-        }
+        html, body, #root, .print-page { width: 100% !important; height: auto !important; min-height: 0 !important; display: block !important; padding: 0 !important; margin: 0 !important; }
         .no-print { display: none !important; }
         .print-only { display: block !important; }
-        div, .print-block, .glass-panel, .card-print { 
-          display: block !important; 
-          width: 100% !important; 
-          margin: 0 0 8px 0 !important; 
-          border: none !important; 
-          page-break-inside: auto !important;
-          padding: 0 !important;
-        }
-
-        /* Quebras de página inteligentes — não deixa título sozinho no fim da folha */
-        h1, h2, h3, h4, .cardHeader, .sectionTitle { 
-          page-break-after: avoid !important; 
-          break-after: avoid !important; 
-        }
-        .print-input-group, .inputGroup, label.checkbox-row { 
-          page-break-inside: avoid !important; 
-          break-inside: avoid !important; 
-        }
+        div, .print-block, .glass-panel, .card-print { display: block !important; width: 100% !important; margin: 0 0 8px 0 !important; border: none !important; page-break-inside: auto !important; padding: 0 !important; }
+        h1, h2, h3, h4, .cardHeader, .sectionTitle { page-break-after: avoid !important; break-after: avoid !important; }
+        .print-input-group, .inputGroup, label.checkbox-row { page-break-inside: avoid !important; break-inside: avoid !important; }
         .section-break { page-break-before: always !important; break-before: page !important; }
-        .card-print > div:first-child { 
-          border-bottom: 1.5px solid black !important; 
-          padding-bottom: 4px !important; 
-          margin-bottom: 8px !important; 
-        }
-
-        /* Inputs como linhas pontilhadas/sublinhadas no documento impresso */
-        input:not([type="checkbox"]) { 
-          border: none !important; 
-          border-bottom: 1px solid black !important; 
-          border-radius: 0 !important; 
-          width: 100% !important; 
-          padding: 1px 0 3px 0 !important; 
-          font-family: Arial, sans-serif !important; 
-          font-size: 10.5pt !important;
-          background: transparent !important;
-        }
-        label { 
-          font-weight: bold !important; 
-          margin-top: 8px !important; 
-          display: block !important; 
-          font-size: 10pt !important;
-        }
-        label.checkbox-row { 
-          display: flex !important; 
-          align-items: center !important; 
-          margin: 4px 0 !important; 
-          font-weight: normal !important; 
-        }
-        label.checkbox-row input[type="checkbox"] { 
-          width: auto !important; 
-          margin-right: 6px !important; 
-          display: inline-block !important; 
-        }
+        .card-print > div:first-child { border-bottom: 1.5px solid black !important; padding-bottom: 4px !important; margin-bottom: 8px !important; }
+        input:not([type="checkbox"]) { border: none !important; border-bottom: 1px solid black !important; border-radius: 0 !important; width: 100% !important; padding: 1px 0 3px 0 !important; font-family: Arial, sans-serif !important; font-size: 10.5pt !important; background: transparent !important; }
+        label { font-weight: bold !important; margin-top: 8px !important; display: block !important; font-size: 10pt !important; }
+        label.checkbox-row { display: flex !important; align-items: center !important; margin: 4px 0 !important; font-weight: normal !important; }
+        label.checkbox-row input[type="checkbox"] { width: auto !important; margin-right: 6px !important; display: inline-block !important; }
         .badge-print { border: 1px solid black !important; }
-
-        /* ===== FOTOS DA GALERIA — tamanho controlado, 2 por linha, NUNCA cortar entre páginas ===== */
-        /* Alta especificidade: .print-only.galeria-print sobrescreve a regra "div { display: block !important }" acima */
-        .print-only.galeria-print {
-          display: grid !important;
-          grid-template-columns: 1fr 1fr !important;
-          gap: 6mm !important;
-          margin-top: 6mm !important;
-          margin-bottom: 6mm !important;
-          width: 100% !important;
-          page-break-inside: auto !important;
-        }
-        /* Quando há só 1 foto, deixa em coluna única ocupando toda a largura */
-        .print-only.galeria-print:has(> div:only-child) {
-          grid-template-columns: 1fr !important;
-        }
-        .print-only.galeria-print > div,
-        div.print-only.galeria-print > div {
-          page-break-inside: avoid !important;
-          break-inside: avoid-page !important;
-          -webkit-column-break-inside: avoid !important;
-          display: flex !important;
-          flex-direction: column !important;
-          align-items: center !important;
-          justify-content: flex-start !important;
-          text-align: center !important;
-          width: 100% !important;
-          height: auto !important;
-          max-height: 100mm !important;
-          margin: 0 !important;
-          padding: 0 !important;
-          overflow: hidden !important;
-        }
-        .print-only.galeria-print img,
-        div.print-only.galeria-print img {
-          max-width: 100% !important;
-          width: auto !important;
-          max-height: 85mm !important;
-          height: auto !important;
-          object-fit: contain !important;
-          display: block !important;
-          border: 1px solid #888 !important;
-          margin: 0 auto !important;
-          page-break-inside: avoid !important;
-          break-inside: avoid !important;
-        }
-        .print-only.galeria-print p {
-          font-size: 9pt !important;
-          color: #444 !important;
-          margin: 2mm 0 0 0 !important;
-          page-break-before: avoid !important;
-        }
-        /* Imagens em geral (fora da galeria) também não podem estourar a página */
-        img { 
-          max-width: 100% !important; 
-          max-height: 240mm !important; 
-          page-break-inside: avoid !important;
-          break-inside: avoid !important;
-        }
-
-        /* ===== REGRA FINAL: garantir que .no-print SEMPRE suma na impressão ===== */
-        /* Vem por último para vencer qualquer .print-block ou outras regras */
-        .no-print,
-        div.no-print,
-        *.no-print {
-          display: none !important;
-          visibility: hidden !important;
-          width: 0 !important;
-          height: 0 !important;
-          max-width: 0 !important;
-          max-height: 0 !important;
-          margin: 0 !important;
-          padding: 0 !important;
-          overflow: hidden !important;
-        }
+        .print-only.galeria-print { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 6mm !important; margin-top: 6mm !important; margin-bottom: 6mm !important; width: 100% !important; page-break-inside: auto !important; }
+        .print-only.galeria-print:has(> div:only-child) { grid-template-columns: 1fr !important; }
+        .print-only.galeria-print > div, div.print-only.galeria-print > div { page-break-inside: avoid !important; break-inside: avoid-page !important; -webkit-column-break-inside: avoid !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: flex-start !important; text-align: center !important; width: 100% !important; height: auto !important; max-height: 100mm !important; margin: 0 !important; padding: 0 !important; overflow: hidden !important; }
+        .print-only.galeria-print img, div.print-only.galeria-print img { max-width: 100% !important; width: auto !important; max-height: 85mm !important; height: auto !important; object-fit: contain !important; display: block !important; border: 1px solid #888 !important; margin: 0 auto !important; page-break-inside: avoid !important; break-inside: avoid !important; }
+        .print-only.galeria-print p { font-size: 9pt !important; color: #444 !important; margin: 2mm 0 0 0 !important; page-break-before: avoid !important; }
+        img { max-width: 100% !important; max-height: 240mm !important; page-break-inside: avoid !important; break-inside: avoid !important; }
+        .no-print, div.no-print, *.no-print { display: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; max-width: 0 !important; max-height: 0 !important; margin: 0 !important; padding: 0 !important; overflow: hidden !important; }
       }
     `}
   </style>
@@ -286,17 +160,6 @@ const Checkbox = ({ label, formData, handleCheckbox, accentColor = '#10b981' }) 
   );
 };
 
-// ============================================================
-// GaleriaFotos — componente reutilizável para múltiplas fotos
-// Salva no Firebase Storage; no documento PEI guarda só os URLs.
-// Props:
-//   - dbKey: identificador do documento PEI (ex.: "João Silva (PEI)")
-//   - campoID: nome do campo (ex.: "laudo_medico", "diario_bimestre_1")
-//   - fotos: array de objetos { url, path, nome } vindos do formData
-//   - onChange: função chamada quando a lista muda — recebe o novo array
-//   - corTema: 'verde' (PEI), 'ambar' (PEI-EI) ou 'azul' (PAEE)
-//   - label: texto do botão
-// ============================================================
 const GaleriaFotos = ({ dbKey, campoID, fotos = [], onChange, corTema = 'verde', label = 'Adicionar Fotos' }) => {
   const [enviando, setEnviando] = useState(false);
   const [progresso, setProgresso] = useState({ atual: 0, total: 0 });
@@ -309,13 +172,12 @@ const GaleriaFotos = ({ dbKey, campoID, fotos = [], onChange, corTema = 'verde',
   };
   const cor = cores[corTema] || cores.verde;
 
-  // Comprime imagem antes de enviar (mantém qualidade boa, mas reduz tamanho)
   const comprimirImagem = (file) => new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = (event) => {
       const img = new Image();
       img.onload = () => {
-        const maxW = 1200; // largura máxima — mantém qualidade alta para leitura de laudos/receitas
+        const maxW = 1200;
         const escala = img.width > maxW ? maxW / img.width : 1;
         const canvas = document.createElement('canvas');
         canvas.width = img.width * escala;
@@ -356,7 +218,7 @@ const GaleriaFotos = ({ dbKey, campoID, fotos = [], onChange, corTema = 'verde',
 
     onChange(novasFotos);
     setEnviando(false);
-    e.target.value = ''; // permite re-selecionar os mesmos arquivos
+    e.target.value = '';
   };
 
   const removerFoto = async (index) => {
@@ -373,7 +235,6 @@ const GaleriaFotos = ({ dbKey, campoID, fotos = [], onChange, corTema = 'verde',
 
   return (
     <>
-      {/* Widget INTERATIVO (só na tela, oculto na impressão) */}
       <div className="no-print" style={{ border: `2px dashed ${cor.border}`, borderRadius: '12px', padding: '15px', backgroundColor: cor.bg, marginTop: '10px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
           <span style={{ fontWeight: '600', color: cor.texto }}>📷 {label} {fotos.length > 0 && <span style={{ color: '#64748b', fontWeight: '400' }}>({fotos.length} foto{fotos.length !== 1 ? 's' : ''})</span>}</span>
@@ -421,7 +282,6 @@ const GaleriaFotos = ({ dbKey, campoID, fotos = [], onChange, corTema = 'verde',
         )}
       </div>
 
-      {/* Versão para IMPRESSÃO (só no print, oculta na tela) — FORA do widget no-print */}
       {fotos.length > 0 && (
         <div className="print-only galeria-print" style={{ marginTop: '15px' }}>
           {fotos.map((foto, idx) => (
@@ -441,21 +301,21 @@ const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [mostrarSenha, setMostrarSenha] = useState(false);
-  const [erro, setErro] = useState(''); const [mensagem, setMensagem] = useState('');
+  const [erro, setErro] = useState('');
+  const [mensagem, setMensagem] = useState('');
 
   const handleLogin = async (e) => {
     e.preventDefault(); setErro(''); setMensagem('');
-    try { await signInWithEmailAndPassword(auth, email, password); } 
+    try { await signInWithEmailAndPassword(auth, email, password); }
     catch (error) { setErro('E-mail ou senha incorretos. Tente novamente.'); }
   };
 
   const handleEsqueciSenha = async () => {
     if (!email) { setErro('Digite seu e-mail acima para redefinir a senha.'); return; }
-    try { await sendPasswordResetEmail(auth, email); setMensagem('E-mail enviado! Verifique sua caixa de entrada.'); setErro(''); } 
+    try { await sendPasswordResetEmail(auth, email); setMensagem('E-mail enviado! Verifique sua caixa de entrada.'); setErro(''); }
     catch (error) { setErro('Erro ao enviar e-mail.'); }
   };
 
-  // Ícones de olho (SVG inline — não depende de biblioteca externa)
   const IconeOlhoAberto = () => (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
@@ -491,13 +351,7 @@ const LoginScreen = () => {
               type="button"
               onClick={() => setMostrarSenha(v => !v)}
               aria-label={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
-              title={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha para conferir'}
-              style={{
-                position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)',
-                background: 'transparent', border: 'none', cursor: 'pointer',
-                padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: mostrarSenha ? '#10b981' : '#64748b', borderRadius: '8px'
-              }}
+              style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: mostrarSenha ? '#10b981' : '#64748b', borderRadius: '8px' }}
             >
               {mostrarSenha ? <IconeOlhoAberto /> : <IconeOlhoFechado />}
             </button>
@@ -513,7 +367,7 @@ const LoginScreen = () => {
 };
 
 // 3. Tela de Lista de Alunos
-const ListaAlunos = ({ onNovoPEI, onNovoPEI_EI, onNovoPAEE, onEditar, onImportar, onLogout, usuario }) => {
+const ListaAlunos = ({ onNovoPEI, onNovoPEI_EI, onNovoPAEE, onEditar, onImportar, onLixeira, onAuditoria, onLogout, usuario }) => {
   const [alunos, setAlunos] = useState([]);
 
   const listaEspecialistas = [
@@ -521,12 +375,13 @@ const ListaAlunos = ({ onNovoPEI, onNovoPEI_EI, onNovoPAEE, onEditar, onImportar
     'iquinhoslp@yahoo.com.br', 'belavista112@gmail.com', 'adriananeri@prof.educacao.sp.gov.br',
     'rackellbonete@gmail.com', 'educacaoredencao@gmail.com'
   ];
-  
+
   const isEspecialista = listaEspecialistas.includes(usuario.email);
+  const isAdmin = usuario.email === EMAIL_ADMIN;
 
   useEffect(() => {
     const dbRef = ref(db, 'alunos');
-    onValue(dbRef, (snapshot) => {
+    const unsubscribe = onValue(dbRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
         let lista = Object.keys(data).map(key => ({ dbKey: key, ...data[key] }));
@@ -534,26 +389,45 @@ const ListaAlunos = ({ onNovoPEI, onNovoPEI_EI, onNovoPAEE, onEditar, onImportar
         setAlunos(lista);
       } else { setAlunos([]); }
     });
+    return () => unsubscribe();
   }, [usuario.email, isEspecialista]);
 
-  const deletarAluno = async (dbKey) => {
-    if(window.confirm(`Tem certeza que deseja excluir este documento?\n\nAtenção: todas as fotos anexadas também serão removidas permanentemente.`)) {
-      // 1. Remove fotos do Storage (se houver)
-      try {
-        const pastaAluno = sRef(storage, `alunos/${dbKey}`);
-        const conteudo = await listAll(pastaAluno);
-        // listAll devolve prefixes (subpastas por campoID) e items diretos
-        const todosArquivos = [...conteudo.items];
-        for (const subpasta of conteudo.prefixes) {
-          const sub = await listAll(subpasta);
-          todosArquivos.push(...sub.items);
-        }
-        await Promise.all(todosArquivos.map(arq => deleteObject(arq).catch(() => null)));
-      } catch (err) {
-        console.warn('Sem fotos no Storage ou erro ao limpar:', err.message);
-      }
-      // 2. Remove o documento do Database
+  const moverParaLixeira = async (aluno) => {
+    if (!isAdmin) {
+      alert('Apenas o administrador do sistema pode excluir documentos.');
+      return;
+    }
+    const nomeDigitado = window.prompt(
+      `Para confirmar a exclusão, digite exatamente o nome do aluno:\n\n"${aluno.aluno}"`
+    );
+    if (nomeDigitado === null) return;
+    if (nomeDigitado !== aluno.aluno) {
+      alert('Nome não confere. Exclusão cancelada por segurança.');
+      return;
+    }
+    try {
+      const dbKey = aluno.dbKey;
+      const dadosCompletos = { ...aluno };
+      delete dadosCompletos.dbKey;
+
+      await set(ref(db, `lixeira/${dbKey}`), {
+        ...dadosCompletos,
+        _excluidoPor: usuario.email,
+        _excluidoEm: Date.now(),
+        _dataLegivel: new Date().toLocaleString('pt-BR')
+      });
+
       await remove(ref(db, `alunos/${dbKey}`));
+
+      await registrarAuditoria({
+        acao: 'excluido', dbKey, aluno: aluno.aluno,
+        tipoDocumento: aluno.tipoDocumento, usuario: usuario.email,
+        detalhes: 'Movido para a lixeira'
+      });
+
+      alert(`"${aluno.aluno}" foi movido para a lixeira. Pode ser restaurado lá se precisar.`);
+    } catch (err) {
+      alert(`Erro ao excluir: ${err.message}`);
     }
   };
 
@@ -579,6 +453,12 @@ const ListaAlunos = ({ onNovoPEI, onNovoPEI_EI, onNovoPAEE, onEditar, onImportar
           <button style={s.btnInfantil} onClick={onNovoPEI_EI}>+ Novo PEI Infantil</button>
           {isEspecialista && <button style={s.btnEspecial} onClick={onNovoPAEE}>+ Novo PAEE</button>}
           {isEspecialista && <button style={{...s.btnEspecial, background: 'linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%)'}} onClick={onImportar}>📂 Importar do Word</button>}
+          {isAdmin && (
+            <>
+              <button style={{...s.btnSecondary, background: '#fef3c7', color: '#92400e'}} onClick={onLixeira}>🗑️ Lixeira</button>
+              <button style={{...s.btnSecondary, background: '#ede9fe', color: '#5b21b6'}} onClick={onAuditoria}>📋 Auditoria</button>
+            </>
+          )}
           <button style={s.btnDanger} onClick={onLogout}>Sair</button>
         </div>
       </div>
@@ -610,7 +490,9 @@ const ListaAlunos = ({ onNovoPEI, onNovoPEI_EI, onNovoPAEE, onEditar, onImportar
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
                   <button style={{...s.btnSecondary, flex: '1', backgroundColor: 'white'}} onClick={() => onEditar(aluno)}>Abrir / Editar</button>
-                  <button style={{...s.btnDanger, padding: '10px'}} onClick={() => deletarAluno(aluno.dbKey)}>Excluir</button>
+                  {isAdmin && (
+                    <button style={{...s.btnDanger, padding: '10px'}} onClick={() => moverParaLixeira(aluno)}>🗑️</button>
+                  )}
                 </div>
               </div>
             );
@@ -621,19 +503,19 @@ const ListaAlunos = ({ onNovoPEI, onNovoPEI_EI, onNovoPAEE, onEditar, onImportar
   );
 };
 
-// 4A. FORMULÁRIO PEI 
+// 4A. FORMULÁRIO PEI
 const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
   const estadoInicial = { tipoDocumento: 'PEI', aluno: '', nascimento: '', anoSerie: '', turma: '', responsaveis: '', diagnostico: '', cid: '', crm: '', resultadoAvaliacao: '', rotinaFamiliar: '', fatoresAmbientais: '', resumoAluno: '', anexos: {}, conteudos: {}, diario: {}, opcoes: {} };
-  
-  const [formData, setFormData] = useState(() => { 
+
+  const [formData, setFormData] = useState(() => {
     if (alunoData) return { ...estadoInicial, ...alunoData, anexos: alunoData.anexos || {} };
     try {
       const rascunho = localStorage.getItem('rascunhoPEI');
       if (rascunho) return JSON.parse(rascunho);
     } catch(e) {}
-    return estadoInicial; 
+    return estadoInicial;
   });
-  
+
   const [aEnviar, setAEnviar] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [zoomImg, setZoomImg] = useState(null);
@@ -642,7 +524,7 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
 
   useEffect(() => {
     if (!alunoData) {
-      try { localStorage.setItem('rascunhoPEI', JSON.stringify(formData)); } 
+      try { localStorage.setItem('rascunhoPEI', JSON.stringify(formData)); }
       catch (e) { console.warn("Rascunho cheio demais"); }
     }
   }, [formData, alunoData]);
@@ -663,19 +545,18 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
     setSalvando(true);
     try {
       const dadosParaSalvar = { ...formData, criadoPor: formData.criadoPor || usuario.email };
-      const dadosLimpos = sanitizeFirebaseKeys(JSON.parse(JSON.stringify(dadosParaSalvar))); 
-      const nomeLimpo = formData.aluno.replace(/[.#$\[\]\/]/g, ' '); 
-      const dbKey = alunoData?.dbKey || `${nomeLimpo} (PEI)`; 
-      await set(ref(db, `alunos/${dbKey}`), dadosLimpos); 
-      alert(`✅ PEI salvo na nuvem com sucesso!`); 
+      const dadosLimpos = sanitizeFirebaseKeys(JSON.parse(JSON.stringify(dadosParaSalvar)));
+      const nomeLimpo = formData.aluno.replace(/[.#$\[\]\/]/g, ' ');
+      const dbKey = alunoData?.dbKey || `${nomeLimpo} (PEI)`;
+      await set(ref(db, `alunos/${dbKey}`), dadosLimpos);
+      registrarAuditoria({ acao: alunoData ? 'editado' : 'criado', dbKey, aluno: formData.aluno, tipoDocumento: 'PEI', usuario: usuario.email });
+      alert(`✅ PEI salvo na nuvem com sucesso!`);
       localStorage.removeItem('rascunhoPEI');
-    } 
-    catch (error) { 
-      alert(`Erro técnico reportado pelo Firebase: ${error.message}\n\n🚨 Fique tranquilo! Seus dados estão salvos no rascunho automático no seu computador.\nAtualize a página e tente salvar novamente em alguns instantes.`); 
     }
-    finally {
-      setSalvando(false);
+    catch (error) {
+      alert(`Erro técnico reportado pelo Firebase: ${error.message}\n\n🚨 Fique tranquilo! Seus dados estão salvos no rascunho automático no seu computador.\nAtualize a página e tente salvar novamente em alguns instantes.`);
     }
+    finally { setSalvando(false); }
   };
 
   const handleFileUpload = (e, campoID) => {
@@ -696,7 +577,6 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
     setFormData(prev => { const novosAnexos = { ...(prev.anexos || {}) }; delete novosAnexos[campoID]; return { ...prev, anexos: novosAnexos }; });
   };
 
-  // Helpers para GaleriaFotos (Firebase Storage — fotos ilimitadas)
   const dbKeyAtual = alunoData?.dbKey || (formData.aluno ? `${formData.aluno.replace(/[.#$\[\]\/]/g, ' ')} (PEI)` : null);
   const handleGaleria = (campoID, novasFotos) => setFormData(prev => ({ ...prev, galerias: { ...(prev.galerias || {}), [campoID]: novasFotos } }));
   const getGaleria = (campoID) => (formData.galerias && formData.galerias[campoID]) || [];
@@ -811,7 +691,7 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
           ))}
         </div>
       </div>
-      
+
       <div className="glass-panel card-print section-break">
         <div style={s.cardHeader}><span className="badge-print" style={s.badge}>J</span> Revisão Final</div>
         <div className="print-input-group"><label style={s.label}>Resumo do Aluno</label><TextareaPrint name="resumoAluno" value={formData.resumoAluno} onChange={handleChange} placeholder="Considerações finais..." minHeight="150px" /></div>
@@ -830,45 +710,26 @@ const SistemaPEI = ({ alunoData, onVoltar, usuario }) => {
   );
 };
 
-// 4B. NOVO FORMULÁRIO: PEI EDUCAÇÃO INFANTIL
+// 4B. FORMULÁRIO PEI EDUCAÇÃO INFANTIL
 const SistemaPEI_EI = ({ alunoData, onVoltar, usuario }) => {
   const estadoInicial = {
-    tipoDocumento: 'PEI-EI',
-    aluno: '',
-    nascimento: '',
-    anoSerie: '2ª Etapa',
-    turma: 'B',
-    responsaveis: '',
-    diagnostico: '',
-    cid: '',
-    medico: '',
-    crm: '',
-    especificidades: '',
-    qualMedicacao: '',
-    frequenciaTerapia: '',
-    outrosEspecialistas: '',
-    relatorioAvaliacao: '',
-    rotinaFamiliar: '',
-    descricaoCompetenciasEF: '',
-    descricaoCompetenciasET: '',
-    organizativasEF: '',
-    organizativasET: '',
-    temporalidadeDescricao: '',
-    anexos: {},
-    camposEI: {},
-    disciplinasEI: {},
-    opcoes: {}
+    tipoDocumento: 'PEI-EI', aluno: '', nascimento: '', anoSerie: '2ª Etapa', turma: 'B',
+    responsaveis: '', diagnostico: '', cid: '', medico: '', crm: '', especificidades: '',
+    qualMedicacao: '', frequenciaTerapia: '', outrosEspecialistas: '', relatorioAvaliacao: '',
+    rotinaFamiliar: '', descricaoCompetenciasEF: '', descricaoCompetenciasET: '',
+    organizativasEF: '', organizativasET: '', temporalidadeDescricao: '',
+    anexos: {}, camposEI: {}, disciplinasEI: {}, opcoes: {}
   };
-  
-  const [formData, setFormData] = useState(() => { 
+
+  const [formData, setFormData] = useState(() => {
     if (alunoData) return { ...estadoInicial, ...alunoData, anexos: alunoData.anexos || {} };
     try {
       const rascunho = localStorage.getItem('rascunhoPEI_EI');
       if (rascunho) return JSON.parse(rascunho);
     } catch(e) {}
-    return estadoInicial; 
+    return estadoInicial;
   });
-  
+
   const [aEnviar, setAEnviar] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [zoomImg, setZoomImg] = useState(null);
@@ -877,13 +738,16 @@ const SistemaPEI_EI = ({ alunoData, onVoltar, usuario }) => {
     { id: 'EF', nome: 'Escuta, Fala, Pensamento e Imaginação', icone: '🗣️' },
     { id: 'ET', nome: 'Espaços, Tempos, Quantidades, Relações e Transformações', icone: '🔢' }
   ];
-  const disciplinas = ['Educação Física', 'Espanhol', 'Música', 'Informática'];
+
+  // ✅ Apenas Educação Física — Música, Espanhol e Informática removidos
+  const disciplinas = ['Educação Física'];
+
   const bimestres = ['1º Bimestre', '2º Bimestre', '3º Bimestre', '4º Bimestre'];
   const bimestresKey = ['1B', '2B', '3B', '4B'];
 
   useEffect(() => {
     if (!alunoData) {
-      try { localStorage.setItem('rascunhoPEI_EI', JSON.stringify(formData)); } 
+      try { localStorage.setItem('rascunhoPEI_EI', JSON.stringify(formData)); }
       catch (e) { console.warn("Rascunho cheio demais"); }
     }
   }, [formData, alunoData]);
@@ -897,30 +761,18 @@ const SistemaPEI_EI = ({ alunoData, onVoltar, usuario }) => {
 
   const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   const handleCheckbox = (opcao) => setFormData(prev => ({ ...prev, opcoes: { ...(prev.opcoes || {}), [opcao]: !(prev.opcoes || {})[opcao] } }));
-  
+
   const handleCampoEI = (campoId, chave, valor) => {
     setFormData(prev => ({
       ...prev,
-      camposEI: {
-        ...(prev.camposEI || {}),
-        [campoId]: {
-          ...((prev.camposEI || {})[campoId] || {}),
-          [chave]: valor
-        }
-      }
+      camposEI: { ...(prev.camposEI || {}), [campoId]: { ...((prev.camposEI || {})[campoId] || {}), [chave]: valor } }
     }));
   };
-  
+
   const handleDisciplinaEI = (disciplina, chave, valor) => {
     setFormData(prev => ({
       ...prev,
-      disciplinasEI: {
-        ...(prev.disciplinasEI || {}),
-        [disciplina]: {
-          ...((prev.disciplinasEI || {})[disciplina] || {}),
-          [chave]: valor
-        }
-      }
+      disciplinasEI: { ...(prev.disciplinasEI || {}), [disciplina]: { ...((prev.disciplinasEI || {})[disciplina] || {}), [chave]: valor } }
     }));
   };
 
@@ -929,19 +781,18 @@ const SistemaPEI_EI = ({ alunoData, onVoltar, usuario }) => {
     setSalvando(true);
     try {
       const dadosParaSalvar = { ...formData, criadoPor: formData.criadoPor || usuario.email };
-      const dadosLimpos = sanitizeFirebaseKeys(JSON.parse(JSON.stringify(dadosParaSalvar))); 
-      const nomeLimpo = formData.aluno.replace(/[.#$\[\]\/]/g, ' '); 
-      const dbKey = alunoData?.dbKey || `${nomeLimpo} (PEI-EI)`; 
-      await set(ref(db, `alunos/${dbKey}`), dadosLimpos); 
-      alert(`✅ PEI Educação Infantil salvo na nuvem com sucesso!`); 
+      const dadosLimpos = sanitizeFirebaseKeys(JSON.parse(JSON.stringify(dadosParaSalvar)));
+      const nomeLimpo = formData.aluno.replace(/[.#$\[\]\/]/g, ' ');
+      const dbKey = alunoData?.dbKey || `${nomeLimpo} (PEI-EI)`;
+      await set(ref(db, `alunos/${dbKey}`), dadosLimpos);
+      registrarAuditoria({ acao: alunoData ? 'editado' : 'criado', dbKey, aluno: formData.aluno, tipoDocumento: 'PEI-EI', usuario: usuario.email });
+      alert(`✅ PEI Educação Infantil salvo na nuvem com sucesso!`);
       localStorage.removeItem('rascunhoPEI_EI');
-    } 
-    catch (error) { 
-      alert(`Erro técnico reportado pelo Firebase: ${error.message}\n\n🚨 Seus dados estão salvos no rascunho automático no seu computador. Atualize a página e tente novamente.`); 
     }
-    finally {
-      setSalvando(false);
+    catch (error) {
+      alert(`Erro técnico reportado pelo Firebase: ${error.message}\n\n🚨 Seus dados estão salvos no rascunho automático no seu computador. Atualize a página e tente novamente.`);
     }
+    finally { setSalvando(false); }
   };
 
   const handleFileUpload = (e, campoID) => {
@@ -962,7 +813,6 @@ const SistemaPEI_EI = ({ alunoData, onVoltar, usuario }) => {
     setFormData(prev => { const novosAnexos = { ...(prev.anexos || {}) }; delete novosAnexos[campoID]; return { ...prev, anexos: novosAnexos }; });
   };
 
-  // Helpers para GaleriaFotos (Firebase Storage — fotos ilimitadas)
   const dbKeyAtual = alunoData?.dbKey || (formData.aluno ? `${formData.aluno.replace(/[.#$\[\]\/]/g, ' ')} (PEI-EI)` : null);
   const handleGaleria = (campoID, novasFotos) => setFormData(prev => ({ ...prev, galerias: { ...(prev.galerias || {}), [campoID]: novasFotos } }));
   const getGaleria = (campoID) => (formData.galerias && formData.galerias[campoID]) || [];
@@ -1122,10 +972,10 @@ const SistemaPEI_EI = ({ alunoData, onVoltar, usuario }) => {
       {camposExperiencia.map((campo, idxCampo) => (
         <div key={campo.id} className="glass-panel card-print section-break">
           <div style={s.cardHeaderEI}>
-            <span className="badge-print" style={s.badgeEI}>{campo.icone}</span> 
+            <span className="badge-print" style={s.badgeEI}>{campo.icone}</span>
             Campo de Experiência: {campo.nome} ({campo.id})
           </div>
-          
+
           <h4 style={s.sectionTitle}>Adaptações aos Conteúdos e Objetivos por Bimestre</h4>
           {bimestres.map((bim, idxBim) => (
             <div key={bim} className="print-block" style={{ border: '1px solid rgba(252, 211, 77, 0.5)', padding: '18px', backgroundColor: 'rgba(254, 243, 199, 0.2)', marginBottom: '15px', borderRadius: '10px' }}>
@@ -1133,18 +983,18 @@ const SistemaPEI_EI = ({ alunoData, onVoltar, usuario }) => {
               <div className="print-block" style={s.grid2}>
                 <div className="print-input-group">
                   <label style={s.label}>Adaptações aos Conteúdos ({campo.id})</label>
-                  <TextareaPrint 
-                    value={(formData.camposEI?.[campo.id] || {})[`${bimestresKey[idxBim]}_conteudo`]} 
-                    onChange={(e) => handleCampoEI(campo.id, `${bimestresKey[idxBim]}_conteudo`, e.target.value)} 
+                  <TextareaPrint
+                    value={(formData.camposEI?.[campo.id] || {})[`${bimestresKey[idxBim]}_conteudo`]}
+                    onChange={(e) => handleCampoEI(campo.id, `${bimestresKey[idxBim]}_conteudo`, e.target.value)}
                     placeholder={`Conteúdos adaptados para ${bim}...`}
                     minHeight="100px"
                   />
                 </div>
                 <div className="print-input-group">
                   <label style={s.label}>Adaptações aos Objetivos ({campo.id})</label>
-                  <TextareaPrint 
-                    value={(formData.camposEI?.[campo.id] || {})[`${bimestresKey[idxBim]}_objetivo`]} 
-                    onChange={(e) => handleCampoEI(campo.id, `${bimestresKey[idxBim]}_objetivo`, e.target.value)} 
+                  <TextareaPrint
+                    value={(formData.camposEI?.[campo.id] || {})[`${bimestresKey[idxBim]}_objetivo`]}
+                    onChange={(e) => handleCampoEI(campo.id, `${bimestresKey[idxBim]}_objetivo`, e.target.value)}
                     placeholder={`Objetivos adaptados para ${bim}...`}
                     minHeight="100px"
                   />
@@ -1155,9 +1005,9 @@ const SistemaPEI_EI = ({ alunoData, onVoltar, usuario }) => {
 
           <div className="print-input-group" style={{marginTop: '20px'}}>
             <label style={s.label}>Adaptações Organizativas de Procedimentos Didáticos</label>
-            <TextareaPrint 
+            <TextareaPrint
               name={`organizativas${campo.id}`}
-              value={formData[`organizativas${campo.id}`]} 
+              value={formData[`organizativas${campo.id}`]}
               onChange={handleChange}
               placeholder="Descreva as adaptações organizativas para este campo..."
               minHeight="120px"
@@ -1174,9 +1024,9 @@ const SistemaPEI_EI = ({ alunoData, onVoltar, usuario }) => {
 
           <div className="print-input-group">
             <label style={s.label}>Descrição das competências que foram desenvolvidas</label>
-            <TextareaPrint 
+            <TextareaPrint
               name={`descricaoCompetencias${campo.id}`}
-              value={formData[`descricaoCompetencias${campo.id}`]} 
+              value={formData[`descricaoCompetencias${campo.id}`]}
               onChange={handleChange}
               placeholder="Descreva as competências desenvolvidas neste campo de experiência..."
               minHeight="140px"
@@ -1185,10 +1035,10 @@ const SistemaPEI_EI = ({ alunoData, onVoltar, usuario }) => {
         </div>
       ))}
 
-      {/* SEÇÃO F.5 - RELATÓRIOS BIMESTRAIS GERAIS (após os dois campos de experiência) */}
+      {/* SEÇÃO F.5 - RELATÓRIOS BIMESTRAIS GERAIS */}
       <div className="glass-panel card-print section-break">
         <div style={s.cardHeaderEI}>
-          <span className="badge-print" style={s.badgeEI}>📝</span> 
+          <span className="badge-print" style={s.badgeEI}>📝</span>
           Relatórios Bimestrais
         </div>
         <p className="no-print" style={{color: '#64748b', fontSize: '0.9rem', marginTop: '-8px', marginBottom: '15px'}}>
@@ -1198,9 +1048,9 @@ const SistemaPEI_EI = ({ alunoData, onVoltar, usuario }) => {
           {bimestres.map((bim, idxBim) => (
             <div key={`rel-geral-${idxBim}`} className="print-input-group" style={{ border: '1px solid rgba(252, 211, 77, 0.4)', padding: '14px', borderRadius: '8px', backgroundColor: 'rgba(254, 243, 199, 0.15)' }}>
               <label style={{...s.label, color: '#92400e'}}>Relatório {bim}</label>
-              <TextareaPrint 
+              <TextareaPrint
                 name={`relatorioBimestre_${bimestresKey[idxBim]}`}
-                value={formData[`relatorioBimestre_${bimestresKey[idxBim]}`]} 
+                value={formData[`relatorioBimestre_${bimestresKey[idxBim]}`]}
                 onChange={handleChange}
                 placeholder={`Relatório de ${bim}...`}
                 minHeight="140px"
@@ -1210,11 +1060,11 @@ const SistemaPEI_EI = ({ alunoData, onVoltar, usuario }) => {
         </div>
       </div>
 
-      {/* SEÇÃO G - DISCIPLINAS ESPECÍFICAS */}
+      {/* SEÇÃO G - EDUCAÇÃO FÍSICA (única disciplina restante) */}
       {disciplinas.map((disc) => (
         <div key={disc} className="glass-panel card-print section-break">
           <div style={s.cardHeaderEI}>
-            <span className="badge-print" style={s.badgeEI}>📚</span> 
+            <span className="badge-print" style={s.badgeEI}>📚</span>
             Disciplina: {disc}
           </div>
           {bimestres.map((bim, idxBim) => (
@@ -1223,8 +1073,8 @@ const SistemaPEI_EI = ({ alunoData, onVoltar, usuario }) => {
               <div className="print-block" style={s.grid2}>
                 <div className="print-input-group">
                   <label style={s.label}>Adaptações aos Conteúdos e Objetivos</label>
-                  <TextareaPrint 
-                    value={(formData.disciplinasEI?.[disc] || {})[`${bimestresKey[idxBim]}_adaptacoes`]} 
+                  <TextareaPrint
+                    value={(formData.disciplinasEI?.[disc] || {})[`${bimestresKey[idxBim]}_adaptacoes`]}
                     onChange={(e) => handleDisciplinaEI(disc, `${bimestresKey[idxBim]}_adaptacoes`, e.target.value)}
                     placeholder={`Adaptações para ${bim}...`}
                     minHeight="100px"
@@ -1232,8 +1082,8 @@ const SistemaPEI_EI = ({ alunoData, onVoltar, usuario }) => {
                 </div>
                 <div className="print-input-group">
                   <label style={s.label}>Relatório de Desempenho Bimestral</label>
-                  <TextareaPrint 
-                    value={(formData.disciplinasEI?.[disc] || {})[`${bimestresKey[idxBim]}_relatorio`]} 
+                  <TextareaPrint
+                    value={(formData.disciplinasEI?.[disc] || {})[`${bimestresKey[idxBim]}_relatorio`]}
                     onChange={(e) => handleDisciplinaEI(disc, `${bimestresKey[idxBim]}_relatorio`, e.target.value)}
                     placeholder={`Relatório de desempenho em ${bim}...`}
                     minHeight="100px"
@@ -1263,21 +1113,19 @@ const SistemaPEI_EI = ({ alunoData, onVoltar, usuario }) => {
         </div>
       </div>
 
-      {/* SEÇÃO I - REVISÃO E FORMULAÇÃO (Assinaturas) */}
+      {/* SEÇÃO I - REVISÃO E FORMULAÇÃO */}
       <div className="glass-panel card-print section-break">
         <div style={s.cardHeaderEI}><span className="badge-print" style={s.badgeEI}>✍️</span> Revisão e Formulação</div>
-
         <div className="print-input-group" style={{ marginTop: '10px' }}>
           <label style={s.label}>Considerações Finais</label>
-          <TextareaPrint 
+          <TextareaPrint
             name="consideracoesFinais"
-            value={formData.consideracoesFinais} 
+            value={formData.consideracoesFinais}
             onChange={handleChange}
             placeholder="Espaço livre para considerações finais, observações da equipe pedagógica, encaminhamentos, recomendações para o próximo ano..."
             minHeight="200px"
           />
         </div>
-
         <p className="no-print" style={{color: '#64748b', fontStyle: 'italic', marginTop: '20px'}}>
           As assinaturas aparecerão automaticamente na versão impressa do documento.
         </p>
@@ -1301,38 +1149,38 @@ const SistemaPEI_EI = ({ alunoData, onVoltar, usuario }) => {
   );
 };
 
-// 4C. FORMULÁRIO PAEE 
+// 4C. FORMULÁRIO PAEE
 const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
   const estadoInicial = {
     tipoDocumento: 'PAEE', aluno: '', nascimento: '', sexo: '',
     escola: 'EMEIEF "PROFESSORA EDNA REGINA DE OLIVEIRA E SILVA"',
-    turno: '', turma: '', anoSerie: '', informacoesEstudante: '', 
-    estudoDeCaso: '', aeeComplementar: '', medidasEscola: '', 
-    assuntoPreferencia: '', quaisFixacao: '', organizacaoTipo: '', 
-    organizacaoAtendimentos: '', organizacaoTempo: '', organizacaoDias: '', 
-    organizacaoDatasObservacao: '', organizacaoDatasAtendimento: '', 
-    organizacaoDatasAtendimentoFamiliar: '', qualDiagnostico: '', 
-    medicamentos: '', tipoFonte: '', qtdAtivImpressas: '', 
-    qtdAtivCopiadas: '', observacoesEstrategias: '', outrosAEE: '', 
+    turno: '', turma: '', anoSerie: '', informacoesEstudante: '',
+    estudoDeCaso: '', aeeComplementar: '', medidasEscola: '',
+    assuntoPreferencia: '', quaisFixacao: '', organizacaoTipo: '',
+    organizacaoAtendimentos: '', organizacaoTempo: '', organizacaoDias: '',
+    organizacaoDatasObservacao: '', organizacaoDatasAtendimento: '',
+    organizacaoDatasAtendimentoFamiliar: '', qualDiagnostico: '',
+    medicamentos: '', tipoFonte: '', qtdAtivImpressas: '',
+    qtdAtivCopiadas: '', observacoesEstrategias: '', outrosAEE: '',
     objetivosAEE: '', opcoes: {}, textos: {}, anexos: {}
   };
-  
-  const [formData, setFormData] = useState(() => { 
+
+  const [formData, setFormData] = useState(() => {
     if (alunoData) return { ...estadoInicial, ...alunoData, anexos: alunoData.anexos || {} };
     try {
       const rascunho = localStorage.getItem('rascunhoPAEE');
       if (rascunho) return JSON.parse(rascunho);
     } catch(e) {}
-    return estadoInicial; 
+    return estadoInicial;
   });
-  
+
   const [aEnviar, setAEnviar] = useState(false);
   const [salvando, setSalvando] = useState(false);
-  const [zoomImg, setZoomImg] = useState(null); 
+  const [zoomImg, setZoomImg] = useState(null);
 
   useEffect(() => {
     if (!alunoData) {
-      try { localStorage.setItem('rascunhoPAEE', JSON.stringify(formData)); } 
+      try { localStorage.setItem('rascunhoPAEE', JSON.stringify(formData)); }
       catch (e) { console.warn("Rascunho cheio demais"); }
     }
   }, [formData, alunoData]);
@@ -1352,19 +1200,18 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
     setSalvando(true);
     try {
       const dadosParaSalvar = { ...formData, criadoPor: formData.criadoPor || usuario.email };
-      const dadosLimpos = sanitizeFirebaseKeys(JSON.parse(JSON.stringify(dadosParaSalvar))); 
-      const nomeLimpo = formData.aluno.replace(/[.#$\[\]\/]/g, ' '); 
+      const dadosLimpos = sanitizeFirebaseKeys(JSON.parse(JSON.stringify(dadosParaSalvar)));
+      const nomeLimpo = formData.aluno.replace(/[.#$\[\]\/]/g, ' ');
       const dbKey = alunoData?.dbKey || `${nomeLimpo} (PAEE)`;
-      await set(ref(db, `alunos/${dbKey}`), dadosLimpos); 
-      alert(`✅ Documento PAEE salvo na nuvem com sucesso!`); 
+      await set(ref(db, `alunos/${dbKey}`), dadosLimpos);
+      registrarAuditoria({ acao: alunoData ? 'editado' : 'criado', dbKey, aluno: formData.aluno, tipoDocumento: 'PAEE', usuario: usuario.email });
+      alert(`✅ Documento PAEE salvo na nuvem com sucesso!`);
       localStorage.removeItem('rascunhoPAEE');
-    } 
-    catch (error) { 
-      alert(`Erro técnico reportado pelo Firebase: ${error.message}\n\n🚨 Fique tranquilo! Seus dados estão salvos no rascunho automático no seu computador.\nAtualize a página e tente salvar novamente em alguns instantes.`); 
     }
-    finally {
-      setSalvando(false);
+    catch (error) {
+      alert(`Erro técnico reportado pelo Firebase: ${error.message}\n\n🚨 Fique tranquilo! Seus dados estão salvos no rascunho automático no seu computador.\nAtualize a página e tente salvar novamente em alguns instantes.`);
     }
+    finally { setSalvando(false); }
   };
 
   const handleFileUpload = (e, campoID) => {
@@ -1385,7 +1232,6 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
     setFormData(prev => { const novosAnexos = { ...(prev.anexos || {}) }; delete novosAnexos[campoID]; return { ...prev, anexos: novosAnexos }; });
   };
 
-  // Helpers para GaleriaFotos (Firebase Storage — fotos ilimitadas)
   const dbKeyAtual = alunoData?.dbKey || (formData.aluno ? `${formData.aluno.replace(/[.#$\[\]\/]/g, ' ')} (PAEE)` : null);
   const handleGaleria = (campoID, novasFotos) => setFormData(prev => ({ ...prev, galerias: { ...(prev.galerias || {}), [campoID]: novasFotos } }));
   const getGaleria = (campoID) => (formData.galerias && formData.galerias[campoID]) || [];
@@ -1456,12 +1302,10 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
           <Checkbox label="Nível 2" formData={formData} handleCheckbox={handleCheckbox} />
           <Checkbox label="Nível 3" formData={formData} handleCheckbox={handleCheckbox} />
         </div>
-
         <div className="print-input-group" style={{marginTop: '20px'}}>
           <label style={s.label}>Laudo Médico / Diagnóstico:</label>
           <GaleriaFotos dbKey={dbKeyAtual} campoID="laudo_medico" fotos={getGaleria("laudo_medico")} onChange={(f) => handleGaleria("laudo_medico", f)} corTema="azul" label="Anexar Foto do Laudo" />
         </div>
-        
         <div className="print-input-group" style={{marginTop: '20px'}}>
           <label style={s.label}>I – Informações do Estudante</label>
           <TextareaPrint name="informacoesEstudante" value={formData.informacoesEstudante} onChange={handleChange} minHeight="120px" />
@@ -1708,7 +1552,6 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
             <Checkbox label="Memória verbal e numérica" formData={formData} handleCheckbox={handleCheckbox} />
           </div>
         </div>
-
         <div className="print-block" style={{...s.grid2, marginTop: '15px'}}>
           <div className="print-input-group">
             <h4>Aprendizagem</h4>
@@ -1727,7 +1570,6 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
             <Checkbox label="Cheio e vazio / Fechado e aberto" formData={formData} handleCheckbox={handleCheckbox} />
           </div>
         </div>
-
         <div className="print-block" style={{...s.grid2, marginTop: '15px'}}>
           <div className="print-input-group">
             <h4>Percepção</h4>
@@ -1742,7 +1584,6 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
             <input style={s.input} name="outrosAEE" value={formData.outrosAEE} onChange={handleChange} placeholder="Outras necessidades..." />
           </div>
         </div>
-
         <div className="print-block print-input-group" style={{marginTop: '25px'}}>
           <label style={s.label}>Relatório Final:</label>
           <TextareaPrint name="objetivosAEE" value={formData.objetivosAEE} onChange={handleChange} placeholder="Descreva o relatório final do atendimento..." minHeight="150px" />
@@ -1773,6 +1614,186 @@ const SistemaPAEE = ({ alunoData, onVoltar, usuario }) => {
   );
 };
 
+// TELA DA LIXEIRA — somente admin
+const TelaLixeira = ({ onVoltar, usuario }) => {
+  const [itens, setItens] = useState([]);
+  const isAdmin = usuario.email === EMAIL_ADMIN;
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    const dbRef = ref(db, 'lixeira');
+    const unsubscribe = onValue(dbRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const lista = Object.keys(data).map(key => ({ dbKey: key, ...data[key] }))
+          .sort((a, b) => (b._excluidoEm || 0) - (a._excluidoEm || 0));
+        setItens(lista);
+      } else { setItens([]); }
+    });
+    return () => unsubscribe();
+  }, [isAdmin]);
+
+  const restaurar = async (item) => {
+    if (!window.confirm(`Restaurar "${item.aluno}" para a lista ativa?`)) return;
+    try {
+      const dbKey = item.dbKey;
+      const dadosLimpos = { ...item };
+      delete dadosLimpos.dbKey;
+      delete dadosLimpos._excluidoPor;
+      delete dadosLimpos._excluidoEm;
+      delete dadosLimpos._dataLegivel;
+      await set(ref(db, `alunos/${dbKey}`), dadosLimpos);
+      await remove(ref(db, `lixeira/${dbKey}`));
+      await registrarAuditoria({ acao: 'restaurado', dbKey, aluno: item.aluno, tipoDocumento: item.tipoDocumento, usuario: usuario.email });
+      alert(`"${item.aluno}" restaurado com sucesso.`);
+    } catch (err) { alert(`Erro ao restaurar: ${err.message}`); }
+  };
+
+  const excluirPermanente = async (item) => {
+    const confirmacao = window.prompt(
+      `⚠️ Esta ação é IRREVERSÍVEL e apaga também as fotos do Storage.\nDigite "EXCLUIR" (maiúsculo) para confirmar a exclusão definitiva de "${item.aluno}":`
+    );
+    if (confirmacao === null) return;
+    if (confirmacao !== 'EXCLUIR') { alert('Confirmação incorreta. Cancelado.'); return; }
+    try {
+      const dbKey = item.dbKey;
+      try {
+        const pastaAluno = sRef(storage, `alunos/${dbKey}`);
+        const conteudo = await listAll(pastaAluno);
+        const todosArquivos = [...conteudo.items];
+        for (const subpasta of conteudo.prefixes) {
+          const sub = await listAll(subpasta);
+          todosArquivos.push(...sub.items);
+        }
+        await Promise.all(todosArquivos.map(arq => deleteObject(arq).catch(() => null)));
+      } catch (err) { console.warn('Sem fotos no Storage ou erro ao limpar:', err.message); }
+      await remove(ref(db, `lixeira/${dbKey}`));
+      await registrarAuditoria({ acao: 'excluido_permanente', dbKey, aluno: item.aluno, tipoDocumento: item.tipoDocumento, usuario: usuario.email });
+      alert(`"${item.aluno}" excluído permanentemente.`);
+    } catch (err) { alert(`Erro ao excluir permanentemente: ${err.message}`); }
+  };
+
+  if (!isAdmin) {
+    return (
+      <div style={s.page}>
+        <GlobalCSS />
+        <div className="glass-panel" style={{ ...s.card, textAlign: 'center', padding: '60px 20px' }}>
+          <p style={{ color: '#64748b', fontWeight: '600' }}>Apenas o administrador do sistema tem acesso à lixeira.</p>
+          <button style={{...s.btnSecondary, marginTop: '15px'}} onClick={onVoltar}>← Voltar</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={s.page}>
+      <GlobalCSS />
+      <div className="glass-panel no-print" style={s.topbar}>
+        <h2 style={{ margin: 0, color: '#0f172a' }}>🗑️ Lixeira ({itens.length})</h2>
+        <button style={s.btnSecondary} onClick={onVoltar}>← Voltar</button>
+      </div>
+      {itens.length === 0 ? (
+        <div className="glass-panel" style={{ textAlign: 'center', padding: '60px 20px', color: '#64748b' }}>
+          <p style={{ fontSize: '1.1rem', fontWeight: '600' }}>Lixeira vazia.</p>
+        </div>
+      ) : (
+        <div style={s.grid3}>
+          {itens.map(item => (
+            <div key={item.dbKey} className="glass-panel" style={s.card}>
+              <h3 style={{ margin: '0 0 8px 0', color: '#92400e' }}>{item.aluno}</h3>
+              <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0 0 4px 0' }}><strong>Tipo:</strong> {item.tipoDocumento}</p>
+              <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0 0 4px 0' }}><strong>Excluído por:</strong> {item._excluidoPor}</p>
+              <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0 0 15px 0' }}><strong>Em:</strong> {item._dataLegivel}</p>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button style={{...s.btnPrimary, flex: 1}} onClick={() => restaurar(item)}>♻️ Restaurar</button>
+                <button style={s.btnDanger} onClick={() => excluirPermanente(item)}>Excluir def.</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// TELA DE AUDITORIA — somente admin
+const TelaAuditoria = ({ onVoltar, usuario }) => {
+  const [registros, setRegistros] = useState([]);
+  const isAdmin = usuario.email === EMAIL_ADMIN;
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    const dbRef = ref(db, 'auditoria');
+    const unsubscribe = onValue(dbRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const lista = Object.keys(data).map(key => ({ id: key, ...data[key] }))
+          .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        setRegistros(lista);
+      } else { setRegistros([]); }
+    });
+    return () => unsubscribe();
+  }, [isAdmin]);
+
+  const corAcao = (acao) => ({
+    criado: '#059669', editado: '#2563eb', excluido: '#d97706',
+    restaurado: '#7c3aed', excluido_permanente: '#dc2626'
+  }[acao] || '#64748b');
+
+  if (!isAdmin) {
+    return (
+      <div style={s.page}>
+        <GlobalCSS />
+        <div className="glass-panel" style={{ ...s.card, textAlign: 'center', padding: '60px 20px' }}>
+          <p style={{ color: '#64748b', fontWeight: '600' }}>Apenas o administrador do sistema tem acesso à trilha de auditoria.</p>
+          <button style={{...s.btnSecondary, marginTop: '15px'}} onClick={onVoltar}>← Voltar</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={s.page}>
+      <GlobalCSS />
+      <div className="glass-panel no-print" style={s.topbar}>
+        <h2 style={{ margin: 0, color: '#0f172a' }}>📋 Trilha de Auditoria ({registros.length})</h2>
+        <button style={s.btnSecondary} onClick={onVoltar}>← Voltar</button>
+      </div>
+      <div className="glass-panel" style={{ padding: '0', overflow: 'auto' }}>
+        {registros.length === 0 ? (
+          <p style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>Nenhum registro ainda.</p>
+        ) : (
+          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '700px' }}>
+            <thead>
+              <tr style={{ backgroundColor: '#f1f5f9', textAlign: 'left' }}>
+                <th style={{ padding: '12px', fontSize: '0.8rem' }}>Data/Hora</th>
+                <th style={{ padding: '12px', fontSize: '0.8rem' }}>Ação</th>
+                <th style={{ padding: '12px', fontSize: '0.8rem' }}>Aluno</th>
+                <th style={{ padding: '12px', fontSize: '0.8rem' }}>Tipo</th>
+                <th style={{ padding: '12px', fontSize: '0.8rem' }}>Usuário</th>
+                <th style={{ padding: '12px', fontSize: '0.8rem' }}>Detalhes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {registros.map(r => (
+                <tr key={r.id} style={{ borderTop: '1px solid #e2e8f0' }}>
+                  <td style={{ padding: '10px 12px', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>{r.dataLegivel}</td>
+                  <td style={{ padding: '10px 12px' }}>
+                    <span style={{ color: corAcao(r.acao), fontWeight: '700', fontSize: '0.8rem', textTransform: 'uppercase' }}>{r.acao}</span>
+                  </td>
+                  <td style={{ padding: '10px 12px', fontWeight: '600' }}>{r.aluno}</td>
+                  <td style={{ padding: '10px 12px', fontSize: '0.85rem' }}>{r.tipoDocumento}</td>
+                  <td style={{ padding: '10px 12px', fontSize: '0.85rem' }}>{r.usuario}</td>
+                  <td style={{ padding: '10px 12px', fontSize: '0.8rem', color: '#64748b' }}>{r.detalhes}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const PROMPT_EXTRACAO = `Você é um assistente especializado em educação especial brasileira.
 Analise este documento PAEE e extraia TODOS os dados preenchidos.
@@ -1888,10 +1909,7 @@ const ImportadorPAEE = ({ onVoltar, usuario }) => {
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('gemini_api_key') || '');
   const [mostrarChave, setMostrarChave] = useState(false);
 
-  const salvarChave = (val) => {
-    setApiKey(val);
-    localStorage.setItem('gemini_api_key', val);
-  };
+  const salvarChave = (val) => { setApiKey(val); localStorage.setItem('gemini_api_key', val); };
 
   const lerDocx = async (file) => {
     const mammoth = await carregarMammoth();
@@ -1909,33 +1927,24 @@ const ImportadorPAEE = ({ onVoltar, usuario }) => {
 
   const extrairDadosComGemini = async (arquivo) => {
     if (!apiKey.trim()) throw new Error('Chave da API não configurada.');
-
     const isPdf = arquivo.name.toLowerCase().endsWith('.pdf');
     let parts;
-
     if (isPdf) {
       const base64 = await lerBase64(arquivo);
-      parts = [
-        { text: PROMPT_EXTRACAO },
-        { inline_data: { mime_type: 'application/pdf', data: base64 } }
-      ];
+      parts = [{ text: PROMPT_EXTRACAO }, { inline_data: { mime_type: 'application/pdf', data: base64 } }];
     } else {
       const texto = await lerDocx(arquivo);
       if (!texto.trim()) throw new Error('Arquivo .docx vazio ou sem texto legível.');
       parts = [{ text: `DOCUMENTO PAEE:\n\n${texto}\n\n---\n\n${PROMPT_EXTRACAO}` }];
     }
-
     const response = await fetch(GEMINI_URL(apiKey.trim()), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ contents: [{ parts }] })
     });
-
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
       throw new Error(`Gemini retornou ${response.status}: ${err?.error?.message || response.statusText}`);
     }
-
     const data = await response.json();
     const texto = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
     const limpo = texto.replace(/```json|```/g, '').trim();
@@ -1947,10 +1956,8 @@ const ImportadorPAEE = ({ onVoltar, usuario }) => {
   const processarArquivos = async () => {
     if (arquivos.length === 0) { alert('Selecione ao menos um arquivo.'); return; }
     if (!apiKey.trim()) { alert('Cole a sua chave do Google AI Studio antes de continuar.'); return; }
-    setProcessando(true);
-    setResultados([]);
+    setProcessando(true); setResultados([]);
     const novosResultados = [];
-
     for (let i = 0; i < arquivos.length; i++) {
       const arquivo = arquivos[i];
       try {
@@ -1980,9 +1987,7 @@ const ImportadorPAEE = ({ onVoltar, usuario }) => {
       const dadosLimpos = sanitize(JSON.parse(JSON.stringify(resultado.dados)));
       await set(push(ref(db, 'alunos')), dadosLimpos);
       setSalvos(prev => ({ ...prev, [idx]: true }));
-    } catch (err) {
-      setErros(prev => ({ ...prev, [idx]: err.message }));
-    }
+    } catch (err) { setErros(prev => ({ ...prev, [idx]: err.message })); }
     setSalvando(prev => ({ ...prev, [idx]: false }));
   };
 
@@ -2022,16 +2027,8 @@ const ImportadorPAEE = ({ onVoltar, usuario }) => {
           </a>{' '}→ clique em <strong>"Create API Key"</strong>. A chave fica salva no seu navegador.
         </p>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginTop: '12px' }}>
-          <input
-            type={mostrarChave ? 'text' : 'password'}
-            placeholder="AIzaSy..."
-            value={apiKey}
-            onChange={(e) => salvarChave(e.target.value)}
-            style={{ ...s.input, flex: 1, fontFamily: 'monospace', fontSize: '0.9rem' }}
-          />
-          <button style={s.btnSecondary} onClick={() => setMostrarChave(v => !v)}>
-            {mostrarChave ? '🙈' : '👁'}
-          </button>
+          <input type={mostrarChave ? 'text' : 'password'} placeholder="AIzaSy..." value={apiKey} onChange={(e) => salvarChave(e.target.value)} style={{ ...s.input, flex: 1, fontFamily: 'monospace', fontSize: '0.9rem' }} />
+          <button style={s.btnSecondary} onClick={() => setMostrarChave(v => !v)}>{mostrarChave ? '🙈' : '👁'}</button>
         </div>
         {apiKey && <p style={{ color: '#10b981', fontSize: '0.85rem', marginTop: '8px', fontWeight: '600' }}>✓ Chave configurada</p>}
       </div>
@@ -2070,9 +2067,7 @@ const ImportadorPAEE = ({ onVoltar, usuario }) => {
 
       {resultados.length > 0 && (
         <div style={{ marginTop: '30px' }}>
-          <h2 style={{ color: '#0f172a', marginBottom: '20px', fontSize: '1.4rem' }}>
-            Resultados — {salvoCount}/{okCount} salvos
-          </h2>
+          <h2 style={{ color: '#0f172a', marginBottom: '20px', fontSize: '1.4rem' }}>Resultados — {salvoCount}/{okCount} salvos</h2>
           {resultados.map((res, idx) => (
             <div key={idx} className="glass-panel" style={{ ...s.card, borderLeft: res.status === 'ok' ? (salvos[idx] ? '4px solid #10b981' : '4px solid #7c3aed') : '4px solid #ef4444', marginBottom: '20px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
@@ -2110,12 +2105,6 @@ const ImportadorPAEE = ({ onVoltar, usuario }) => {
                       </div>
                     </div>
                   )}
-                  {res.dados.objetivosAEE && (
-                    <div style={{ marginTop: '12px' }}>
-                      <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: '600' }}>OBJETIVOS DO AEE</span>
-                      <p style={{ margin: '4px 0 0 0', fontSize: '0.88rem', color: '#334155' }}>{res.dados.objetivosAEE.substring(0, 250)}{res.dados.objetivosAEE.length > 250 ? '...' : ''}</p>
-                    </div>
-                  )}
                 </div>
               )}
             </div>
@@ -2126,52 +2115,49 @@ const ImportadorPAEE = ({ onVoltar, usuario }) => {
   );
 };
 
-
 // 5. COMPONENTE PRINCIPAL
 export default function App() {
   const [usuario, setUsuario] = useState(null);
   const [carregando, setCarregando] = useState(true);
-  const [telaAtiva, setTelaAtiva] = useState('lista'); 
+  const [telaAtiva, setTelaAtiva] = useState('lista');
   const [alunoEditando, setAlunoEditando] = useState(null);
   const [telaImportar, setTelaImportar] = useState(false);
 
-  useEffect(() => { const unsubscribe = onAuthStateChanged(auth, (user) => { setUsuario(user); setCarregando(false); }); return () => unsubscribe(); }, []);
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => { setUsuario(user); setCarregando(false); });
+    return () => unsubscribe();
+  }, []);
 
-  // Ativa corretor ortográfico em português em todos os inputs de texto e textareas.
-  // Usa MutationObserver para cobrir campos renderizados depois (mudança de tela, novos cards, etc.)
   useEffect(() => {
     document.documentElement.setAttribute('lang', 'pt-BR');
-
     const aplicarCorretor = () => {
-      // Seleciona TODOS os textareas e inputs de texto (exclui password, número, data, etc.)
       const seletor = 'textarea, input[type="text"], input[type="email"], input:not([type])';
       document.querySelectorAll(seletor).forEach(el => {
-        // Pula o campo de senha mesmo se vier no seletor por algum motivo
         if (el.type === 'password') return;
-        // Se o autor explicitamente desativou (autoComplete one-time-code etc.), respeita
         if (el.getAttribute('spellcheck') === 'false') return;
         el.setAttribute('spellcheck', 'true');
         el.setAttribute('lang', 'pt-BR');
-        // autoCorrect/autoCapitalize ajudam em mobile (iOS/Android)
         if (el.tagName === 'TEXTAREA') {
           el.setAttribute('autocorrect', 'on');
           el.setAttribute('autocapitalize', 'sentences');
         }
       });
     };
-
     aplicarCorretor();
     const observer = new MutationObserver(aplicarCorretor);
     observer.observe(document.body, { childList: true, subtree: true });
     return () => observer.disconnect();
   }, []);
+
   const fazerLogout = () => signOut(auth);
   const irParaImportar = () => { setTelaImportar(true); setTelaAtiva('lista'); };
+  const irParaLixeira = () => setTelaAtiva('lixeira');
+  const irParaAuditoria = () => setTelaAtiva('auditoria');
   const irParaNovoPEI = () => { localStorage.removeItem('rascunhoPEI'); setAlunoEditando(null); setTelaAtiva('formularioPEI'); };
   const irParaNovoPEI_EI = () => { localStorage.removeItem('rascunhoPEI_EI'); setAlunoEditando(null); setTelaAtiva('formularioPEI_EI'); };
   const irParaNovoPAEE = () => { localStorage.removeItem('rascunhoPAEE'); setAlunoEditando(null); setTelaAtiva('formularioPAEE'); };
-  const irParaEditar = (aluno) => { 
-    setAlunoEditando(aluno); 
+  const irParaEditar = (aluno) => {
+    setAlunoEditando(aluno);
     if (aluno.tipoDocumento === 'PAEE') setTelaAtiva('formularioPAEE');
     else if (aluno.tipoDocumento === 'PEI-EI') setTelaAtiva('formularioPEI_EI');
     else setTelaAtiva('formularioPEI');
@@ -2179,9 +2165,11 @@ export default function App() {
 
   if (carregando) return <div style={{ textAlign: 'center', marginTop: '50px' }}>A carregar o ambiente pedagógico...</div>;
   if (!usuario) return <LoginScreen />;
-  
+
   if (telaImportar) return <ImportadorPAEE onVoltar={() => setTelaImportar(false)} usuario={usuario} />;
-  if (telaAtiva === 'lista') return <ListaAlunos onNovoPEI={irParaNovoPEI} onNovoPEI_EI={irParaNovoPEI_EI} onNovoPAEE={irParaNovoPAEE} onEditar={irParaEditar} onImportar={irParaImportar} onLogout={fazerLogout} usuario={usuario} />;
+  if (telaAtiva === 'lixeira') return <TelaLixeira onVoltar={() => setTelaAtiva('lista')} usuario={usuario} />;
+  if (telaAtiva === 'auditoria') return <TelaAuditoria onVoltar={() => setTelaAtiva('lista')} usuario={usuario} />;
+  if (telaAtiva === 'lista') return <ListaAlunos onNovoPEI={irParaNovoPEI} onNovoPEI_EI={irParaNovoPEI_EI} onNovoPAEE={irParaNovoPAEE} onEditar={irParaEditar} onImportar={irParaImportar} onLixeira={irParaLixeira} onAuditoria={irParaAuditoria} onLogout={fazerLogout} usuario={usuario} />;
   if (telaAtiva === 'formularioPAEE') return <SistemaPAEE alunoData={alunoEditando} onVoltar={() => setTelaAtiva('lista')} usuario={usuario} />;
   if (telaAtiva === 'formularioPEI_EI') return <SistemaPEI_EI alunoData={alunoEditando} onVoltar={() => setTelaAtiva('lista')} usuario={usuario} />;
   return <SistemaPEI alunoData={alunoEditando} onVoltar={() => setTelaAtiva('lista')} usuario={usuario} />;
